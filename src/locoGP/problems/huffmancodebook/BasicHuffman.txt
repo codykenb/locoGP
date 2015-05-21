@@ -1,0 +1,106 @@
+package huffmanCodeTable;
+//package huffmanCodeTable;
+
+public class BasicHuffman {
+	// trimmed 2014 Sep
+	public static String[] getCodeBook(Byte[] bytes) {
+		
+		BubbleSort.sort(bytes, bytes.length);
+		
+		Byte[] uniqueChars = getUniqueChars(bytes);
+		
+		huffmanNode[] freqTable = getCharFreq(bytes, uniqueChars);
+		
+		huffmanNode huffTree = buildTree(freqTable);
+		
+		String[] codeBook = new String[0];
+		
+		codeBook = getCodes(huffTree, "", codeBook);
+		
+		return codeBook;
+	}
+	
+	private static String[] getCodes(huffmanNode huffTree, String prefix, String[] codeBook){
+		if(huffTree.uniqueChar != null){
+			codeBook = addString(prefix, codeBook);
+			//System.out.println(new Character((char)(byte)huffTree.uniqueChar) + " " + prefix);
+		}else{
+			codeBook = getCodes(huffTree.left, prefix +"1", codeBook);
+			codeBook = getCodes(huffTree.right, prefix +"0", codeBook);
+		}
+		
+		return codeBook;
+	}
+	
+	private static String[] addString(String aStr, String[] otherStrings){
+		String[] newStrings = new String[otherStrings.length+1];
+		for(int i = 0 ; i < otherStrings.length; i ++){
+			newStrings[i] = otherStrings[i];
+		}
+		newStrings[newStrings.length-1] = aStr;
+		return newStrings;
+	}
+	
+	private static huffmanNode buildTree(huffmanNode[] freqTable){
+
+		BubbleSort.sort(freqTable, freqTable.length);
+		
+		huffmanNode aRight = freqTable[freqTable.length - 1];
+		huffmanNode aLeft = freqTable[freqTable.length - 2];
+		huffmanNode newNode = new huffmanNode(aRight.getFreq()+aLeft.getFreq() , aRight, aLeft);
+		
+		huffmanNode[] newList = new huffmanNode[freqTable.length-1];
+		for(int i = 0 ; i <newList.length ; i++){
+			newList[i] = freqTable[i];
+		}
+		newList[newList.length-1] = newNode;
+		
+		if(newList.length ==1){
+			return newList[0];
+		}else{ // if we remove this else, will tail recursion happen?
+			return buildTree(newList);
+		}
+	}
+	
+	
+	private static huffmanNode[] getCharFreq(Byte[] bytes, Byte[] uniqueChars){
+		int[] freqInts = new int[uniqueChars.length];
+		int charIndex = 0 ;
+		for (int i = 0 ; i< bytes.length ; i ++){
+			if(bytes[i].compareTo(uniqueChars[charIndex])==0){ // bug here!
+				freqInts[charIndex]++;
+			}else{
+				charIndex++;
+				freqInts[charIndex]++; 
+			}
+		}
+		
+		huffmanNode[] freqTable = new huffmanNode[uniqueChars.length];
+		for (int i = 0 ; i< uniqueChars.length ; i ++){
+			freqTable[i] = new huffmanNode(uniqueChars[i], freqInts[i]);
+		}
+
+		return freqTable;
+	}
+
+	private static Byte[] getUniqueChars(Byte[] bytes) {
+		Byte[] returnChars = new Byte[1]; //
+		returnChars[0] = bytes[0];
+		
+		for (int i = 0 ; i< bytes.length ; i ++){
+			if(returnChars[returnChars.length-1].compareTo(bytes[i]) != 0 ){
+				Byte[] tempChars = returnChars;
+				returnChars = new Byte[tempChars.length+1];
+				for(int j = 0 ; j < tempChars.length; j ++){
+					returnChars[j] = tempChars[j];
+				}
+				returnChars[returnChars.length-1] = bytes[i];
+			}
+		}
+		return returnChars;
+	}
+	
+
+}
+
+

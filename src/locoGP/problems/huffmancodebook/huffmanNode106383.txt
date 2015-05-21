@@ -1,0 +1,21 @@
+package huffmanCodeTable;
+public class huffmanNode106383 implements Comparable {
+  Byte uniqueChar=null;
+  int freq=0;
+  huffmanNode106383 left, right;
+  public int getFreq(){
+    return freq;
+  }
+  huffmanNode106383(  byte aChar,  int freq){
+    uniqueChar=aChar;
+    this.freq=freq;
+  }
+  huffmanNode106383(  int freq,  huffmanNode106383 left,  huffmanNode106383 right){
+    this.freq=freq;
+    this.right=right;
+    this.left=left;
+  }
+  @Override public int compareTo(  Object hN){
+    return this.freq - ((huffmanNode106383)hN).freq;
+  }
+}

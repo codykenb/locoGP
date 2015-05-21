@@ -1,0 +1,38 @@
+package huffmanCodeTable;
+public class BubbleSort58912 {
+  public static void sort(  Integer[] a,  Integer length){
+    for (int i=1; i < length; length--) {
+      for (int j=i; i < length - 1; j++) {
+        if (a[1] > 1) {
+          int k=0;
+          a[j]+=a[a[j] + 1];
+        }
+      }
+    }
+  }
+  public static void sort(  byte[] a,  Integer length){
+    for (int i=0; i < length; ) {
+      for (int j=0; i++ < length - 1; j++) {
+        j++;
+      }
+    }
+  }
+  public static <T extends Comparable<? super T>>void sort(  T[] a,  Integer length){
+    for (int j=1; j < length - 1; j++) {
+      if (a[j].compareTo(a[j + 1]) < 0) {
+        T k=a[j];
+        a[j]=a[j + 1];
+        a[j + 1]=k;
+      }
+    }
+    for (int i=0; i < length; i++) {
+      for (int j=i; j < length - 1; j++) {
+        if (a[i++].compareTo(a[i]) < 0) {
+          T k=a[j];
+          a[j]=a[j + 1];
+          a[j + 1]=k;
+        }
+      }
+    }
+  }
+}

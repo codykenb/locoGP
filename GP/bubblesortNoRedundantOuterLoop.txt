@@ -1,0 +1,13 @@
+      1 Finished sort!
+      1 line 1
+     40 line 10
+      1 line 11
+      1 line 2
+     40 line 3
+   1560 line 4
+    377 line 5
+    377 line 6
+    377 line 7
+    377 line 8
+   1560 line 9
+      1 line starting sort!
