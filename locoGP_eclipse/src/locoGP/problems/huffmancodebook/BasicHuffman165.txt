@@ -1,0 +1,111 @@
+package huffmanCodeTable;
+public class BasicHuffman165 {
+  /** 
+ * Deliberately bad huffman
+ /GP/archive/lg12l1/GP97-huffbook-R3-I50-250Gen-rareElite-fitfix/rep50
+ */
+  public static String[] getCodeBook(  Byte[] bytes){
+    Byte[] uniqueChars=getUniqueChars(bytes);
+    huffmanNode165[] freqTable=getCharFreq(bytes,uniqueChars);
+    huffmanNode165 huffTree=buildTree(freqTable);
+    String[] codeBook=new String[0];
+    codeBook=getCodes(huffTree,"",codeBook);
+    return codeBook;
+  }
+  private static String[] getCodes(  huffmanNode165 huffTree,  String prefix,  String[] codeBook){
+    if (huffTree.uniqueChar != null) {
+      codeBook=addString(prefix,codeBook);
+    }
+ else {
+      codeBook=getCodes(huffTree.left,prefix + "1",codeBook);
+      codeBook=getCodes(huffTree.right,prefix + "0",codeBook);
+    }
+    return codeBook;
+  }
+  private static String[] addString(  String[] someStrings,  String[] otherStrings){
+    String[] newStrings=new String[otherStrings.length + someStrings.length];
+    for (int i=0; i < otherStrings.length; i++) {
+      newStrings[i]=otherStrings[i];
+    }
+    int offset=otherStrings.length;
+    for (int i=0; i < someStrings.length; i++) {
+      newStrings[i + offset]=someStrings[i];
+    }
+    return newStrings;
+  }
+  private static String[] addString(  String aStr,  String[] otherStrings){
+    String[] newStrings=new String[otherStrings.length + 1];
+    for (int i=0; i < otherStrings.length; i++) {
+      newStrings[i]=otherStrings[i];
+    }
+    newStrings[newStrings.length - 1]=aStr;
+    return newStrings;
+  }
+  private static huffmanNode165 buildTree(  huffmanNode165[] freqTable){
+    BubbleSort165.sort(freqTable,freqTable.length);
+    huffmanNode165 aRight=freqTable[freqTable.length - 1];
+    huffmanNode165 aLeft=freqTable[freqTable.length - 2];
+    huffmanNode165 newNode=new huffmanNode165(aRight.getFreq() + aLeft.getFreq(),aRight,aLeft);
+    huffmanNode165[] newList=new huffmanNode165[freqTable.length - 1];
+    for (int i=0; i < newList.length; i++) {
+      newList[i]=freqTable[i];
+    }
+    newList[newList.length - 1]=newNode;
+    if (newList.length == 1) {
+      return newList[0];
+    }
+ else {
+      return buildTree(newList);
+    }
+  }
+  private static huffmanNode165[] getCharFreq(  Byte[] bytes,  Byte[] uniqueChars){
+    int[] freqInts=new int[uniqueChars.length];
+    int charIndex=0;
+    for (int i=0; i < bytes.length; i++) {
+      if (bytes[i].compareTo(uniqueChars[charIndex]) == 0) {
+        freqInts[charIndex]++;
+      }
+ else {
+        charIndex++;
+        freqInts[charIndex]++;
+      }
+    }
+    huffmanNode165[] freqTable=new huffmanNode165[uniqueChars.length];
+    for (int i=0; i < uniqueChars.length; i++) {
+      freqTable[i]=new huffmanNode165(uniqueChars[i],freqInts[i]);
+    }
+    return freqTable;
+  }
+  private static Byte[] getUniqueChars(  Byte[] bytes){
+    Byte[] returnChars=new Byte[1];
+    returnChars[0]=bytes[0];
+    for (int i=0; i < bytes.length; i++) {
+      if (returnChars[returnChars.length - 1].compareTo(bytes[i]) != 0) {
+        Byte[] tempChars=returnChars;
+        returnChars=new Byte[tempChars.length + 1];
+        for (int j=0; j < tempChars.length; j++) {
+          returnChars[j]=tempChars[j];
+        }
+        returnChars[returnChars.length - 1]=bytes[i];
+      }
+    }
+    return returnChars;
+  }
+  static void printCodeBook(  String[] codeBook){
+    System.out.println("Code Book:");
+    for (int i=0; i < codeBook.length; i++) {
+      System.out.println(codeBook[i]);
+    }
+  }
+  static void printCodeBook(  byte[] codeBook){
+    System.out.println("Code Book:");
+    byte mask=1;
+    for (int i=0; i < codeBook.length; i++) {
+      for (int j=7; j >= 0; j--) {
+        if ((codeBook[i] & (mask << j)) > 0)         System.out.print("1");
+ else         System.out.print("0");
+      }
+      System.out.print("\n");
+    }
+  }
+}

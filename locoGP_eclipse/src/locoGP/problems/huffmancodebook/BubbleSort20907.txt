@@ -1,0 +1,15 @@
+package huffmanCodeTable;
+public class BubbleSort20907 {
+
+  public static <T extends Comparable<? super T>>void sort(  T[] a,  Integer length){
+    for (int i=1; i < length; i++) {
+      for (int j=0; j < length - i; j++) {
+        if (a[j].compareTo(a[j + 1]) < 0) {
+          T k=a[j];
+          a[j]=a[j + 1];
+          a[j + 1]=k;
+        }
+      }
+    }
+  }
+}

@@ -9,34 +9,33 @@ or drop me a line with any comments/questions
 ----------------------------------------------------------------
 
 Dependencies:
-  bycounter https://sdqweb.ipd.kit.edu/wiki/ByCounter
-  openjdk-6-jdk (Java 6)
+
+  Java 6 or 7 with -noverify
 
 ----------------------------------------------------------------
 
 Directories:
-  GP - Helper scripts for deployment across several machines and graphing
-       Used as a working dir for running deploying self-contained locoGP experiment jars
-  locoGP_lib - Libraries required for locoGP/bycounter
+
+  GP_Master      - Helper scripts for Master/Slave experiment workflow including graphing
+                   Used as a working dir for deploying self-contained locoGP experiment jars
+		   
+  locoGP_eclipse - Eclipse project dir (use File -> Import)
+                   Includes extra libraries required for locoGP/bycounter
 
 ----------------------------------------------------------------
 
-To configure locoGP in Eclipse:
+Notes:
 
-1. Create a project by importing the src directory (call it locoGP). 
-
-2. Add the locoGP_lib directory to the project "Referenced Libraries" (through the build path of the project)
-
-3. Get a copy of the bycounter code https://sdqweb.ipd.kit.edu/wiki/ByCounter
-   (r26653 is known good at time of writing)
-   https://svnserver.informatik.kit.edu/i43/svn/code/BySuite/ByCounter/trunk/Palladio.BySuite.ByCounter/?p=26653
-
-4. Create another project from the bycounter directory
-
-5. Add the bycounter project to the build path of the locoGP project.
-
-6. In Run Configurations -> Arguments -> VM arguments
+Change memory options depending on test problem and available memory
+ - In Eclipse -> Run Configurations -> Arguments -> VM arguments
    add -Xss1000M (adjust as needed)
+   see GP_Master/88-runJarInNewDir.sh for examples
 
-7. Compile, run
+Performance (bytecodes executed) measured with bycounter 
+ - source available: https://sdqweb.ipd.kit.edu/wiki/ByCounter
+
+Developed mainly using openjdk-6-jdk, Eclipse 3.8.1, Debian wheezy & jessie
+
+----------------------------------------------------------------
+
 

@@ -1,0 +1,18 @@
+library('tikzDevice')
+setEPS()
+postscript("GPcomparisonGP83.eps")
+plot(nofocusallminAvg, ylim=c(.975,1), xlab="Generation No.", ylab="Fitness (Normalised)", pch=c('.', rep(NA,1)))
+lines(nofocusallminAvg, type="c")
+points(R3allminAvg, pch=c('o', rep(NA,1)))
+#lines(R3allminAvg, type="c")
+legend(55,1,c("Canonical GP","Self-focusing GP"),pch=c('.','o'),y.intersp=1.7)
+dev.off()
+
+
+tikz( 'GPcomparisonGP83.tex' )
+plot(nofocusallminAvg, ylim=c(.975,1), xlim=c(0,100), xlab="Generation No.", ylab="Fitness (Normalised)", pch=c('.', rep(NA,1)))
+lines(nofocusallminAvg, type="c")
+points(R3allminAvg, pch=c('o', rep(NA,1)))
+#lines(R3allminAvg, type="c")
+legend(55,1,c("Canonical GP","Self-focusing GP"),pch=c('.','o'),y.intersp=1.7)
+dev.off()
