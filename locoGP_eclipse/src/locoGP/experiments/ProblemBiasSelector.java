@@ -1,6 +1,6 @@
 package locoGP.experiments;
 
-// Brendan Cody-Kenny <codykenb@tcd.ie>
+// Brendan Cody-Kenny <codykenny@gmail.com>
  
 
 import locoGP.Generation;
