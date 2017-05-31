@@ -2,9 +2,9 @@
 locoGP is a Genetic Programming system which modifies, compiles and executes Java source code with a focus on improving the performance of programs as measured in bytecodes executed. 
 
 For more information, have a look at the locoGP paper
-  https://www.scss.tcd.ie/~codykenb/locoGP.html
+  https://codykenb.github.io/
 or drop me a line with any comments/questions
-  codykenb at tcd.ie
+  codykenny@gmail.com
 
 ----------------------------------------------------------------
 
