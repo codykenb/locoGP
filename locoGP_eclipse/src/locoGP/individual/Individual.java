@@ -11,6 +11,7 @@ import locoGP.operators.NodeOperators;
 import locoGP.problems.CompilationSet;
 import locoGP.problems.Problem;
 import locoGP.util.GPSecureClassLoader;
+import locoGP.util.JavaClassObject;
 import locoGP.util.Logger;
 import locoGP.util.ParentProbabilityReferencerVisitor;
 import locoGP.util.ProbabilityClonerVisitor;
@@ -41,7 +42,10 @@ public class Individual implements Comparable, java.io.Serializable {
 	public static Problem ourProblem = null; 
 	//private GPSecureClassLoader classLoader;
 	private Map<String, byte[]> classByteMap=null;
+	private Map<String, JavaClassObject> classMap=null;
 	private boolean compiled = false;
+
+	private Class<?> clazz;
 	
 	public void setNullRefs() {//public void deleteRefs() {
 		// the parents of this program may be in the next generation, cause
@@ -1422,9 +1426,45 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 		ourProblem.setBaselineRuntimeAvg(0);
 		this.runningTime = 0;
 	}
-	public Method getEntryMethod(){
-		return null; // just to stop errors
+	
+	public Method getEntryMethod() {
+		Method m = null;
+		try {
+
+			m = this.getEntryClazz().getMethod(ourProblem.getMethodName(),
+					ourProblem.getClassParams());
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return m;
 	}
+
+	public void setClass(Class<?> clazz) {
+		this.clazz = clazz;
+	}
+
+	public Class<?> getCompiledClass() {
+		return this.clazz;
+	}
+
+	public Class<?> getEntryClazz() {
+		return this.clazz;
+	}
+
+	
+	
+	public void setClassMap(Map<String, JavaClassObject> classByteMap) {
+		this.classMap = classByteMap;
+	}
+	
+	public Map<String, JavaClassObject> getClassMap() {
+		return this.classMap;
+	}
+	
 	
 	public void setClassByteMap(Map<String, byte[]> classByteMap) {
 		this.classByteMap = classByteMap;

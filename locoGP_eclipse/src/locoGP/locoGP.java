@@ -75,8 +75,9 @@ public class locoGP {
 		//             popSize, numGens, tournSize, pickBestLocation, updateLocationBias, debug
 		//GPConfig gpConfig = new GPConfig( 100, 100, 2, true,true, false);
 		GPConfig gpConfig = new GPConfig();
-		gpConfig.setPopulationSize(100);
-		gpConfig.setNumGenerations(1000);
+		gpConfig.setUseByteCodeCounter(false);
+		gpConfig.setPopulationSize(10);
+		gpConfig.setNumGenerations(100);
 		gpConfig.setTournamentSize(2);
 		gpConfig.setPickBestLocation(false);
 		gpConfig.setUpdateLocationBias(false);

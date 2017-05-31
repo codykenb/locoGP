@@ -147,7 +147,10 @@ public class StringCompiler implements java.io.Serializable{
 				//ClassLoader.
 				Class<?> clazz = cl.loadClass(className);*/
 				//Class<?> clazz = Class.forName(className);
+				
+				// TODO one or the other
 				ind.setClassByteMap(((ClassFileManager)fileManager).getClassByteMap());
+				ind.setClass(((ClassFileManager)fileManager).getClassLoader(null).loadClass(ind.getClassName())); 
 				/*Thread.currentThread().setContextClassLoader(cl);*/
 				//SimpleVerifier.setClassLoader(cl);
 		
@@ -170,6 +173,9 @@ public class StringCompiler implements java.io.Serializable{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				compileStatus = false;
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}else{
 			System.out.print("No Compile");

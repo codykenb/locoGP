@@ -14,8 +14,8 @@ import de.uka.ipd.sdq.ByCounter.results.CountingResult;
 import de.uka.ipd.sdq.ByCounter.utils.InvocationResultData;
 import de.uka.ipd.sdq.ByCounter.utils.MethodDescriptor;
 
-
-public class OpCodeCounter {
+// Use bycounter to benchmark program
+public class OpCodeCounter implements PerformanceMeasure{
 
 	Individual ind = null;
 	
@@ -23,7 +23,8 @@ public class OpCodeCounter {
 		this.ind = ind;
 	}
 	
-	public synchronized void run(){
+	@Override
+	public synchronized void measureAllTests(){
 		// Reimplementation of the fitness measure. Use ByCounter instead of timing the function.
 		BytecodeCounter counter = new BytecodeCounter();
 		String className = ind.getClassName();

@@ -5,24 +5,27 @@ import locoGP.util.Logger;
 
 public class RunFitnessFunction extends Thread{
 
-	//RunTimer opCounter ; // old code to get wall-clock time
-	OpCodeCounter opCounter ;
+	PerformanceMeasure perfCounter ; 
+	
 	private boolean running = false;
 	boolean stayAlive = true;
 	
 	public RunFitnessFunction( Individual ind){
 		setIndividualToEvaluate(ind);
-		//opCounter = new RunTimer(ind);
 	}
 	
 	public void setIndividualToEvaluate( Individual ind){
 		running = true;
-		opCounter = new OpCodeCounter(ind);
+		if(Individual.ourProblem.gpConfig.useByteCodeCounter())
+			perfCounter = new OpCodeCounter(ind);
+		else
+			perfCounter = new RunTimer(ind);
+
 	}
 	
 	public  void runBasicCounter(){
 		try {
-			opCounter.run();
+			perfCounter.measureAllTests();
 		} catch (Exception e) {
 			Logger.logDebugConsole("Thread died (possibly infinite loop?): ");
 			e.printStackTrace();

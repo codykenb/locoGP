@@ -32,6 +32,8 @@ public class GPConfig {
 	private double elitismRate = .30,
 			initialPopulationSeedRatio = .1,
 			overProvisioningRatio = 1.5; // at least 1/3 of programs fail to compile
+
+	private boolean useByteCodeCounter;
 	
 	public static boolean useFineGranularityChange(){ // TODO make all static?
 		return fineGranularityChange;
@@ -259,6 +261,14 @@ public class GPConfig {
 	public double getElitismRate() {
 		// TODO Auto-generated method stub
 		return this.elitismRate;
+	}
+
+	public void setUseByteCodeCounter(boolean b) {
+		this.useByteCodeCounter = b;
+	}
+
+	public boolean useByteCodeCounter() {
+		return this.useByteCodeCounter;
 	}
 
 }
