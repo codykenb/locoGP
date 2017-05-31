@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/locoGP/src/locoGP/locoGP.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="locoGP.locoGP"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="locoGP"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xss1000M -Xss32M -Xmx5100M -XX:ReservedCodeCacheSize=1000M -XX:+UseCodeCacheFlushing -XX:MaxPermSize=2000M -XX:+ScavengeBeforeFullGC -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled -noverify"/>
+</launchConfiguration>
