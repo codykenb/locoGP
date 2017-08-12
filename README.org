@@ -48,27 +48,21 @@ For more information, have a look at the locoGP paper
 or drop me a line with any comments/questions
   codykenny@gmail.com
 
+* Getting Started
 
-* Dependencies:
-
-  Java 6 or 7 with -noverify
-
-
-* Directories:
-
-  GP_Master      - Helper scripts for Master/Slave experiment workflow including graphing
-                   Used as a working dir for deploying self-contained locoGP experiment jars
-		   
-  locoGP_eclipse - Eclipse project dir (use File -> Import)
-                   Includes extra libraries required for locoGP/bycounter
-
+ - Install Eclipse and Java (Tested with Java 6 and Java 7 with -noverify) 
+ - Import project dir locoGP_eclipse (Eclipse -> File -> Import) 
+   This should import extra libraries required for locoGP/bycounter
+ - Change memory options 
+   - Eclipse -> Run Configurations -> Arguments -> VM arguments
+   add -Xss1000M (adjust as needed)
+   (see [[https://github.com/codykenb/locoGP/blob/master/GP_Master/88-runJarInNewDir.sh#L25][GP_Master/88-runJarInNewDir.sh]] for examples depending on test problem and available memory)
 
 * Notes:
 
-Change memory options depending on test problem and available memory
- - In Eclipse -> Run Configurations -> Arguments -> VM arguments
-   add -Xss1000M (adjust as needed)
-   see GP_Master/88-runJarInNewDir.sh for examples
+GP_Master      
+ - Helper scripts for Master/Slave experiment workflow including graphing
+   Used as a working dir for deploying self-contained locoGP experiment jars
 
 Performance (bytecodes executed) measured with bycounter 
  - source available: https://sdqweb.ipd.kit.edu/wiki/ByCounter
