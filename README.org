@@ -48,13 +48,11 @@ For more information, have a look at the locoGP paper
 or drop me a line with any comments/questions
   codykenny@gmail.com
 
-----------------------------------------------------------------
 
 * Dependencies:
 
   Java 6 or 7 with -noverify
 
-----------------------------------------------------------------
 
 * Directories:
 
@@ -64,7 +62,6 @@ or drop me a line with any comments/questions
   locoGP_eclipse - Eclipse project dir (use File -> Import)
                    Includes extra libraries required for locoGP/bycounter
 
-----------------------------------------------------------------
 
 * Notes:
 
@@ -78,6 +75,5 @@ Performance (bytecodes executed) measured with bycounter
 
 Developed mainly using openjdk-6-jdk, Eclipse 3.8.1, Debian wheezy & jessie
 
-----------------------------------------------------------------
 
 
