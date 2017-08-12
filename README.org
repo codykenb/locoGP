@@ -56,7 +56,7 @@ or drop me a line with any comments/questions
  - Change memory options 
    - add -Xss1000M
    - Eclipse -> Run Configurations -> Arguments -> VM arguments
-   - adjust as needed, see [[https://github.com/codykenb/locoGP/blob/master/GP_Master/88-runJarInNewDir.sh#L25][GP_Master/88-runJarInNewDir.sh]] for examples depending on test problem and available memory
+   - adjust as needed depending on test problem and available memory, see [[https://github.com/codykenb/locoGP/blob/master/GP_Master/88-runJarInNewDir.sh#L25][GP_Master/88-runJarInNewDir.sh]] for examples 
 
 * Notes:
 
