@@ -44,9 +44,9 @@ A number of programs are mutated to make each [[https://github.com/codykenb/loco
 With repeat modifications over repeat generations, locoGP is able to find performance improvements in programs.  
 
 For more information, have a look at the locoGP paper
-  https://codykenb.github.io/
+ - https://codykenb.github.io/
 or drop me a line with any comments/questions
-  codykenny@gmail.com
+ - [[mailto:codykenny@gmail.com][codykenny@gmail.com]]
 
 * Getting Started
 
