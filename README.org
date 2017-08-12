@@ -1,0 +1,83 @@
+
+* Intro
+locoGP is a Genetic Programming system which modifies, compiles and executes Java source code with a focus on improving the performance of programs as measured in bytecodes executed. 
+
+To evolve a Java function In locoGP, such as Bubblesort, the function is [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/problems/Sort1Problem.java#L29][defined as a string]] (which must be valid Java).
+
+This source code string is [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/operators/NodeOperators.java#L821][parsed]] and the result is a [[http://help.eclipse.org/kepler/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2Fdom%2FCompilationUnit.html][tree of nodes]].
+
+The tree representation of java source code looks roughly like this:
+
+ - MethodDeclaration
+   - Modifier (1:n)
+     - "public"
+   - Parameter (1:n)
+     - VariableDeclaration
+       - Type
+         - SimpleType
+           - SimpleName
+             - "Integer[]"
+       - SimpleName
+         - "a"
+     - VariableDeclaration
+       - Type
+         - SimpleType
+           - SimpleName
+             - "Integer"
+       - SimpleName
+         - "length"
+   - Name
+     - "sort"
+   - Body
+     - Statement (1:n)
+       - ForStatement
+         - ...
+
+The parsing library used ([[http://www.vogella.com/tutorials/EclipseJDT/article.html][JDT]]) gives you types for each node in the tree, so you can make a decision how you want to mutate the tree, based on the node type. 
+
+For example, see how the different expression types are [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/operators/NodeOperators.java#L234][replaced]] in target Java code.
+
+locoGP selects nodes in the JDT randomly, makes modifications and [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/fitness/IndividualEvaluator.java][evaluates]] the resulting program for correctness and [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/fitness/RunTimer.java][runtime]]. An initial generation of programs is [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/Generation.java#L382][created]] by [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/operators/Mutator.java#L69][mutating]] the original "seed" program. 
+
+A number of programs are mutated to make each [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/locoGP.java#L112][generation]]. Programs are [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/operators/OperatorPipeline.java#L32][selected]] (biased towards the most correct and least costly) from each generation to produce programs for the next generation.
+
+With repeat modifications over repeat generations, locoGP is able to find performance improvements in programs.  
+
+For more information, have a look at the locoGP paper
+  https://codykenb.github.io/
+or drop me a line with any comments/questions
+  codykenny@gmail.com
+
+----------------------------------------------------------------
+
+* Dependencies:
+
+  Java 6 or 7 with -noverify
+
+----------------------------------------------------------------
+
+* Directories:
+
+  GP_Master      - Helper scripts for Master/Slave experiment workflow including graphing
+                   Used as a working dir for deploying self-contained locoGP experiment jars
+		   
+  locoGP_eclipse - Eclipse project dir (use File -> Import)
+                   Includes extra libraries required for locoGP/bycounter
+
+----------------------------------------------------------------
+
+* Notes:
+
+Change memory options depending on test problem and available memory
+ - In Eclipse -> Run Configurations -> Arguments -> VM arguments
+   add -Xss1000M (adjust as needed)
+   see GP_Master/88-runJarInNewDir.sh for examples
+
+Performance (bytecodes executed) measured with bycounter 
+ - source available: https://sdqweb.ipd.kit.edu/wiki/ByCounter
+
+Developed mainly using openjdk-6-jdk, Eclipse 3.8.1, Debian wheezy & jessie
+
+----------------------------------------------------------------
+
+
