@@ -1,5 +1,5 @@
 
-* Intro
+* Introduction
 locoGP is a Genetic Programming system which modifies, compiles and executes Java source code with a focus on improving the performance of programs as measured in bytecodes executed. 
 
 To evolve a Java function In locoGP, such as Bubblesort, the function is [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/problems/Sort1Problem.java#L29][defined as a string]] (which must be valid Java).
