@@ -50,7 +50,7 @@ or drop me a line with any comments/questions
 
 * Getting Started
 
- - Install Eclipse and Java (Tested with Java 6 and Java 7 with -noverify) 
+ - Install Eclipse and JDK (Tested with Java 6 and Java 7 with -noverify) 
  - Import project dir locoGP_eclipse (Eclipse -> File -> Import) 
    This should import extra libraries required for locoGP/bycounter
  - Change memory options 
@@ -61,7 +61,7 @@ or drop me a line with any comments/questions
 * Notes:
 
 GP_Master      
- - Helper scripts for Master/Slave experiment workflow including graphing
+ - Helper scripts for Master/Slave experiment workflow including graphing.
    Used as a working dir for deploying self-contained locoGP experiment jars
 
 Performance (bytecodes executed) measured with bycounter 
