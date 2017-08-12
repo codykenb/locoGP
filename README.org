@@ -54,18 +54,16 @@ or drop me a line with any comments/questions
  - Import project dir locoGP_eclipse (Eclipse -> File -> Import) 
    This should import extra libraries required for locoGP/bycounter
  - Change memory options 
+   - add -Xss1000M
    - Eclipse -> Run Configurations -> Arguments -> VM arguments
-   add -Xss1000M (adjust as needed)
-   (see [[https://github.com/codykenb/locoGP/blob/master/GP_Master/88-runJarInNewDir.sh#L25][GP_Master/88-runJarInNewDir.sh]] for examples depending on test problem and available memory)
+   - adjust as needed, see [[https://github.com/codykenb/locoGP/blob/master/GP_Master/88-runJarInNewDir.sh#L25][GP_Master/88-runJarInNewDir.sh]] for examples depending on test problem and available memory
 
 * Notes:
 
-GP_Master      
- - Helper scripts for Master/Slave experiment workflow including graphing.
-   Used as a working dir for deploying self-contained locoGP experiment jars
+[[https://github.com/codykenb/locoGP/tree/master/GP_Master][GP_Master]] contains helper scripts for Master/Slave experiment workflow including graphing.
+Used as a working dir for deploying self-contained locoGP experiment jars
 
-Performance (bytecodes executed) measured with bycounter 
- - source available: https://sdqweb.ipd.kit.edu/wiki/ByCounter
+Performance can also be measured in terms of [[https://github.com/codykenb/locoGP/blob/master/locoGP_eclipse/src/locoGP/fitness/OpCodeCounter.java#L29][bytecodes]] executed with [[https://sdqweb.ipd.kit.edu/wiki/ByCounter][bycounter]].
 
 Developed mainly using openjdk-6-jdk, Eclipse 3.8.1, Debian wheezy & jessie
 
