@@ -37,7 +37,7 @@ public class RunTimer implements PerformanceMeasure{
 			System.out.println("Thread CPU time not supported! No fitness!");
 		long bestTime = (long)999999999*10;
 		int functionalityScore = 0;
-		
+		Object returnVal = null;
 		for (int testIndex = 0; testIndex < ind.ourProblem.getNumTests(); testIndex++) {
 			for (int i = 0; i < runNums; i++) {
 				_args = ind.ourProblem.getTestData()[testIndex].getTest(); //new Object[] { testArray };
@@ -45,13 +45,13 @@ public class RunTimer implements PerformanceMeasure{
 				
 				//System.out.println("Before: "+arrayPrinter((Integer[])_args[0]));
 				try{
-				//startTime = System.nanoTime();
-				startTime = bean.getCurrentThreadUserTime( ) ;
+				startTime = System.nanoTime();
+				//startTime = bean.getCurrentThreadUserTime( ) ;
 					
 				// __________________________Timezone_______________________________________________________
-				m.invoke(null, _args); // sort doesnt return! // null is only for static methods !!!!!!		|
+				returnVal = m.invoke(null, _args); // sort doesnt return! // null is for static methods !	|
 				// ________________________________________________________________________________________/
-				stopTime = bean.getCurrentThreadUserTime( ) ;
+				stopTime = System.nanoTime();
 
 				} catch (Exception e){
 					
@@ -71,8 +71,7 @@ public class RunTimer implements PerformanceMeasure{
 			}
 
 			ind.addBestTime(bestTime);
-			functionalityScore += ind.ourProblem.getTestData()[testIndex].checkAnswer((Integer[])_args[0]);
-			
+			functionalityScore += ind.ourProblem.getTestData()[testIndex].checkAnswer(returnVal); 
 		}
 		
 		ind.setFunctionalityScore((long)functionalityScore);
