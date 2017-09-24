@@ -10,12 +10,12 @@ workingDir="$curDir/$jobName/rep$i-`hostname`-`date +"%Y%m%d%H%M%S"`"
 
 
 compressFiles(){
-  sleep 60
-    biasFileList="$(ls *bias)"
-  7z -mx9 u biasFiles.7z $biasFileList
+  sleep 600
+  biasFileList="$(ls *bias)"
+  nice 10 7z -mx9 u biasFiles.7z $biasFileList
   rm $biasFileList
   javaFileList="$(ls *java)"
-  7z -mx9 u javaFiles.7z $javaFileList
+  nice 10 7z -mx9 u javaFiles.7z $javaFileList
   rm $javaFileList
 }
 
