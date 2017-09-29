@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import locoGP.*;
 import locoGP.fitness.IndividualEvaluator;
 import locoGP.individual.Individual;
 import locoGP.operators.GPMaterialVisitor;
@@ -33,6 +32,29 @@ public class ExhaustiveChange {
 		}		
 	}
 	
+	private static void mutateSelectedElements() {
+		/*Integer[] sortArr = {12,4,6,2,3,5,6,45,5};
+		blarghSort(sortArr, sortArr.length);*/		
+		Individual originalIndividual = getIndividual(12);
+		Individual returned = replaceNodeAtIndex(originalIndividual,5,21);
+		replaceNodeAtIndex(returned,21,10);
+	}
+	
+	
+
+	private static Integer[]  blarghSort(Integer[] a, Integer length) {
+	    for (int i=0; i < length; i++) {
+	      for (int j=0; j < length - i; j++) {
+	        if (a[j] > a[j + 1]) {
+	          int k=a[j];
+	          a[j]=a[j + 1];
+	          a[j + 1]=k;
+	        }
+	      }
+	    }
+	    return a;
+	}
+
 	private static Individual replaceNodeAtIndex(Individual originalIndividual, int indexToReplace, int replacementIndex) {
 		Individual indClone =originalIndividual.clone(); 
 		List<ASTNode> seedNodes = originalIndividual.gpMaterial.getAllAllowedNodes();

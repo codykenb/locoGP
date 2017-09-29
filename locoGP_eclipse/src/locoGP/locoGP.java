@@ -76,7 +76,7 @@ public class locoGP {
 		//GPConfig gpConfig = new GPConfig( 100, 100, 2, true,true, false);
 		GPConfig gpConfig = new GPConfig();
 		gpConfig.setUseByteCodeCounter(false);
-		gpConfig.setPopulationSize(1000);
+		gpConfig.setPopulationSize(10);
 		gpConfig.setNumGenerations(100);
 		gpConfig.setTournamentSize(2);
 		gpConfig.setPickBestLocation(false);
