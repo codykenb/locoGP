@@ -60,6 +60,7 @@ public class StringCompiler implements java.io.Serializable{
 		//JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		//JavaFileManager fileManager = new ClassFileManager(compiler.getStandardFileManager(null, null, null));
 		Iterable<? extends JavaFileObject> fileObjects = getJavaSourceFromStrings(cD);
+		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 	/*	return compile(fileObjects);
 	}
 	
@@ -78,7 +79,7 @@ public class StringCompiler implements java.io.Serializable{
 	
 	/*private boolean compile(Iterable<? extends JavaFileObject> fileObjects){
 		boolean compileStatus = false;*/
-		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+		
 		
 		if(compiler==null){
 			System.out.println("No compiler installed (install jdk!)");
@@ -97,7 +98,7 @@ public class StringCompiler implements java.io.Serializable{
 		
 		//http://stackoverflow.com/questions/12173294/compiling-fully-in-memory-with-javax-tools-javacompiler
 		//ClassLoader cl = ClassLoader.getSystemClassLoader();
-		ClassLoader cl = fileManager.getClassLoader(null); 
+		//ClassLoader cl = fileManager.getClassLoader(null); 
 		//if( compiler.getTask(tempWriter, null, null, compilationOptionss, null, fileObjects).call()) // eclipse only!!! makes sure class goes into bin
 		//if( compiler.getTask(tempWriter, null, null, null, null, fileObjects).call()) // not eclipse 
 		//try {
@@ -164,7 +165,6 @@ public class StringCompiler implements java.io.Serializable{
 				Object[] _args = Triangle2.testData[0].getTest(); //new Object[] { testArray };
 					int result = (Integer) m.invoke(null, _args);							
 					System.out.println("result " + result);*/
-				
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -177,16 +177,38 @@ public class StringCompiler implements java.io.Serializable{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}else{
+		}/*else{
 			System.out.print("No Compile");
-		}
-		compiler=null;
-		cl=null;
+		}*/
+		
+		//compiler=null;
+		ind.setClassLoader(((ClassFileManager)fileManager).getClassLoader(null));
+		//cl=null;
 		
 		return compileStatus;
 	}
 	
-	public static void testClassLoaders(){
+	
+	class ByteClassLoader extends URLClassLoader {
+	    private final Map<String, byte[]> extraClassDefs;
+
+	    public ByteClassLoader(URL[] urls, ClassLoader parent, Map<String, byte[]> extraClassDefs) {
+	      super(urls, parent);
+	      this.extraClassDefs = new HashMap<String, byte[]>(extraClassDefs);
+	    }
+
+	    @Override
+	    protected Class<?> findClass(final String name) throws ClassNotFoundException {
+	      byte[] classBytes = this.extraClassDefs.remove(name);
+	      if (classBytes != null) {
+	        return defineClass(name, classBytes, 0, classBytes.length); 
+	      }
+	      return super.findClass(name);
+	    }
+
+	  }
+	
+	/*public static void testClassLoaders(){
 		
 		// TODO Work custom classloaders into the rest of the code! & test!
 		
@@ -216,15 +238,15 @@ public class StringCompiler implements java.io.Serializable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		/*ClassLoader cL2 =  ToolProvider.getSystemToolClassLoader();
+		ClassLoader cL2 =  ToolProvider.getSystemToolClassLoader();
 		if( cL==null)
 			System.out.println("cl null ");
 		if( cL2==null)
 			System.out.println("cl2 null ");
 		if( cL.equals(cL2)){
 			System.out.println("Same flipping classloader!! ");
-		}*/
-	}
+		}
+	}*/
 	
 	// -------------deprecated 
 	
