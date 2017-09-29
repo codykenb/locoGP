@@ -54,6 +54,10 @@ public class GPConfig {
 	public int getThreadPoolSize(){
 		return threadPoolSize;
 	}
+	
+	public void setThreadPoolSize(int threadPS){
+		threadPoolSize = threadPS;
+	}
 
 	public void setUpdateLocationBias(boolean updateLocationBias) {
 		this.updateLocationBias = updateLocationBias;
@@ -132,7 +136,14 @@ public class GPConfig {
 		Logger.logAll("Debug on! ---------------------------------------------------------------");
 		this.debug = true;
 	}
-	
+
+    	public void checkDebug(){
+		if (debug) {
+			Logger.logDebugConsole(" Debug on! ---------------------------------------------------------------");
+			Logger.logAll("Debug on! ---------------------------------------------------------------");
+		}
+	}
+    
 	public boolean debug(){
 		return this.debug;
 	}
@@ -150,6 +161,8 @@ public class GPConfig {
 		java.util.logging.Logger globalLogger = java.util.logging.Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);
 		globalLogger.setLevel(java.util.logging.Level.SEVERE); //SEVERE OFF);
 		Logger.disableDebugLogging();
+		threadPoolSize = 1;
+		debug = false;
 	}
 	
 	public boolean isSinglePointEnforced() {
@@ -244,6 +257,8 @@ public class GPConfig {
 		// Elitism which takes only one of each program for each of the top fitness values
 		// This works at a fine level, so any decimal difference in fitness is distinct and 
 		this.UseDiverseElitismFine = true;	
+		if (this.useDiverseElitism) // surely a better way TODO replace with single Elitism selector variable
+			throw new IllegalStateException("Multiple Elitism Settings used");	
 	}
 	public boolean getUseDiverseElitismFine() {
 		// Elitism which takes only one of each program for each of the top fitness values
@@ -261,6 +276,19 @@ public class GPConfig {
 	public double getElitismRate() {
 		// TODO Auto-generated method stub
 		return this.elitismRate;
+	}
+	
+	public void setElitismRate(double rate) {
+		this.elitismRate = rate;
+	}
+	
+	public void setUseDiverseElitism() {
+		this.useDiverseElitism = true;
+		if (this.UseDiverseElitismFine)
+			throw new IllegalStateException("Multiple Elitism Settings used");	
+	}
+	public boolean useDiverseElitism() {
+		return this.useDiverseElitism ;
 	}
 
 	public void setUseByteCodeCounter(boolean b) {
