@@ -49,7 +49,8 @@ For more information, have a look at the locoGP [[https://codykenb.github.io/loc
 * Getting Started
 
  - Install Eclipse and JDK (Tested with Java 6 and Java 7 with -noverify) 
- - Import project dir locoGP_eclipse (Eclipse -> File -> Import) 
+ - Import project -> locoGP_eclipse (Eclipse -> File -> Import)
+   Import project -> bycounter (required by locoGP) 
    This should import extra libraries required for locoGP/bycounter
  - Change memory options 
    - add -Xss1000M
