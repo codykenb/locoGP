@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head>
+<title>ByCounter Introduction</title>
+<meta name="author" content=""/>
+<meta name="date" content=""/>
+<meta name="copyright" content=""/>
+<meta name="keywords" content="ByCounter, bytecode, java, instrumentation, introduction, tutorial, help"/>
+<meta name="description" content=""/>
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW"/>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8"/>
+<meta http-equiv="content-style-type" content="text/css"/>
+<link href="bycounter.css" type="text/css" rel="stylesheet"/>
+</head>
+
+<body>
+<div class="content">
+	<h1><!-- <img src="logo.png" alt="ByCounter Logo"/> --> ByCounter Introduction</h1>
+	This document provides an overview over the structure of ByCounter, what it is and how to use it.
+	You can find the source code for the examples used here in the 
+	<a href="de/uka/ipd/sdq/ByCounter/example/package-summary.html"><code>de.uka.ipd.sqd.ByCounter.example</code></a> package.
+	Please refer to the example classes in that package for source code reference as the extracts 
+	presented here may not be up to date. 
+
+	
+	<h2>Overview</h2>
+	<p>
+	ByCounter is a tool for collecting information about the execution of Java 
+	bytecode instructions in Java classes. It works by first instrumenting Java
+	bytecode with counting instructions and then executing the instrumented 
+	code to gather the results of these instructions.
+	</p>
+	<p>
+	Using ByCounter involves at least two separate steps that are important for users to consider.
+	First of all, the user needs to decide what specific code he wants to get counting information for and 
+	then tell ByCounter to instrument that code by calling ByCounters <code>instrument</code> method with 
+	the desired options. This step is explained in the <a href="#instrumentation">instrumentation section</a>
+	of this document.
+	</p>
+	<p>
+	The second step is to execute the instrumented code so that ByCounter can collect runtime information about 
+	the code. ByCounter can execute instrumented code using reflection methods. This is, however, not 
+	appropriate in many cases as you may want to execute the code in it's normal program context. More 
+	information on that is supplied in the <a href="#execution">execution section</a> of this document.
+	</p>
+	<p>
+	Depending on how you choose to instrument your code, your results might have been written to a log 
+	file that you can now evaluate. Or you may want to make use of ByCounters result aggregation 
+	facilities. More details on that is provided in the <a href="#results">result retrieval section</a>.
+	</p>
+	<p>
+	There are ways to control the instrumentation done by ByCounter in more detail. Information on that 
+	is discussed in the <a href="#options">options section</a> of this document.
+	</p>
+	<h4>Example1</h4>
+	Whenever you want to use ByCounter, you need to construct an instance of 
+	<a href="de/uka/ipd/sdq/ByCounter/execution/BytecodeCounter.html"><code>BytecodeCounter</code></a>.
+	Here is what example1 of the example class does:
+	<div class="code">
+	<pre>	
+	/**
+	 * Quickstart example of the most basic ByCounter usage.
+	 */
+	public static void example1() {		
+		//1. Set up a BytecodeCounter instance to use ByCounter, using a parameterless constructor.
+		BytecodeCounter counter = new BytecodeCounter();
+		[..]</pre>
+	</div>
+	
+
+	<a id="instrumentation" />
+	<h3>Instrumentation</h3>
+	<p>
+	For ByCounter to instrument your code, you need to specify that code. This means describing one or 
+	more method(s) using the class 
+	<a href="de/uka/ipd/sdq/ByCounter/utils/MethodDescriptor.html"><code>MethodDescriptor</code></a>.
+	In short, a MethodDescriptor contains information about the package and class a specific method 
+	exists in, as well as information about its exact signature so that it can be distinguished from 
+	all other methods. 
+	</p>
+	<a id="dummyMethod" />
+	The example contains a simple method with the name <code>dummyMethod</code>.
+	<div class="code">
+	<pre>
+	/**
+	 * This dummy method is here to get instrumented in the example.
+	 * @param str Some {@link java.lang.String} that gets printed.
+	 * @param f Some float that contributes to the result.
+	 * @return An int value that is computed based on input (cf. source code).
+	 */
+	public static int dummyMethod(String str, float f) {
+		System.out.println(str);
+		if(f > 0) {
+			return -1;
+		}
+		int result = (int)(2*f);
+		return result;
+	}</pre>
+	</div> 
+	To specify a MethodDescriptor for this method, we supply MethodDescriptor's constructor with the fully 
+	qualified class name (i.e. containing the package name) and the method signature as in your 
+	Java code.
+	Here is the continuation of example1:	
+	<div class="code">
+	<pre>
+		[..]
+		//2. Specify the method to be instrumented (several methods are supported as well)
+		String className = "de.uka.ipd.sdq.ByCounter.example.ByCounterExample";
+		MethodDescriptor myMethod = new MethodDescriptor(
+				className,
+				"public static int dummyMethodToBeInstrumented(java.lang.String str, float f)");
+		
+		//3. now tell ByCounter to instrument the specified method
+		counter.instrument(myMethod);
+		[..]</pre>
+	</div>
+	<p>
+	<strong>Notice</strong> however a subtle, yet very important difference here. For the type <code>String</code>
+	we did not simply write <code>String</code>, but <code>java.lang.String</code>. That is the fully qualified 
+	name for the String class. For MethodDescriptor signatures, you <em>always</em> need to use these fully qualified 
+	type names. Whenever ByCounter fails, this is a good place to start looking for an error.
+	</p>
+	<p>
+	To make ByCounter instrument the now specified method(s), call <code>instrument(..)</code>. To perform instrumentation
+	on more than one method, you can also supply a List of MethodDescriptors (<code>List&lt;MethodDescriptor&gt;</code>) instead.
+	</p>
+	
+
+	<a id="execution" />
+	<h3>Execution</h3>
+	
+	<p>
+	Now that we have used ByCounter to instrument your methods, the code that uses 
+	these methods needs to be invoked so that the instrumented code is executed.
+	</p>	
+	<p>
+	If the class you want to execute specifies a default constructor, i.e. a constructor without parameters, the
+	execution setup is completed here. Likewise, static methods can be executed without any setup. 
+	If you do not want to run the executed method by itself, as we do for this example, 
+	construction is done in your normal code. However, if that is not the case, ByCounter also needs to know how to create an instance of 
+	the class that contains the method you want to execute.
+	</p>
+	<p>
+	In that case, the constructor to use is once again specified using a MethodDescriptor. For constructors, you need to use the static 
+	method <code>MethodDescriptor.forConstructor(..)</code> instead of <code>new MethodDescriptor(..)</code>. Then, this 
+	construction information is supplied to the ByCounter instance using the <code>setConstructionParameters(..)</code> 
+	method that uses the method descriptor and an array of objects to use as the parameters of the constructor.
+	</p>
+	<div class="code">
+	<pre>
+		//4. If the class which contains the method that we want to execute 
+		// has no default constructor and the method is non-static, we need to 
+		// provide construction parameters.
+		// If a default constructor is available or the method you want to 
+		// execute is static, you can skip this step.
+		MethodDescriptor constructor = MethodDescriptor.forConstructor(
+				ByCounterExample.class.getCanonicalName(), 
+				"public ByCounterExample(int number)");
+		counter.setConstructionParameters(constructor, new Object[]{8});
+	</pre>
+	</div>
+	
+	Now everything is set up to actually run the instrumented code, so that ByCounter can acquire the counting information.
+	To run the instrumented method, call <code>execute(..)</code>.
+	<div class="code">
+	<pre>
+		[..]
+		//5. let ByCounter execute the method (note that here, this class is reloaded internally)
+		counter.execute(myMethod, new Object[] {"Hello world!", 0.0f});
+		[..]
+	</pre>
+	</div>
+	<p>
+	As before for <code>instrument()</code>, you need to specify the method to execute using the MethodDescriptor class.
+	In this simple example, we reuse the MethodDescriptor myMethod, as all we want is to execute and count that method in 
+	no specific context. But this is not a limitation. You could specify any method in any class, i.e. the main method
+	of your application, to start the execution. In that case, pay attention to the classpath.
+	</p>
+	<p>
+	In addition to the MethodDescriptor, we also need to supply the methods arguments since 
+	<a href="#dummyMethod">dummyMethod</a> takes a String and a float. We do this in the form of a simple Object[].
+	</p>
+
+	<a id="results" />
+	<h3>Result retrieval</h3>
+	Results can either be retrieved through the class <a href="de/uka/ipd/sdq/ByCounter/execution/CountingResultCollector.html"><code>CountingResultCollector</code></a> 
+	or through log files optionally created by ByCounter. The usage of CountingResultCollector is demonstrated below.
+	<div class="code">
+	<pre>
+		[..]
+		//6. now that ByCounter has completed counting, we can fetch the results,
+		//i.e. get the result list from CountingResultCollector
+		//"nonRecursively" means that even if the instrumented methods called 
+		//other instrumented methods, the CountingResults of the callees are 
+		//not inlined into those of callers
+		List<CountingResult> results = 
+			CountingResultCollector.getInstance().getAllCountingResults_nonRecursively();
+		
+		//7. output the results to the console/log
+		for(CountingResult r : results) {
+			CountingResultCollector.getInstance().logResult(r, false, true);
+		}
+		
+		//8. clear the results as we do not need them anymore
+		CountingResultCollector.getInstance().clearResults();
+	</pre>
+	</div>
+	<p>
+	To access CountingResultCollector (which employs the singleton pattern) you have to use the static
+	<code>getInstance()</code> method. From the instance you can retrieve the results by calling one of the 
+	<code>getResults()</code> method. Here, we use CountingResultCollector again to dump the results to 
+	the console or log (as specified in the log4j config file). You can, however, get more detailed 
+	information from the results. Please refer to the javadoc for 
+	<a href="de/uka/ipd/sdq/ByCounter/execution/CountingResult.html"><code>CountingResult</code></a>.
+	</p>
+	<p>
+	If you no longer need the result collector to hold the results, call <code>clearResults()</code>.
+	</p>
+
+	<h4>Example2</h4>
+
+	<a id="options" />
+	<h3>ByCounter options</h3>
+	There are more options to ByCounter than shown above. Some of these options are presented here.
+	The code to this example is from the <code>example2()</code> method. For reference, here is what
+	it looks like:
+	<div class="code">
+	<pre>
+	/**
+	 * Example of ByCounter usage with options.
+	 * Watch the console output to see where the result log file is written.
+	 */
+	public static void example2() {
+		//1. Set up a BytecodeCounter instance to use ByCounter. 
+		BytecodeCounter counter = new BytecodeCounter();
+		
+		//2. In this example, we do not want to use the CountingResultCollector, so
+		// we tell ByCounter to write to a log file instead.
+		counter.getInstrumentationParams().setUseResultCollector(false);
+		counter.getInstrumentationParams().setResultLogFileName(
+				"myResults" + File.separatorChar + "ByCounter_result_");
+		
+		//3. we want to keep the class files that are generated by ByCounter 
+		// (to see what the instrumented file looks like), so we write the classes to disk
+		counter.getInstrumentationParams().setWriteClassesToDisk(true);
+
+		//4 If the class which contains the method that we want to execute 
+		// has no default constructor, we need to provide construction parameters.
+		// If a default constructor is available or the method you want to 
+		// execute is static, you can skip this step.
+		MethodDescriptor constructor = MethodDescriptor.forConstructor(
+				ByCounterExample.class.getCanonicalName(), 
+				"public ByCounterExample(int number)");
+		counter.setConstructionParameters(constructor, new Object[]{8});
+		
+		//5. we want to know more about the usage of arrays in our code
+		counter.getInstrumentationParams().setUseArrayParameterRecording(true);
+
+		//6. as in the first example, we specify the method to instrument
+		MethodDescriptor myMethod = new MethodDescriptor(
+				"de.uka.ipd.sdq.ByCounter.example.ByCounterExample",
+				"public static int dummyMethodToBeInstrumented(java.lang.String str, float f)");
+		
+		//7. ... we tell ByCounter to instrument the specified method
+		counter.instrument(myMethod);
+		
+		//8. ... make ByCounter execute the method (note that this class must be reloaded! TODO check)
+		counter.execute(myMethod, new Object[] {"Hello world!", 0.0f});
+		
+		//since we wrote the results to a log file, we are done with this example
+	}
+	</pre>
+	</div>
+	<p>
+	The basic usage of ByCounter in this example is similiar to that seen in Example1. Notice the block in which 
+	we set the instrumentation parameters. To access these, we call <code>getInstrumentationParams()</code> on
+	the BytecodeCounter instance. 
+	</p>
+	<p>
+	First we tell ByCounter not to use the CountingResultCollector mechanism. This 
+	means that a log file is written for each method instead. In the next line, we specify the file names for 
+	these log files. The specified string is a prefix to the generated name. The javadoc explains this in more detail.
+	</p>
+	<p>
+	Next we instruct ByCounter to write the instrumented .class files to disk. You will find these in the 
+	'bin_instrumented' directory.
+	</p>
+	<p>
+	Finally we tell ByCounter to record array parameters such as the dimension and type of arrays. These
+	are then found in the CountingResults.
+	</p>
+	<p>
+	Other than the here mentioned options, more are available. Please refer to the javadoc.
+	</p>
+	<p>
+	Note that ByCounter allows you to specify the exact class file that you want to instrument as a byte array.
+	Use the <code>setClassToInstrument(classToInstrument)</code> method of the BytecodeCounter for that.
+	</p>
+
+
+</div>
+</body>
+</html>

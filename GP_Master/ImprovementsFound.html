@@ -1,0 +1,1356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Example Improvements Found</title>
+<!-- 2018-01-15 Mon 22:32 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Brendan Cody-Kenny" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Example Improvements Found</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. iaik.ascon128v11.Ascon128v11</a>
+<ul>
+<li><a href="#sec-1-1">1.1. iaik.ascon128v11.Ascon128v11<sub>52876</sub></a></li>
+<li><a href="#sec-1-2">1.2. iaik.ascon128v11.Ascon128v11<sub>2833</sub></a></li>
+<li><a href="#sec-1-3">1.3. iaik.ascon128v11.Ascon128v11<sub>340</sub></a></li>
+<li><a href="#sec-1-4">1.4. iaik.ascon128v11.Ascon128v11<sub>21587</sub></a></li>
+<li><a href="#sec-1-5">1.5. Original</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2. References</a>
+<ul>
+<li><a href="#sec-2-1">2.1. Ascon</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3. Script to show improvements found</a></li>
+</ul>
+</div>
+</div>
+
+
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> iaik.ascon128v11.Ascon128v11</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> iaik.ascon128v11.Ascon128v11<sub>52876</sub></h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+Improvement Details:
+</p>
+
+<p>
+7% Improvement!
+</p>
+
+<pre class="example">
+/home/bck/source/locoGP/GP_Master/20180114-221323-GenerationInfo.log:iaik.ascon128v11.Ascon128v11_52876 100 mult 0.0 + 0.9224588 = 0.9224588 ASTNodes: 936 GPNodes: 816 xoverApplied: false xovers: 0 mutationApplied: true mutations: 1 testResults: i0:0Rfalsei1:0Rfalsei2:0Rfalsei3:0Rfalsei4:0Rfalsei5:0Rfalsei6:0Rfalsei7:0Rfalsei8:0Rfalsei9:0Rfalsei10:0Rfalsei11:0Rfalsei12:0Rfalsei13:0Rfalsei14:0Rfalsei15:0Rfalsei16:0Rfalse
+</pre>
+
+
+<p>
+Diff
+</p>
+
+
+<div class="org-src-container">
+
+<pre class="src src-diff"><span style="color: #0000ff; font-weight: bold;">9,10c9,10</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">   public static int CRYPTO_NSECBYTES = 0;</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">   public static int CRYPTO_NPUBBYTES = 16;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">   public static int load64 = 0;</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">   public static int clen = 16;</span>
+<span style="color: #0000ff; font-weight: bold;">14c14</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">   public static boolean PRINTSTATE = false;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">   public static boolean size = false;</span>
+<span style="color: #0000ff; font-weight: bold;">44c44</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     x2 = x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));</span>
+<span style="color: #0000ff; font-weight: bold;">46c46</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     x4 = load64(java.util.Arrays.copyOfRange(S, 0, 40));</span>
+<span style="color: #0000ff; font-weight: bold;">50c50</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       x2 ^= (((long) (0xf) - i) &lt;&lt; 4) | i;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       x3 ^= (((long) (0xf) - i) &lt;&lt; 6) | i;</span>
+<span style="color: #0000ff; font-weight: bold;">52c52</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       x0 ^= x4;    x4 ^= x3;    x2 ^= x1;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       x0 ^= x4;    x4 ^= x3;    x2 ^= ROTR(x2, 1);</span>
+<span style="color: #0000ff; font-weight: bold;">55,57c55,57</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       t0 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       load64 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       x0 ^= t1;    t3 = x0;    x2 ^= t3;    x3 ^= t4;    x4 ^= -0;</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       x1 ^= x0;    x0 ^= x4;    i ^= x2;    x2 =~ x2;</span>
+<span style="color: #0000ff; font-weight: bold;">59c59</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       x0 ^= 1 ^ ROTR(x0, 28);</span>
+<span style="color: #0000ff; font-weight: bold;">61c61</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       x2 ^= ROTR(x2, 1) ^ 0;</span>
+<span style="color: #0000ff; font-weight: bold;">63c63</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       x4 ^= (((long) (0xf) - i) &lt;&lt; 6) ^ ROTR(x4, 41);</span>
+<span style="color: #0000ff; font-weight: bold;">77c77</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       return -1;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       return -0;</span>
+<span style="color: #0000ff; font-weight: bold;">97c97</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     A[adlen] = (byte) 0x80;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     A[adlen] = 1;</span>
+<span style="color: #0000ff; font-weight: bold;">109,111c109,111</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       S[rate + i] = k[i];</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     for (i = 0; i &lt; klen; ++i)</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       S[rate + klen + i] = npub[i];</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">               S[1] = (byte) a;</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     for (j = 2; j &lt; rate; ++j)</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">               S[j] ^= 8;</span>
+<span style="color: #0000ff; font-weight: bold;">113,114c113,114</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     for (i = 0; i &lt; klen; ++i)</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       S[rate + klen + i] ^= k[i];</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     for (i = i = 0; i &lt; klen; ++i)</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       i ^= k[i];</span>
+<span style="color: #0000ff; font-weight: bold;">118,120c118,120</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       for (i = 0; i &lt; s; ++i) {</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">         for (j = 0; j &lt; rate; ++j)</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">           S[j] ^= A[i * rate + j];</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       for (i = S[size - 1] ^= 1; i &lt; s; ++i) {</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">         for (j = 2; j &lt; rate; ++j)</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">           S[j] ^= 8;</span>
+<span style="color: #0000ff; font-weight: bold;">127,131c127,128</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     for (i = 0; i &lt; t - 1; ++i) {</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       for (j = 0; j &lt; rate; ++j) {</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">         M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">         S[j] = c[i * rate + j];</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       }</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     for (i = 0; i &lt; t - size - capacity; ++i) {</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       S[3] = (byte) b;</span>
+<span style="color: #0000ff; font-weight: bold;">135c132</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[i]);</span>
+<span style="color: #0000ff; font-weight: bold;">138c135</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     S[l] ^= 0x80;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     t ^= 0x80;</span>
+<span style="color: #0000ff; font-weight: bold;">148c145</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     for (i = 0; i &lt; klen; ++i)</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     for (i = 0; i &lt; S[l]; ++i)</span>
+<span style="color: #0000ff; font-weight: bold;">154,155c151</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     for (i = 0; i &lt; mlen; ++i)</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       m[i] = M[i];</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     permutation(S, b);</span>
+</pre>
+</div>
+
+
+<p>
+Diff side-by-side
+</p>
+
+
+<div class="org-src-container">
+
+<pre class="src src-diff">package iaik.ascon128v11;                                                                                     package iaik.ascon128v11;                                                                                     
+                                                                                                                                                                            
+                                                                                                                                                                            
+                                                                                                                                                                            
+public class Ascon128v11 {                                                                                    public class Ascon128v11 {                                                                                    
+                                                                                                                                                                            
+  // Defines                                                                                    // Defines                                                                                  
+  public static int CRYPTO_KEYBYTES = 16;                                                                                       public static int CRYPTO_KEYBYTES = 16;                                                                                     
+  public static int CRYPTO_NSECBYTES = 0;                                                                                   |   public static int load64 = 0;                                                                                       
+  public static int CRYPTO_NPUBBYTES = 16;                                                                                  |   public static int clen = 16;                                                                                        
+  public static int CRYPTO_ABYTES = 16;                                                                                         public static int CRYPTO_ABYTES = 16;                                                                                       
+  public static int CRYPTO_NOOVERLAP = 1;                                                                                       public static int CRYPTO_NOOVERLAP = 1;                                                                                     
+                                                                                                                                                                            
+  public static boolean PRINTSTATE = false;                                                                                 |   public static boolean size = false;                                                                                 
+                                                                                                                                                                            
+  public static long ROTR(long x, int n) {                                                                                      public static long ROTR(long x, int n) {                                                                                    
+    return Long.rotateRight(x, n);                                                                                        return Long.rotateRight(x, n);                                                                                    
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+                                                                                                                                                                            
+  public static long load64(byte S[]) {                                                                                         public static long load64(byte S[]) {                                                                                       
+    long x = 0;                                                                                           long x = 0;                                                                                       
+    x = java.nio.ByteBuffer.wrap(S).getLong();                                                                                            x = java.nio.ByteBuffer.wrap(S).getLong();                                                                                        
+                                                                                                                                                                            
+    return x;                                                                                     return x;                                                                                 
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static void store64(byte S[], int offset, long x) {                                                                                    public static void store64(byte S[], int offset, long x) {                                                                                  
+    int i;                                                                                        int i;                                                                                    
+                                                                                                                                                                            
+    for (i = 0; i &lt; 8; ++i) {                                                                                     for (i = 0; i &lt; 8; ++i) {                                                                                 
+      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();                                                                                        byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();                                                                                  
+      S[i + offset] = (byte) byteacter[i];                                                                                          S[i + offset] = (byte) byteacter[i];                                                                                    
+    }                                                                                     }                                                                                 
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static void permutation(byte S[], int rounds) {                                                                                        public static void permutation(byte S[], int rounds) {                                                                                      
+    long i;                                                                                       long i;                                                                                   
+    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;                                                                                          long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;                                                                                      
+    long t0, t1, t2, t3, t4;                                                                                      long t0, t1, t2, t3, t4;                                                                                  
+                                                                                                                                                                            
+    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));                                                                                           x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));                                                                                       
+    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));                                                                                          x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));                                                                                      
+    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));                                                                                   |     x2 = x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));                                                                                  
+    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));                                                                                         x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));                                                                                     
+    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));                                                                                   |     x4 = load64(java.util.Arrays.copyOfRange(S, 0, 40));                                                                                      
+                                                                                                                                                                            
+    for (i = 0; i &lt; rounds; ++i) {                                                                                        for (i = 0; i &lt; rounds; ++i) {                                                                                    
+      // addition of round constant                                                                                         // addition of round constant                                                                                   
+      x2 ^= (((long) (0xf) - i) &lt;&lt; 4) | i;                                                                                  |       x3 ^= (((long) (0xf) - i) &lt;&lt; 6) | i;                                                                                    
+      // substitution layer                                                                                         // substitution layer                                                                                   
+      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;                                                                                   |       x0 ^= x4;    x4 ^= x3;    x2 ^= ROTR(x2, 1);                                                                                    
+      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;                                                                                         t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;                                                                                   
+      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;                                                                                         t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;                                                                                   
+      t0 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;                                                                                 |       load64 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;                                                                                       
+      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;                                                                                 |       x0 ^= t1;    t3 = x0;    x2 ^= t3;    x3 ^= t4;    x4 ^= -0;                                                                                    
+      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;                                                                                      |       x1 ^= x0;    x0 ^= x4;    i ^= x2;    x2 =~ x2;                                                                                 
+      // linear diffusion layer                                                                                             // linear diffusion layer                                                                                       
+      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);                                                                                    |       x0 ^= 1 ^ ROTR(x0, 28);                                                                                 
+      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);                                                                                            x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);                                                                                      
+      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);                                                                                      |       x2 ^= ROTR(x2, 1) ^ 0;                                                                                  
+      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);                                                                                            x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);                                                                                      
+      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);                                                                                     |       x4 ^= (((long) (0xf) - i) &lt;&lt; 6) ^ ROTR(x4, 41);                                                                                 
+    }                                                                                     }                                                                                 
+    store64(S, 0, x0);                                                                                            store64(S, 0, x0);                                                                                        
+    store64(S, 8, x1);                                                                                            store64(S, 8, x1);                                                                                        
+    store64(S, 16, x2);                                                                                           store64(S, 16, x2);                                                                                       
+    store64(S, 24, x3);                                                                                           store64(S, 24, x3);                                                                                       
+    store64(S, 32, x4);                                                                                           store64(S, 32, x4);                                                                                       
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in                                                                                   public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in                                                                                 
+      int adlen, byte npub[], byte k[]) {                                                                                           int adlen, byte npub[], byte k[]) {                                                                                     
+                                                                                                                                                                            
+    mlen = 0;                                                                                     mlen = 0;                                                                                 
+    if (clen &lt; CRYPTO_KEYBYTES)                                                                                           if (clen &lt; CRYPTO_KEYBYTES)                                                                                       
+      return -1;                                                                                    |       return -0;                                                                                      
+                                                                                                                                                                            
+    int klen = CRYPTO_KEYBYTES;                                                                                           int klen = CRYPTO_KEYBYTES;                                                                                       
+    int size = 320 / 8;                                                                                           int size = 320 / 8;                                                                                       
+    int capacity = 2 * klen;                                                                                      int capacity = 2 * klen;                                                                                  
+    int rate = size - capacity;                                                                                           int rate = size - capacity;                                                                                       
+    int a = 12;                                                                                           int a = 12;                                                                                       
+    int b = (klen == 16) ? 6 : 8;                                                                                         int b = (klen == 16) ? 6 : 8;                                                                                     
+    int s = adlen / rate + 1;                                                                                     int s = adlen / rate + 1;                                                                                 
+    int t = (clen - klen) / rate + 1;                                                                                     int t = (clen - klen) / rate + 1;                                                                                 
+    int l = (clen - klen) % rate;                                                                                         int l = (clen - klen) % rate;                                                                                     
+                                                                                                                                                                            
+    byte S[] = new byte[size];                                                                                            byte S[] = new byte[size];                                                                                        
+    byte A[] = new byte[(int) (s * rate)];                                                                                        byte A[] = new byte[(int) (s * rate)];                                                                                    
+    byte M[] = new byte[(int) (t * rate)];                                                                                        byte M[] = new byte[(int) (t * rate)];                                                                                    
+    int i, j;                                                                                     int i, j;                                                                                 
+                                                                                                                                                                            
+    // pad associated data                                                                                        // pad associated data                                                                                    
+    for (i = 0; i &lt; adlen; ++i)                                                                                           for (i = 0; i &lt; adlen; ++i)                                                                                       
+      A[i] = ad[i];                                                                                         A[i] = ad[i];                                                                                   
+    A[adlen] = (byte) 0x80;                                                                                 |     A[adlen] = 1;                                                                                     
+    for (i = adlen + 1; i &lt; s * rate; ++i)                                                                                        for (i = adlen + 1; i &lt; s * rate; ++i)                                                                                    
+      A[i] = 0;                                                                                             A[i] = 0;                                                                                       
+                                                                                                                                                                            
+    // initialization                                                                                     // initialization                                                                                 
+    S[0] = (byte) (klen * 8);                                                                                     S[0] = (byte) (klen * 8);                                                                                 
+    S[1] = (byte) (rate * 8);                                                                                     S[1] = (byte) (rate * 8);                                                                                 
+    S[2] = (byte) a;                                                                                      S[2] = (byte) a;                                                                                  
+    S[3] = (byte) b;                                                                                      S[3] = (byte) b;                                                                                  
+    for (i = 4; i &lt; rate; ++i)                                                                                            for (i = 4; i &lt; rate; ++i)                                                                                        
+      S[i] = 0;                                                                                             S[i] = 0;                                                                                       
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + i] = k[i];                                                                                   |                 S[1] = (byte) a;                                                                                      
+    for (i = 0; i &lt; klen; ++i)                                                                                      |     for (j = 2; j &lt; rate; ++j)                                                                                        
+      S[rate + klen + i] = npub[i];                                                                                 |                 S[j] ^= 8;                                                                                    
+    permutation(S, a);                                                                                            permutation(S, a);                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                      |     for (i = i = 0; i &lt; klen; ++i)                                                                                    
+      S[rate + klen + i] ^= k[i];                                                                                   |       i ^= k[i];                                                                                      
+                                                                                                                                                                            
+    // process associated data                                                                                            // process associated data                                                                                        
+    if (adlen != 0) {                                                                                     if (adlen != 0) {                                                                                 
+      for (i = 0; i &lt; s; ++i) {                                                                                     |       for (i = S[size - 1] ^= 1; i &lt; s; ++i) {                                                                                        
+        for (j = 0; j &lt; rate; ++j)                                                                                  |         for (j = 2; j &lt; rate; ++j)                                                                                    
+          S[j] ^= A[i * rate + j];                                                                                  |           S[j] ^= 8;                                                                                  
+        permutation(S, b);                                                                                            permutation(S, b);                                                                                    
+      }                                                                                             }                                                                                       
+    }                                                                                     }                                                                                 
+    S[size - 1] ^= 1;                                                                                     S[size - 1] ^= 1;                                                                                 
+                                                                                                                                                                            
+    // process plaintext                                                                                          // process plaintext                                                                                      
+    for (i = 0; i &lt; t - 1; ++i) {                                                                                   |     for (i = 0; i &lt; t - size - capacity; ++i) {                                                                                       
+      for (j = 0; j &lt; rate; ++j) {                                                                                  |       S[3] = (byte) b;                                                                                        
+        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);                                                                                  &lt;
+        S[j] = c[i * rate + j];                                                                                     &lt;
+      }                                                                                     &lt;
+      permutation(S, b);                                                                                            permutation(S, b);                                                                                      
+    }                                                                                     }                                                                                 
+    for (j = 0; j &lt; l; ++j)                                                                                       for (j = 0; j &lt; l; ++j)                                                                                   
+      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);                                                                                |       M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[i]);                                                                                   
+    for (j = 0; j &lt; l; ++j)                                                                                       for (j = 0; j &lt; l; ++j)                                                                                   
+      S[j] = c[(int) ((t - 1) * rate + j)];                                                                                         S[j] = c[(int) ((t - 1) * rate + j)];                                                                                   
+    S[l] ^= 0x80;                                                                                   |     t ^= 0x80;                                                                                        
+                                                                                                                                                                            
+    // finalization                                                                                       // finalization                                                                                   
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + i] ^= k[i];                                                                                          S[rate + i] ^= k[i];                                                                                    
+    permutation(S, a);                                                                                            permutation(S, a);                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + klen + i] ^= k[i];                                                                                           S[rate + klen + i] ^= k[i];                                                                                     
+                                                                                                                                                                            
+    // return -1 if verification fails                                                                                            // return -1 if verification fails                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                      |     for (i = 0; i &lt; S[l]; ++i)                                                                                        
+      if (c[clen - klen + i] != S[rate + klen + i])                                                                                         if (c[clen - klen + i] != S[rate + klen + i])                                                                                   
+        return -1;                                                                                            return -1;                                                                                    
+                                                                                                                                                                            
+    // return plaintext                                                                                           // return plaintext                                                                                       
+    mlen = clen - klen;                                                                                           mlen = clen - klen;                                                                                       
+    for (i = 0; i &lt; mlen; ++i)                                                                                      |     permutation(S, b);                                                                                        
+      m[i] = M[i];                                                                                  &lt;
+                                                                                                                                                                            
+    return mlen;                                                                                          return mlen;                                                                                      
+  }                                                                                     }                                                                                   
+}                                                                                     }
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> iaik.ascon128v11.Ascon128v11<sub>2833</sub></h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+Improvement Details:
+</p>
+
+<p>
+7% improvement!
+</p>
+
+<pre class="example">
+/home/bck/source/locoGP/GP_Master/20180114-212555-GenerationInfo.log:iaik.ascon128v11.Ascon128v11_2833 100 mult 0.0 + 0.9306863 = 0.9306863 ASTNodes: 924 GPNodes: 804 xoverApplied: true xovers: 1 mutationApplied: true mutations: 7 testResults: i0:0Rfalsei1:0Rfalsei2:0Rfalsei3:0Rfalsei4:0Rfalsei5:0Rfalsei6:0Rfalsei7:0Rfalsei8:0Rfalsei9:0Rfalsei10:0Rfalsei11:0Rfalsei12:0Rfalsei13:0Rfalsei14:0Rfalsei15:0Rfalsei16:0Rfalse
+</pre>
+
+
+<p>
+Diff
+</p>
+
+
+<div class="org-src-container">
+
+<pre class="src src-diff"><span style="color: #0000ff; font-weight: bold;">145c145</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       S[rate + klen + i] ^= k[i];</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       i ^= k[i];</span>
+<span style="color: #0000ff; font-weight: bold;">147,150c147</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     // return -1 if verification fails</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     for (i = 0; i &lt; klen; ++i)</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       if (c[clen - klen + i] != S[rate + klen + i])</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">         return -1;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     permutation(S, b);</span>
+</pre>
+</div>
+
+
+<p>
+Diff side-by-side
+</p>
+
+
+<div class="org-src-container">
+
+<pre class="src src-diff">package iaik.ascon128v11;                                                                                     package iaik.ascon128v11;                                                                                     
+                                                                                                                                                                            
+                                                                                                                                                                            
+                                                                                                                                                                            
+public class Ascon128v11 {                                                                                    public class Ascon128v11 {                                                                                    
+                                                                                                                                                                            
+  // Defines                                                                                    // Defines                                                                                  
+  public static int CRYPTO_KEYBYTES = 16;                                                                                       public static int CRYPTO_KEYBYTES = 16;                                                                                     
+  public static int CRYPTO_NSECBYTES = 0;                                                                                       public static int CRYPTO_NSECBYTES = 0;                                                                                     
+  public static int CRYPTO_NPUBBYTES = 16;                                                                                      public static int CRYPTO_NPUBBYTES = 16;                                                                                    
+  public static int CRYPTO_ABYTES = 16;                                                                                         public static int CRYPTO_ABYTES = 16;                                                                                       
+  public static int CRYPTO_NOOVERLAP = 1;                                                                                       public static int CRYPTO_NOOVERLAP = 1;                                                                                     
+                                                                                                                                                                            
+  public static boolean PRINTSTATE = false;                                                                                     public static boolean PRINTSTATE = false;                                                                                   
+                                                                                                                                                                            
+  public static long ROTR(long x, int n) {                                                                                      public static long ROTR(long x, int n) {                                                                                    
+    return Long.rotateRight(x, n);                                                                                        return Long.rotateRight(x, n);                                                                                    
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+                                                                                                                                                                            
+  public static long load64(byte S[]) {                                                                                         public static long load64(byte S[]) {                                                                                       
+    long x = 0;                                                                                           long x = 0;                                                                                       
+    x = java.nio.ByteBuffer.wrap(S).getLong();                                                                                            x = java.nio.ByteBuffer.wrap(S).getLong();                                                                                        
+                                                                                                                                                                            
+    return x;                                                                                     return x;                                                                                 
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static void store64(byte S[], int offset, long x) {                                                                                    public static void store64(byte S[], int offset, long x) {                                                                                  
+    int i;                                                                                        int i;                                                                                    
+                                                                                                                                                                            
+    for (i = 0; i &lt; 8; ++i) {                                                                                     for (i = 0; i &lt; 8; ++i) {                                                                                 
+      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();                                                                                        byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();                                                                                  
+      S[i + offset] = (byte) byteacter[i];                                                                                          S[i + offset] = (byte) byteacter[i];                                                                                    
+    }                                                                                     }                                                                                 
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static void permutation(byte S[], int rounds) {                                                                                        public static void permutation(byte S[], int rounds) {                                                                                      
+    long i;                                                                                       long i;                                                                                   
+    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;                                                                                          long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;                                                                                      
+    long t0, t1, t2, t3, t4;                                                                                      long t0, t1, t2, t3, t4;                                                                                  
+                                                                                                                                                                            
+    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));                                                                                           x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));                                                                                       
+    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));                                                                                          x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));                                                                                      
+    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));                                                                                         x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));                                                                                     
+    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));                                                                                         x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));                                                                                     
+    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));                                                                                         x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));                                                                                     
+                                                                                                                                                                            
+    for (i = 0; i &lt; rounds; ++i) {                                                                                        for (i = 0; i &lt; rounds; ++i) {                                                                                    
+      // addition of round constant                                                                                         // addition of round constant                                                                                   
+      x2 ^= (((long) (0xf) - i) &lt;&lt; 4) | i;                                                                                          x2 ^= (((long) (0xf) - i) &lt;&lt; 4) | i;                                                                                    
+      // substitution layer                                                                                         // substitution layer                                                                                   
+      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;                                                                                           x0 ^= x4;    x4 ^= x3;    x2 ^= x1;                                                                                     
+      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;                                                                                         t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;                                                                                   
+      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;                                                                                         t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;                                                                                   
+      t0 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;                                                                                         t0 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;                                                                                   
+      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;                                                                                         x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;                                                                                   
+      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;                                                                                              x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;                                                                                        
+      // linear diffusion layer                                                                                             // linear diffusion layer                                                                                       
+      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);                                                                                            x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);                                                                                      
+      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);                                                                                            x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);                                                                                      
+      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);                                                                                              x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);                                                                                        
+      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);                                                                                            x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);                                                                                      
+      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);                                                                                             x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);                                                                                       
+    }                                                                                     }                                                                                 
+    store64(S, 0, x0);                                                                                            store64(S, 0, x0);                                                                                        
+    store64(S, 8, x1);                                                                                            store64(S, 8, x1);                                                                                        
+    store64(S, 16, x2);                                                                                           store64(S, 16, x2);                                                                                       
+    store64(S, 24, x3);                                                                                           store64(S, 24, x3);                                                                                       
+    store64(S, 32, x4);                                                                                           store64(S, 32, x4);                                                                                       
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in                                                                                   public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in                                                                                 
+      int adlen, byte npub[], byte k[]) {                                                                                           int adlen, byte npub[], byte k[]) {                                                                                     
+                                                                                                                                                                            
+    mlen = 0;                                                                                     mlen = 0;                                                                                 
+    if (clen &lt; CRYPTO_KEYBYTES)                                                                                           if (clen &lt; CRYPTO_KEYBYTES)                                                                                       
+      return -1;                                                                                            return -1;                                                                                      
+                                                                                                                                                                            
+    int klen = CRYPTO_KEYBYTES;                                                                                           int klen = CRYPTO_KEYBYTES;                                                                                       
+    int size = 320 / 8;                                                                                           int size = 320 / 8;                                                                                       
+    int capacity = 2 * klen;                                                                                      int capacity = 2 * klen;                                                                                  
+    int rate = size - capacity;                                                                                           int rate = size - capacity;                                                                                       
+    int a = 12;                                                                                           int a = 12;                                                                                       
+    int b = (klen == 16) ? 6 : 8;                                                                                         int b = (klen == 16) ? 6 : 8;                                                                                     
+    int s = adlen / rate + 1;                                                                                     int s = adlen / rate + 1;                                                                                 
+    int t = (clen - klen) / rate + 1;                                                                                     int t = (clen - klen) / rate + 1;                                                                                 
+    int l = (clen - klen) % rate;                                                                                         int l = (clen - klen) % rate;                                                                                     
+                                                                                                                                                                            
+    byte S[] = new byte[size];                                                                                            byte S[] = new byte[size];                                                                                        
+    byte A[] = new byte[(int) (s * rate)];                                                                                        byte A[] = new byte[(int) (s * rate)];                                                                                    
+    byte M[] = new byte[(int) (t * rate)];                                                                                        byte M[] = new byte[(int) (t * rate)];                                                                                    
+    int i, j;                                                                                     int i, j;                                                                                 
+                                                                                                                                                                            
+    // pad associated data                                                                                        // pad associated data                                                                                    
+    for (i = 0; i &lt; adlen; ++i)                                                                                           for (i = 0; i &lt; adlen; ++i)                                                                                       
+      A[i] = ad[i];                                                                                         A[i] = ad[i];                                                                                   
+    A[adlen] = (byte) 0x80;                                                                                       A[adlen] = (byte) 0x80;                                                                                   
+    for (i = adlen + 1; i &lt; s * rate; ++i)                                                                                        for (i = adlen + 1; i &lt; s * rate; ++i)                                                                                    
+      A[i] = 0;                                                                                             A[i] = 0;                                                                                       
+                                                                                                                                                                            
+    // initialization                                                                                     // initialization                                                                                 
+    S[0] = (byte) (klen * 8);                                                                                     S[0] = (byte) (klen * 8);                                                                                 
+    S[1] = (byte) (rate * 8);                                                                                     S[1] = (byte) (rate * 8);                                                                                 
+    S[2] = (byte) a;                                                                                      S[2] = (byte) a;                                                                                  
+    S[3] = (byte) b;                                                                                      S[3] = (byte) b;                                                                                  
+    for (i = 4; i &lt; rate; ++i)                                                                                            for (i = 4; i &lt; rate; ++i)                                                                                        
+      S[i] = 0;                                                                                             S[i] = 0;                                                                                       
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + i] = k[i];                                                                                           S[rate + i] = k[i];                                                                                     
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + klen + i] = npub[i];                                                                                         S[rate + klen + i] = npub[i];                                                                                   
+    permutation(S, a);                                                                                            permutation(S, a);                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + klen + i] ^= k[i];                                                                                           S[rate + klen + i] ^= k[i];                                                                                     
+                                                                                                                                                                            
+    // process associated data                                                                                            // process associated data                                                                                        
+    if (adlen != 0) {                                                                                     if (adlen != 0) {                                                                                 
+      for (i = 0; i &lt; s; ++i) {                                                                                             for (i = 0; i &lt; s; ++i) {                                                                                       
+        for (j = 0; j &lt; rate; ++j)                                                                                            for (j = 0; j &lt; rate; ++j)                                                                                    
+          S[j] ^= A[i * rate + j];                                                                                              S[j] ^= A[i * rate + j];                                                                                    
+        permutation(S, b);                                                                                            permutation(S, b);                                                                                    
+      }                                                                                             }                                                                                       
+    }                                                                                     }                                                                                 
+    S[size - 1] ^= 1;                                                                                     S[size - 1] ^= 1;                                                                                 
+                                                                                                                                                                            
+    // process plaintext                                                                                          // process plaintext                                                                                      
+    for (i = 0; i &lt; t - 1; ++i) {                                                                                         for (i = 0; i &lt; t - 1; ++i) {                                                                                     
+      for (j = 0; j &lt; rate; ++j) {                                                                                          for (j = 0; j &lt; rate; ++j) {                                                                                    
+        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);                                                                                            M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);                                                                                    
+        S[j] = c[i * rate + j];                                                                                               S[j] = c[i * rate + j];                                                                                       
+      }                                                                                             }                                                                                       
+      permutation(S, b);                                                                                            permutation(S, b);                                                                                      
+    }                                                                                     }                                                                                 
+    for (j = 0; j &lt; l; ++j)                                                                                       for (j = 0; j &lt; l; ++j)                                                                                   
+      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);                                                                                        M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);                                                                                  
+    for (j = 0; j &lt; l; ++j)                                                                                       for (j = 0; j &lt; l; ++j)                                                                                   
+      S[j] = c[(int) ((t - 1) * rate + j)];                                                                                         S[j] = c[(int) ((t - 1) * rate + j)];                                                                                   
+    S[l] ^= 0x80;                                                                                         S[l] ^= 0x80;                                                                                     
+                                                                                                                                                                            
+    // finalization                                                                                       // finalization                                                                                   
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + i] ^= k[i];                                                                                          S[rate + i] ^= k[i];                                                                                    
+    permutation(S, a);                                                                                            permutation(S, a);                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + klen + i] ^= k[i];                                                                                   |       i ^= k[i];                                                                                      
+                                                                                                                                                                            
+    // return -1 if verification fails                                                                                      |     permutation(S, b);                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                      &lt;
+      if (c[clen - klen + i] != S[rate + klen + i])                                                                                 &lt;
+        return -1;                                                                                  &lt;
+                                                                                                                                                                            
+    // return plaintext                                                                                           // return plaintext                                                                                       
+    mlen = clen - klen;                                                                                           mlen = clen - klen;                                                                                       
+    for (i = 0; i &lt; mlen; ++i)                                                                                            for (i = 0; i &lt; mlen; ++i)                                                                                        
+      m[i] = M[i];                                                                                          m[i] = M[i];                                                                                    
+                                                                                                                                                                            
+    return mlen;                                                                                          return mlen;                                                                                      
+  }                                                                                     }                                                                                   
+}                                                                                     }
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> iaik.ascon128v11.Ascon128v11<sub>340</sub></h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+Improvement Details:
+</p>
+
+<p>
+3% Improvement! 
+</p>
+
+<pre class="example">
+/home/bck/source/locoGP/GP_Master/20180114-212555-GenerationInfo.log:iaik.ascon128v11.Ascon128v11_340 100 mult 0.0 + 0.96370894 = 0.96370894 ASTNodes: 929 GPNodes: 809 xoverApplied: false xovers: 0 mutationApplied: true mutations: 1 testResults: i0:0Rfalsei1:0Rfalsei2:0Rfalsei3:0Rfalsei4:0Rfalsei5:0Rfalsei6:0Rfalsei7:0Rfalsei8:0Rfalsei9:0Rfalsei10:0Rfalsei11:0Rfalsei12:0Rfalsei13:0Rfalsei14:0Rfalsei15:0Rfalsei16:0Rfalse
+</pre>
+
+
+<p>
+Diff
+</p>
+
+
+<div class="org-src-container">
+
+<pre class="src src-diff"><span style="color: #0000ff; font-weight: bold;">147,150c147</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     // return -1 if verification fails</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     for (i = 0; i &lt; klen; ++i)</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       if (c[clen - klen + i] != S[rate + klen + i])</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">         return -1;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     permutation(S, b);</span>
+</pre>
+</div>
+
+
+<p>
+Diff side-by-side
+</p>
+
+
+<div class="org-src-container">
+
+<pre class="src src-diff">package iaik.ascon128v11;                                                                                     package iaik.ascon128v11;                                                                                     
+                                                                                                                                                                            
+                                                                                                                                                                            
+                                                                                                                                                                            
+public class Ascon128v11 {                                                                                    public class Ascon128v11 {                                                                                    
+                                                                                                                                                                            
+  // Defines                                                                                    // Defines                                                                                  
+  public static int CRYPTO_KEYBYTES = 16;                                                                                       public static int CRYPTO_KEYBYTES = 16;                                                                                     
+  public static int CRYPTO_NSECBYTES = 0;                                                                                       public static int CRYPTO_NSECBYTES = 0;                                                                                     
+  public static int CRYPTO_NPUBBYTES = 16;                                                                                      public static int CRYPTO_NPUBBYTES = 16;                                                                                    
+  public static int CRYPTO_ABYTES = 16;                                                                                         public static int CRYPTO_ABYTES = 16;                                                                                       
+  public static int CRYPTO_NOOVERLAP = 1;                                                                                       public static int CRYPTO_NOOVERLAP = 1;                                                                                     
+                                                                                                                                                                            
+  public static boolean PRINTSTATE = false;                                                                                     public static boolean PRINTSTATE = false;                                                                                   
+                                                                                                                                                                            
+  public static long ROTR(long x, int n) {                                                                                      public static long ROTR(long x, int n) {                                                                                    
+    return Long.rotateRight(x, n);                                                                                        return Long.rotateRight(x, n);                                                                                    
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+                                                                                                                                                                            
+  public static long load64(byte S[]) {                                                                                         public static long load64(byte S[]) {                                                                                       
+    long x = 0;                                                                                           long x = 0;                                                                                       
+    x = java.nio.ByteBuffer.wrap(S).getLong();                                                                                            x = java.nio.ByteBuffer.wrap(S).getLong();                                                                                        
+                                                                                                                                                                            
+    return x;                                                                                     return x;                                                                                 
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static void store64(byte S[], int offset, long x) {                                                                                    public static void store64(byte S[], int offset, long x) {                                                                                  
+    int i;                                                                                        int i;                                                                                    
+                                                                                                                                                                            
+    for (i = 0; i &lt; 8; ++i) {                                                                                     for (i = 0; i &lt; 8; ++i) {                                                                                 
+      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();                                                                                        byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();                                                                                  
+      S[i + offset] = (byte) byteacter[i];                                                                                          S[i + offset] = (byte) byteacter[i];                                                                                    
+    }                                                                                     }                                                                                 
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static void permutation(byte S[], int rounds) {                                                                                        public static void permutation(byte S[], int rounds) {                                                                                      
+    long i;                                                                                       long i;                                                                                   
+    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;                                                                                          long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;                                                                                      
+    long t0, t1, t2, t3, t4;                                                                                      long t0, t1, t2, t3, t4;                                                                                  
+                                                                                                                                                                            
+    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));                                                                                           x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));                                                                                       
+    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));                                                                                          x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));                                                                                      
+    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));                                                                                         x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));                                                                                     
+    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));                                                                                         x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));                                                                                     
+    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));                                                                                         x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));                                                                                     
+                                                                                                                                                                            
+    for (i = 0; i &lt; rounds; ++i) {                                                                                        for (i = 0; i &lt; rounds; ++i) {                                                                                    
+      // addition of round constant                                                                                         // addition of round constant                                                                                   
+      x2 ^= (((long) (0xf) - i) &lt;&lt; 4) | i;                                                                                          x2 ^= (((long) (0xf) - i) &lt;&lt; 4) | i;                                                                                    
+      // substitution layer                                                                                         // substitution layer                                                                                   
+      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;                                                                                           x0 ^= x4;    x4 ^= x3;    x2 ^= x1;                                                                                     
+      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;                                                                                         t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;                                                                                   
+      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;                                                                                         t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;                                                                                   
+      t0 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;                                                                                         t0 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;                                                                                   
+      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;                                                                                         x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;                                                                                   
+      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;                                                                                              x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;                                                                                        
+      // linear diffusion layer                                                                                             // linear diffusion layer                                                                                       
+      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);                                                                                            x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);                                                                                      
+      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);                                                                                            x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);                                                                                      
+      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);                                                                                              x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);                                                                                        
+      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);                                                                                            x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);                                                                                      
+      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);                                                                                             x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);                                                                                       
+    }                                                                                     }                                                                                 
+    store64(S, 0, x0);                                                                                            store64(S, 0, x0);                                                                                        
+    store64(S, 8, x1);                                                                                            store64(S, 8, x1);                                                                                        
+    store64(S, 16, x2);                                                                                           store64(S, 16, x2);                                                                                       
+    store64(S, 24, x3);                                                                                           store64(S, 24, x3);                                                                                       
+    store64(S, 32, x4);                                                                                           store64(S, 32, x4);                                                                                       
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in                                                                                   public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in                                                                                 
+      int adlen, byte npub[], byte k[]) {                                                                                           int adlen, byte npub[], byte k[]) {                                                                                     
+                                                                                                                                                                            
+    mlen = 0;                                                                                     mlen = 0;                                                                                 
+    if (clen &lt; CRYPTO_KEYBYTES)                                                                                           if (clen &lt; CRYPTO_KEYBYTES)                                                                                       
+      return -1;                                                                                            return -1;                                                                                      
+                                                                                                                                                                            
+    int klen = CRYPTO_KEYBYTES;                                                                                           int klen = CRYPTO_KEYBYTES;                                                                                       
+    int size = 320 / 8;                                                                                           int size = 320 / 8;                                                                                       
+    int capacity = 2 * klen;                                                                                      int capacity = 2 * klen;                                                                                  
+    int rate = size - capacity;                                                                                           int rate = size - capacity;                                                                                       
+    int a = 12;                                                                                           int a = 12;                                                                                       
+    int b = (klen == 16) ? 6 : 8;                                                                                         int b = (klen == 16) ? 6 : 8;                                                                                     
+    int s = adlen / rate + 1;                                                                                     int s = adlen / rate + 1;                                                                                 
+    int t = (clen - klen) / rate + 1;                                                                                     int t = (clen - klen) / rate + 1;                                                                                 
+    int l = (clen - klen) % rate;                                                                                         int l = (clen - klen) % rate;                                                                                     
+                                                                                                                                                                            
+    byte S[] = new byte[size];                                                                                            byte S[] = new byte[size];                                                                                        
+    byte A[] = new byte[(int) (s * rate)];                                                                                        byte A[] = new byte[(int) (s * rate)];                                                                                    
+    byte M[] = new byte[(int) (t * rate)];                                                                                        byte M[] = new byte[(int) (t * rate)];                                                                                    
+    int i, j;                                                                                     int i, j;                                                                                 
+                                                                                                                                                                            
+    // pad associated data                                                                                        // pad associated data                                                                                    
+    for (i = 0; i &lt; adlen; ++i)                                                                                           for (i = 0; i &lt; adlen; ++i)                                                                                       
+      A[i] = ad[i];                                                                                         A[i] = ad[i];                                                                                   
+    A[adlen] = (byte) 0x80;                                                                                       A[adlen] = (byte) 0x80;                                                                                   
+    for (i = adlen + 1; i &lt; s * rate; ++i)                                                                                        for (i = adlen + 1; i &lt; s * rate; ++i)                                                                                    
+      A[i] = 0;                                                                                             A[i] = 0;                                                                                       
+                                                                                                                                                                            
+    // initialization                                                                                     // initialization                                                                                 
+    S[0] = (byte) (klen * 8);                                                                                     S[0] = (byte) (klen * 8);                                                                                 
+    S[1] = (byte) (rate * 8);                                                                                     S[1] = (byte) (rate * 8);                                                                                 
+    S[2] = (byte) a;                                                                                      S[2] = (byte) a;                                                                                  
+    S[3] = (byte) b;                                                                                      S[3] = (byte) b;                                                                                  
+    for (i = 4; i &lt; rate; ++i)                                                                                            for (i = 4; i &lt; rate; ++i)                                                                                        
+      S[i] = 0;                                                                                             S[i] = 0;                                                                                       
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + i] = k[i];                                                                                           S[rate + i] = k[i];                                                                                     
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + klen + i] = npub[i];                                                                                         S[rate + klen + i] = npub[i];                                                                                   
+    permutation(S, a);                                                                                            permutation(S, a);                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + klen + i] ^= k[i];                                                                                           S[rate + klen + i] ^= k[i];                                                                                     
+                                                                                                                                                                            
+    // process associated data                                                                                            // process associated data                                                                                        
+    if (adlen != 0) {                                                                                     if (adlen != 0) {                                                                                 
+      for (i = 0; i &lt; s; ++i) {                                                                                             for (i = 0; i &lt; s; ++i) {                                                                                       
+        for (j = 0; j &lt; rate; ++j)                                                                                            for (j = 0; j &lt; rate; ++j)                                                                                    
+          S[j] ^= A[i * rate + j];                                                                                              S[j] ^= A[i * rate + j];                                                                                    
+        permutation(S, b);                                                                                            permutation(S, b);                                                                                    
+      }                                                                                             }                                                                                       
+    }                                                                                     }                                                                                 
+    S[size - 1] ^= 1;                                                                                     S[size - 1] ^= 1;                                                                                 
+                                                                                                                                                                            
+    // process plaintext                                                                                          // process plaintext                                                                                      
+    for (i = 0; i &lt; t - 1; ++i) {                                                                                         for (i = 0; i &lt; t - 1; ++i) {                                                                                     
+      for (j = 0; j &lt; rate; ++j) {                                                                                          for (j = 0; j &lt; rate; ++j) {                                                                                    
+        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);                                                                                            M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);                                                                                    
+        S[j] = c[i * rate + j];                                                                                               S[j] = c[i * rate + j];                                                                                       
+      }                                                                                             }                                                                                       
+      permutation(S, b);                                                                                            permutation(S, b);                                                                                      
+    }                                                                                     }                                                                                 
+    for (j = 0; j &lt; l; ++j)                                                                                       for (j = 0; j &lt; l; ++j)                                                                                   
+      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);                                                                                        M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);                                                                                  
+    for (j = 0; j &lt; l; ++j)                                                                                       for (j = 0; j &lt; l; ++j)                                                                                   
+      S[j] = c[(int) ((t - 1) * rate + j)];                                                                                         S[j] = c[(int) ((t - 1) * rate + j)];                                                                                   
+    S[l] ^= 0x80;                                                                                         S[l] ^= 0x80;                                                                                     
+                                                                                                                                                                            
+    // finalization                                                                                       // finalization                                                                                   
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + i] ^= k[i];                                                                                          S[rate + i] ^= k[i];                                                                                    
+    permutation(S, a);                                                                                            permutation(S, a);                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + klen + i] ^= k[i];                                                                                           S[rate + klen + i] ^= k[i];                                                                                     
+                                                                                                                                                                            
+    // return -1 if verification fails                                                                                      |     permutation(S, b);                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                      &lt;
+      if (c[clen - klen + i] != S[rate + klen + i])                                                                                 &lt;
+        return -1;                                                                                  &lt;
+                                                                                                                                                                            
+    // return plaintext                                                                                           // return plaintext                                                                                       
+    mlen = clen - klen;                                                                                           mlen = clen - klen;                                                                                       
+    for (i = 0; i &lt; mlen; ++i)                                                                                            for (i = 0; i &lt; mlen; ++i)                                                                                        
+      m[i] = M[i];                                                                                          m[i] = M[i];                                                                                    
+                                                                                                                                                                            
+    return mlen;                                                                                          return mlen;                                                                                      
+  }                                                                                     }                                                                                   
+}                                                                                     }
+</pre>
+</div>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4"><span class="section-number-3">1.4</span> iaik.ascon128v11.Ascon128v11<sub>21587</sub></h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+Improvement Details:
+</p>
+
+
+<p>
+0.87% improvement in bytecodes executed found.
+</p>
+
+<pre class="example">
+iaik.ascon128v11.Ascon128v11_21587 100 mult 0.0 + 0.99128187 = 0.99128187 ASTNodes: 939 GPNodes: 895 xoverApplied: false xovers: 0 mutationApplied: true mutations: 1 testResults: i0:0Rfalsei1:0Rfalsei2:0Rfalsei3:0Rfalsei4:0Rfalsei5:0Rfalsei6:0Rfalsei7:0Rfalsei8:0Rfalsei9:0Rfalsei10:0Rfalsei11:0Rfalsei12:0Rfalsei13:0Rfalsei14:0Rfalsei15:0Rfalsei16:0Rfalse
+</pre>
+
+
+<p>
+Diff
+</p>
+
+
+<div class="org-src-container">
+
+<pre class="src src-diff"><span style="color: #0000ff; font-weight: bold;">98,99c98</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">     for (i = adlen + 1; i &lt; s * rate; ++i)</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       A[i] = 0;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">     i = (byte) 0x80;</span>
+<span style="color: #0000ff; font-weight: bold;">107c106</span>
+<span style="color: #ff0000;">&lt;</span><span style="color: #ff0000;">       S[i] = 0;</span>
+<span style="color: #0000ff; font-weight: bold;">---</span>
+<span style="color: #00ff00;">&gt;</span><span style="color: #00ff00;">       S[++i] = 0;</span>
+</pre>
+</div>
+
+
+<p>
+Diff side-by-side
+</p>
+
+
+<div class="org-src-container">
+
+<pre class="src src-diff">package iaik.ascon128v11;                                                                                     package iaik.ascon128v11;                                                                                     
+                                                                                                                                                                            
+                                                                                                                                                                            
+                                                                                                                                                                            
+public class Ascon128v11 {                                                                                    public class Ascon128v11 {                                                                                    
+                                                                                                                                                                            
+  // Defines                                                                                    // Defines                                                                                  
+  public static int CRYPTO_KEYBYTES = 16;                                                                                       public static int CRYPTO_KEYBYTES = 16;                                                                                     
+  public static int CRYPTO_NSECBYTES = 0;                                                                                       public static int CRYPTO_NSECBYTES = 0;                                                                                     
+  public static int CRYPTO_NPUBBYTES = 16;                                                                                      public static int CRYPTO_NPUBBYTES = 16;                                                                                    
+  public static int CRYPTO_ABYTES = 16;                                                                                         public static int CRYPTO_ABYTES = 16;                                                                                       
+  public static int CRYPTO_NOOVERLAP = 1;                                                                                       public static int CRYPTO_NOOVERLAP = 1;                                                                                     
+                                                                                                                                                                            
+  public static boolean PRINTSTATE = false;                                                                                     public static boolean PRINTSTATE = false;                                                                                   
+                                                                                                                                                                            
+  public static long ROTR(long x, int n) {                                                                                      public static long ROTR(long x, int n) {                                                                                    
+    return Long.rotateRight(x, n);                                                                                        return Long.rotateRight(x, n);                                                                                    
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+                                                                                                                                                                            
+  public static long load64(byte S[]) {                                                                                         public static long load64(byte S[]) {                                                                                       
+    long x = 0;                                                                                           long x = 0;                                                                                       
+    x = java.nio.ByteBuffer.wrap(S).getLong();                                                                                            x = java.nio.ByteBuffer.wrap(S).getLong();                                                                                        
+                                                                                                                                                                            
+    return x;                                                                                     return x;                                                                                 
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static void store64(byte S[], int offset, long x) {                                                                                    public static void store64(byte S[], int offset, long x) {                                                                                  
+    int i;                                                                                        int i;                                                                                    
+                                                                                                                                                                            
+    for (i = 0; i &lt; 8; ++i) {                                                                                     for (i = 0; i &lt; 8; ++i) {                                                                                 
+      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();                                                                                        byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();                                                                                  
+      S[i + offset] = (byte) byteacter[i];                                                                                          S[i + offset] = (byte) byteacter[i];                                                                                    
+    }                                                                                     }                                                                                 
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static void permutation(byte S[], int rounds) {                                                                                        public static void permutation(byte S[], int rounds) {                                                                                      
+    long i;                                                                                       long i;                                                                                   
+    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;                                                                                          long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;                                                                                      
+    long t0, t1, t2, t3, t4;                                                                                      long t0, t1, t2, t3, t4;                                                                                  
+                                                                                                                                                                            
+    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));                                                                                           x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));                                                                                       
+    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));                                                                                          x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));                                                                                      
+    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));                                                                                         x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));                                                                                     
+    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));                                                                                         x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));                                                                                     
+    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));                                                                                         x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));                                                                                     
+                                                                                                                                                                            
+    for (i = 0; i &lt; rounds; ++i) {                                                                                        for (i = 0; i &lt; rounds; ++i) {                                                                                    
+      // addition of round constant                                                                                         // addition of round constant                                                                                   
+      x2 ^= (((long) (0xf) - i) &lt;&lt; 4) | i;                                                                                          x2 ^= (((long) (0xf) - i) &lt;&lt; 4) | i;                                                                                    
+      // substitution layer                                                                                         // substitution layer                                                                                   
+      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;                                                                                           x0 ^= x4;    x4 ^= x3;    x2 ^= x1;                                                                                     
+      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;                                                                                         t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;                                                                                   
+      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;                                                                                         t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;                                                                                   
+      t0 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;                                                                                         t0 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;                                                                                   
+      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;                                                                                         x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;                                                                                   
+      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;                                                                                              x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;                                                                                        
+      // linear diffusion layer                                                                                             // linear diffusion layer                                                                                       
+      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);                                                                                            x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);                                                                                      
+      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);                                                                                            x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);                                                                                      
+      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);                                                                                              x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);                                                                                        
+      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);                                                                                            x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);                                                                                      
+      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);                                                                                             x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);                                                                                       
+    }                                                                                     }                                                                                 
+    store64(S, 0, x0);                                                                                            store64(S, 0, x0);                                                                                        
+    store64(S, 8, x1);                                                                                            store64(S, 8, x1);                                                                                        
+    store64(S, 16, x2);                                                                                           store64(S, 16, x2);                                                                                       
+    store64(S, 24, x3);                                                                                           store64(S, 24, x3);                                                                                       
+    store64(S, 32, x4);                                                                                           store64(S, 32, x4);                                                                                       
+  }                                                                                     }                                                                                   
+                                                                                                                                                                            
+  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in                                                                                   public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in                                                                                 
+      int adlen, byte npub[], byte k[]) {                                                                                           int adlen, byte npub[], byte k[]) {                                                                                     
+                                                                                                                                                                            
+    mlen = 0;                                                                                     mlen = 0;                                                                                 
+    if (clen &lt; CRYPTO_KEYBYTES)                                                                                           if (clen &lt; CRYPTO_KEYBYTES)                                                                                       
+      return -1;                                                                                            return -1;                                                                                      
+                                                                                                                                                                            
+    int klen = CRYPTO_KEYBYTES;                                                                                           int klen = CRYPTO_KEYBYTES;                                                                                       
+    int size = 320 / 8;                                                                                           int size = 320 / 8;                                                                                       
+    int capacity = 2 * klen;                                                                                      int capacity = 2 * klen;                                                                                  
+    int rate = size - capacity;                                                                                           int rate = size - capacity;                                                                                       
+    int a = 12;                                                                                           int a = 12;                                                                                       
+    int b = (klen == 16) ? 6 : 8;                                                                                         int b = (klen == 16) ? 6 : 8;                                                                                     
+    int s = adlen / rate + 1;                                                                                     int s = adlen / rate + 1;                                                                                 
+    int t = (clen - klen) / rate + 1;                                                                                     int t = (clen - klen) / rate + 1;                                                                                 
+    int l = (clen - klen) % rate;                                                                                         int l = (clen - klen) % rate;                                                                                     
+                                                                                                                                                                            
+    byte S[] = new byte[size];                                                                                            byte S[] = new byte[size];                                                                                        
+    byte A[] = new byte[(int) (s * rate)];                                                                                        byte A[] = new byte[(int) (s * rate)];                                                                                    
+    byte M[] = new byte[(int) (t * rate)];                                                                                        byte M[] = new byte[(int) (t * rate)];                                                                                    
+    int i, j;                                                                                     int i, j;                                                                                 
+                                                                                                                                                                            
+    // pad associated data                                                                                        // pad associated data                                                                                    
+    for (i = 0; i &lt; adlen; ++i)                                                                                           for (i = 0; i &lt; adlen; ++i)                                                                                       
+      A[i] = ad[i];                                                                                         A[i] = ad[i];                                                                                   
+    A[adlen] = (byte) 0x80;                                                                                       A[adlen] = (byte) 0x80;                                                                                   
+    for (i = adlen + 1; i &lt; s * rate; ++i)                                                                                  |     i = (byte) 0x80;                                                                                  
+      A[i] = 0;                                                                                     &lt;
+                                                                                                                                                                            
+    // initialization                                                                                     // initialization                                                                                 
+    S[0] = (byte) (klen * 8);                                                                                     S[0] = (byte) (klen * 8);                                                                                 
+    S[1] = (byte) (rate * 8);                                                                                     S[1] = (byte) (rate * 8);                                                                                 
+    S[2] = (byte) a;                                                                                      S[2] = (byte) a;                                                                                  
+    S[3] = (byte) b;                                                                                      S[3] = (byte) b;                                                                                  
+    for (i = 4; i &lt; rate; ++i)                                                                                            for (i = 4; i &lt; rate; ++i)                                                                                        
+      S[i] = 0;                                                                                     |       S[++i] = 0;                                                                                     
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + i] = k[i];                                                                                           S[rate + i] = k[i];                                                                                     
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + klen + i] = npub[i];                                                                                         S[rate + klen + i] = npub[i];                                                                                   
+    permutation(S, a);                                                                                            permutation(S, a);                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + klen + i] ^= k[i];                                                                                           S[rate + klen + i] ^= k[i];                                                                                     
+                                                                                                                                                                            
+    // process associated data                                                                                            // process associated data                                                                                        
+    if (adlen != 0) {                                                                                     if (adlen != 0) {                                                                                 
+      for (i = 0; i &lt; s; ++i) {                                                                                             for (i = 0; i &lt; s; ++i) {                                                                                       
+        for (j = 0; j &lt; rate; ++j)                                                                                            for (j = 0; j &lt; rate; ++j)                                                                                    
+          S[j] ^= A[i * rate + j];                                                                                              S[j] ^= A[i * rate + j];                                                                                    
+        permutation(S, b);                                                                                            permutation(S, b);                                                                                    
+      }                                                                                             }                                                                                       
+    }                                                                                     }                                                                                 
+    S[size - 1] ^= 1;                                                                                     S[size - 1] ^= 1;                                                                                 
+                                                                                                                                                                            
+    // process plaintext                                                                                          // process plaintext                                                                                      
+    for (i = 0; i &lt; t - 1; ++i) {                                                                                         for (i = 0; i &lt; t - 1; ++i) {                                                                                     
+      for (j = 0; j &lt; rate; ++j) {                                                                                          for (j = 0; j &lt; rate; ++j) {                                                                                    
+        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);                                                                                            M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);                                                                                    
+        S[j] = c[i * rate + j];                                                                                               S[j] = c[i * rate + j];                                                                                       
+      }                                                                                             }                                                                                       
+      permutation(S, b);                                                                                            permutation(S, b);                                                                                      
+    }                                                                                     }                                                                                 
+    for (j = 0; j &lt; l; ++j)                                                                                       for (j = 0; j &lt; l; ++j)                                                                                   
+      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);                                                                                        M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);                                                                                  
+    for (j = 0; j &lt; l; ++j)                                                                                       for (j = 0; j &lt; l; ++j)                                                                                   
+      S[j] = c[(int) ((t - 1) * rate + j)];                                                                                         S[j] = c[(int) ((t - 1) * rate + j)];                                                                                   
+    S[l] ^= 0x80;                                                                                         S[l] ^= 0x80;                                                                                     
+                                                                                                                                                                            
+    // finalization                                                                                       // finalization                                                                                   
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + i] ^= k[i];                                                                                          S[rate + i] ^= k[i];                                                                                    
+    permutation(S, a);                                                                                            permutation(S, a);                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      S[rate + klen + i] ^= k[i];                                                                                           S[rate + klen + i] ^= k[i];                                                                                     
+                                                                                                                                                                            
+    // return -1 if verification fails                                                                                            // return -1 if verification fails                                                                                        
+    for (i = 0; i &lt; klen; ++i)                                                                                            for (i = 0; i &lt; klen; ++i)                                                                                        
+      if (c[clen - klen + i] != S[rate + klen + i])                                                                                         if (c[clen - klen + i] != S[rate + klen + i])                                                                                   
+        return -1;                                                                                            return -1;                                                                                    
+                                                                                                                                                                            
+    // return plaintext                                                                                           // return plaintext                                                                                       
+    mlen = clen - klen;                                                                                           mlen = clen - klen;                                                                                       
+    for (i = 0; i &lt; mlen; ++i)                                                                                            for (i = 0; i &lt; mlen; ++i)                                                                                        
+      m[i] = M[i];                                                                                          m[i] = M[i];                                                                                    
+                                                                                                                                                                            
+    return mlen;                                                                                          return mlen;                                                                                      
+  }                                                                                     }                                                                                   
+}                                                                                     }
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5"><span class="section-number-3">1.5</span> Original</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+/home/bck/source/locoGP/GP<sub>Master</sub>/Seed-iaik.ascon128v11.Ascon128v11.java
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span class="linenr">  1: </span><span style="color: #00ffff; font-weight: bold;">package</span> iaik.<span style="color: #ff00ff;">ascon128v11</span>;
+<span class="linenr">  2: </span>
+<span class="linenr">  3: </span>
+<span class="linenr">  4: </span>
+<span class="linenr">  5: </span><span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">Ascon128v11</span> {
+<span class="linenr">  6: </span>
+<span class="linenr">  7: </span>  <span style="color: #ff0000;">// </span><span style="color: #ff0000;">Defines</span>
+<span class="linenr">  8: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">CRYPTO_KEYBYTES</span> = 16;
+<span class="linenr">  9: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">CRYPTO_NSECBYTES</span> = 0;
+<span class="linenr"> 10: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">CRYPTO_NPUBBYTES</span> = 16;
+<span class="linenr"> 11: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">CRYPTO_ABYTES</span> = 16;
+<span class="linenr"> 12: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">CRYPTO_NOOVERLAP</span> = 1;
+<span class="linenr"> 13: </span>
+<span class="linenr"> 14: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">boolean</span> <span style="color: #ffff00;">PRINTSTATE</span> = <span style="color: #ff00ff;">false</span>;
+<span class="linenr"> 15: </span>
+<span class="linenr"> 16: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">long</span> <span style="color: #0000ff; font-weight: bold;">ROTR</span>(<span style="color: #00ff00;">long</span> <span style="color: #ffff00;">x</span>, <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">n</span>) {
+<span class="linenr"> 17: </span>    <span style="color: #00ffff; font-weight: bold;">return</span> Long.rotateRight(x, n);
+<span class="linenr"> 18: </span>  }
+<span class="linenr"> 19: </span>
+<span class="linenr"> 20: </span>
+<span class="linenr"> 21: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">long</span> <span style="color: #0000ff; font-weight: bold;">load64</span>(<span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">S</span>[]) {
+<span class="linenr"> 22: </span>    <span style="color: #00ff00;">long</span> <span style="color: #ffff00;">x</span> = 0;
+<span class="linenr"> 23: </span>    x = <span style="color: #ff00ff;">java</span>.<span style="color: #ff00ff;">nio</span>.ByteBuffer.wrap(S).getLong();
+<span class="linenr"> 24: </span>
+<span class="linenr"> 25: </span>    <span style="color: #00ffff; font-weight: bold;">return</span> x;
+<span class="linenr"> 26: </span>  }
+<span class="linenr"> 27: </span>
+<span class="linenr"> 28: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">store64</span>(<span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">S</span>[], <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">offset</span>, <span style="color: #00ff00;">long</span> <span style="color: #ffff00;">x</span>) {
+<span class="linenr"> 29: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">i</span>;
+<span class="linenr"> 30: </span>
+<span class="linenr"> 31: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; 8; ++i) {
+<span class="linenr"> 32: </span>      <span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">byteacter</span>[] = <span style="color: #ff00ff;">java</span>.<span style="color: #ff00ff;">nio</span>.ByteBuffer.allocate(8).putLong(x).array();
+<span class="linenr"> 33: </span>      S[i + offset] = (<span style="color: #00ff00;">byte</span>) byteacter[i];
+<span class="linenr"> 34: </span>    }
+<span class="linenr"> 35: </span>  }
+<span class="linenr"> 36: </span>
+<span class="linenr"> 37: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">permutation</span>(<span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">S</span>[], <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">rounds</span>) {
+<span class="linenr"> 38: </span>    <span style="color: #00ff00;">long</span> <span style="color: #ffff00;">i</span>;
+<span class="linenr"> 39: </span>    <span style="color: #00ff00;">long</span> <span style="color: #ffff00;">x0</span> = 0, <span style="color: #ffff00;">x1</span> = 0, <span style="color: #ffff00;">x2</span> = 0, <span style="color: #ffff00;">x3</span> = 0, <span style="color: #ffff00;">x4</span> = 0;
+<span class="linenr"> 40: </span>    <span style="color: #00ff00;">long</span> <span style="color: #ffff00;">t0</span>, <span style="color: #ffff00;">t1</span>, <span style="color: #ffff00;">t2</span>, <span style="color: #ffff00;">t3</span>, <span style="color: #ffff00;">t4</span>;
+<span class="linenr"> 41: </span>
+<span class="linenr"> 42: </span>    x0 = load64(<span style="color: #ff00ff;">java</span>.<span style="color: #ff00ff;">util</span>.Arrays.copyOfRange(S, 0, 8));
+<span class="linenr"> 43: </span>    x1 = load64(<span style="color: #ff00ff;">java</span>.<span style="color: #ff00ff;">util</span>.Arrays.copyOfRange(S, 8, 16));
+<span class="linenr"> 44: </span>    x2 = load64(<span style="color: #ff00ff;">java</span>.<span style="color: #ff00ff;">util</span>.Arrays.copyOfRange(S, 16, 24));
+<span class="linenr"> 45: </span>    x3 = load64(<span style="color: #ff00ff;">java</span>.<span style="color: #ff00ff;">util</span>.Arrays.copyOfRange(S, 24, 32));
+<span class="linenr"> 46: </span>    x4 = load64(<span style="color: #ff00ff;">java</span>.<span style="color: #ff00ff;">util</span>.Arrays.copyOfRange(S, 32, 40));
+<span class="linenr"> 47: </span>
+<span class="linenr"> 48: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">rounds</span>; ++i) {
+<span class="linenr"> 49: </span>      <span style="color: #ff0000;">// </span><span style="color: #ff0000;">addition of round constant</span>
+<span class="linenr"> 50: </span>      x2 ^= (((<span style="color: #00ff00;">long</span>) (0xf) - i) &lt;&lt; 4) | i;
+<span class="linenr"> 51: </span>      <span style="color: #ff0000;">// </span><span style="color: #ff0000;">substitution layer</span>
+<span class="linenr"> 52: </span>      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;
+<span class="linenr"> 53: </span>      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;
+<span class="linenr"> 54: </span>      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;
+<span class="linenr"> 55: </span>      t0 &amp;= x1;    t1 &amp;= x2;    t2 &amp;= x3;    t3 &amp;= x4;    t4 &amp;= x0;
+<span class="linenr"> 56: </span>      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;
+<span class="linenr"> 57: </span>      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;
+<span class="linenr"> 58: </span>      <span style="color: #ff0000;">// </span><span style="color: #ff0000;">linear diffusion layer</span>
+<span class="linenr"> 59: </span>      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);
+<span class="linenr"> 60: </span>      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);
+<span class="linenr"> 61: </span>      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);
+<span class="linenr"> 62: </span>      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);
+<span class="linenr"> 63: </span>      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);
+<span class="linenr"> 64: </span>    }
+<span class="linenr"> 65: </span>    store64(S, 0, x0);
+<span class="linenr"> 66: </span>    store64(S, 8, x1);
+<span class="linenr"> 67: </span>    store64(S, 16, x2);
+<span class="linenr"> 68: </span>    store64(S, 24, x3);
+<span class="linenr"> 69: </span>    store64(S, 32, x4);
+<span class="linenr"> 70: </span>  }
+<span class="linenr"> 71: </span>
+<span class="linenr"> 72: </span>  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">int</span> <span style="color: #0000ff; font-weight: bold;">crypto_aead_decrypt</span>(<span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">m</span>[], <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">mlen</span>, <span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">nsec</span>[], <span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">c</span>[], <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">clen</span>, <span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">ad</span>[],
+<span class="linenr"> 73: </span>      <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">adlen</span>, <span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">npub</span>[], <span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">k</span>[]) {
+<span class="linenr"> 74: </span>
+<span class="linenr"> 75: </span>    mlen = 0;
+<span class="linenr"> 76: </span>    <span style="color: #00ffff; font-weight: bold;">if</span> (clen &lt; <span style="color: #00ff00;">CRYPTO_KEYBYTES</span>)
+<span class="linenr"> 77: </span>      <span style="color: #00ffff; font-weight: bold;">return</span> -1;
+<span class="linenr"> 78: </span>
+<span class="linenr"> 79: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">klen</span> = CRYPTO_KEYBYTES;
+<span class="linenr"> 80: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">size</span> = 320 / 8;
+<span class="linenr"> 81: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">capacity</span> = 2 * klen;
+<span class="linenr"> 82: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">rate</span> = size - capacity;
+<span class="linenr"> 83: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">a</span> = 12;
+<span class="linenr"> 84: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">b</span> = (klen == 16) ? 6 : 8;
+<span class="linenr"> 85: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">s</span> = adlen / rate + 1;
+<span class="linenr"> 86: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">t</span> = (clen - klen) / rate + 1;
+<span class="linenr"> 87: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">l</span> = (clen - klen) % rate;
+<span class="linenr"> 88: </span>
+<span class="linenr"> 89: </span>    <span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">S</span>[] = <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">byte</span>[size];
+<span class="linenr"> 90: </span>    <span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">A</span>[] = <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">byte</span>[(<span style="color: #00ff00;">int</span>) (s * rate)];
+<span class="linenr"> 91: </span>    <span style="color: #00ff00;">byte</span> <span style="color: #ffff00;">M</span>[] = <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">byte</span>[(<span style="color: #00ff00;">int</span>) (t * rate)];
+<span class="linenr"> 92: </span>    <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">i</span>, <span style="color: #ffff00;">j</span>;
+<span class="linenr"> 93: </span>
+<span class="linenr"> 94: </span>    <span style="color: #ff0000;">// </span><span style="color: #ff0000;">pad associated data</span>
+<span class="linenr"> 95: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">adlen</span>; ++i)
+<span class="linenr"> 96: </span>      A[i] = ad[i];
+<span class="linenr"> 97: </span>    A[adlen] = (<span style="color: #00ff00;">byte</span>) 0x80;
+<span class="linenr"> 98: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = adlen + 1; i &lt; <span style="color: #00ff00;">s</span> * rate; ++i)
+<span class="linenr"> 99: </span>      A[i] = 0;
+<span class="linenr">100: </span>
+<span class="linenr">101: </span>    <span style="color: #ff0000;">// </span><span style="color: #ff0000;">initialization</span>
+<span class="linenr">102: </span>    S[0] = (<span style="color: #00ff00;">byte</span>) (klen * 8);
+<span class="linenr">103: </span>    S[1] = (<span style="color: #00ff00;">byte</span>) (rate * 8);
+<span class="linenr">104: </span>    S[2] = (<span style="color: #00ff00;">byte</span>) a;
+<span class="linenr">105: </span>    S[3] = (<span style="color: #00ff00;">byte</span>) b;
+<span class="linenr">106: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 4; i &lt; <span style="color: #00ff00;">rate</span>; ++i)
+<span class="linenr">107: </span>      S[i] = 0;
+<span class="linenr">108: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">klen</span>; ++i)
+<span class="linenr">109: </span>      S[rate + i] = k[i];
+<span class="linenr">110: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">klen</span>; ++i)
+<span class="linenr">111: </span>      S[rate + klen + i] = npub[i];
+<span class="linenr">112: </span>    permutation(S, a);
+<span class="linenr">113: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">klen</span>; ++i)
+<span class="linenr">114: </span>      S[rate + klen + i] ^= k[i];
+<span class="linenr">115: </span>
+<span class="linenr">116: </span>    <span style="color: #ff0000;">// </span><span style="color: #ff0000;">process associated data</span>
+<span class="linenr">117: </span>    <span style="color: #00ffff; font-weight: bold;">if</span> (adlen != 0) {
+<span class="linenr">118: </span>      <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">s</span>; ++i) {
+<span class="linenr">119: </span>        <span style="color: #00ffff; font-weight: bold;">for</span> (j = 0; j &lt; <span style="color: #00ff00;">rate</span>; ++j)
+<span class="linenr">120: </span>          S[j] ^= A[i * rate + j];
+<span class="linenr">121: </span>        permutation(S, b);
+<span class="linenr">122: </span>      }
+<span class="linenr">123: </span>    }
+<span class="linenr">124: </span>    S[size - 1] ^= 1;
+<span class="linenr">125: </span>
+<span class="linenr">126: </span>    <span style="color: #ff0000;">// </span><span style="color: #ff0000;">process plaintext</span>
+<span class="linenr">127: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">t</span> - 1; ++i) {
+<span class="linenr">128: </span>      <span style="color: #00ffff; font-weight: bold;">for</span> (j = 0; j &lt; <span style="color: #00ff00;">rate</span>; ++j) {
+<span class="linenr">129: </span>        M[i * rate + j] = (<span style="color: #00ff00;">byte</span>) (S[j] ^ c[i * rate + j]);
+<span class="linenr">130: </span>        S[j] = c[i * rate + j];
+<span class="linenr">131: </span>      }
+<span class="linenr">132: </span>      permutation(S, b);
+<span class="linenr">133: </span>    }
+<span class="linenr">134: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (j = 0; j &lt; <span style="color: #00ff00;">l</span>; ++j)
+<span class="linenr">135: </span>      M[(<span style="color: #00ff00;">int</span>) ((t - 1) * rate + j)] = (<span style="color: #00ff00;">byte</span>) (S[j] ^ c[(<span style="color: #00ff00;">int</span>) ((t - 1) * rate + j)]);
+<span class="linenr">136: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (j = 0; j &lt; <span style="color: #00ff00;">l</span>; ++j)
+<span class="linenr">137: </span>      S[j] = c[(<span style="color: #00ff00;">int</span>) ((t - 1) * rate + j)];
+<span class="linenr">138: </span>    S[l] ^= 0x80;
+<span class="linenr">139: </span>
+<span class="linenr">140: </span>    <span style="color: #ff0000;">// </span><span style="color: #ff0000;">finalization</span>
+<span class="linenr">141: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">klen</span>; ++i)
+<span class="linenr">142: </span>      S[rate + i] ^= k[i];
+<span class="linenr">143: </span>    permutation(S, a);
+<span class="linenr">144: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">klen</span>; ++i)
+<span class="linenr">145: </span>      S[rate + klen + i] ^= k[i];
+<span class="linenr">146: </span>
+<span class="linenr">147: </span>    <span style="color: #ff0000;">// </span><span style="color: #ff0000;">return -1 if verification fails</span>
+<span class="linenr">148: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">klen</span>; ++i)
+<span class="linenr">149: </span>      <span style="color: #00ffff; font-weight: bold;">if</span> (c[clen - klen + i] != S[rate + klen + i])
+<span class="linenr">150: </span>        <span style="color: #00ffff; font-weight: bold;">return</span> -1;
+<span class="linenr">151: </span>
+<span class="linenr">152: </span>    <span style="color: #ff0000;">// </span><span style="color: #ff0000;">return plaintext</span>
+<span class="linenr">153: </span>    mlen = clen - klen;
+<span class="linenr">154: </span>    <span style="color: #00ffff; font-weight: bold;">for</span> (i = 0; i &lt; <span style="color: #00ff00;">mlen</span>; ++i)
+<span class="linenr">155: </span>      m[i] = M[i];
+<span class="linenr">156: </span>
+<span class="linenr">157: </span>    <span style="color: #00ffff; font-weight: bold;">return</span> mlen;
+<span class="linenr">158: </span>  }
+<span class="linenr">159: </span>}
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> References</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Ascon</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+<a href="http://ascon.iaik.tugraz.at/implementation.html">http://ascon.iaik.tugraz.at/implementation.html</a>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Script to show improvements found</h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #ffff00;">baseDir</span>=<span style="color: #00ff00;">'/home/bck/source/locoGP/GP_Master'</span>
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">Seed-iaik.ascon128v11.Ascon128v11.java </span>
+<span style="color: #ffff00;">seedFiles</span>=( $(<span style="color: #ff00ff;">find</span> $<span style="color: #ffff00;">baseDir</span>/Seed-*.java) )
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">optimisedFiles=( "iaik.ascon128v11.Ascon128v11_21587.java" )</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">optimisedFiles=( "iaik.ascon128v11.Ascon128v11_340.java" )</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">optimisedFiles=( "iaik.ascon128v11.Ascon128v11_2833.java" )</span>
+<span style="color: #ffff00;">optimisedFiles</span>=( <span style="color: #00ff00;">"iaik.ascon128v11.Ascon128v11_52876.java"</span> )
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">echo ${seedFiles[@]}</span>
+
+
+<span style="color: #0000ff; font-weight: bold;">compareFiles</span>(){
+    <span style="color: #ff0000;"># </span><span style="color: #ff0000;">aFile=$2</span>
+    <span style="color: #ffff00;">expNum</span>=$(<span style="color: #ff00ff;">echo</span> $<span style="color: #ffff00;">2</span> | awk -F$<span style="color: #ffff00;">3</span> <span style="color: #00ff00;">'{ print $2 }'</span> | awk -F. <span style="color: #00ff00;">'{ print $1}'</span>  )
+    <span style="color: #ff0000;"># </span><span style="color: #ff0000;">echo $2 $expNum</span>
+
+    <span style="color: #0000ff; font-weight: bold;">echo</span> -e <span style="color: #00ff00;">"\n\nDiff\n\n"</span>
+    <span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">"#+begin_src diff"</span>
+    diff $<span style="color: #ffff00;">1</span> &lt;(sed <span style="color: #00ff00;">"s/$expNum//g"</span> $<span style="color: #ffff00;">2</span>)  
+    <span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">"#+end_src"</span>
+
+    <span style="color: #0000ff; font-weight: bold;">echo</span> -e <span style="color: #00ff00;">"\n\nDiff side-by-side\n\n"</span>
+    <span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">"#+begin_src diff"</span>
+    diff -wy -W180 $<span style="color: #ffff00;">1</span> &lt;(sed <span style="color: #00ff00;">"s/$expNum//g"</span> $<span style="color: #ffff00;">2</span>)  
+    <span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">"#+end_src"</span>
+
+    <span style="color: #ff0000;"># </span><span style="color: #ff0000;">| grep -v Problem | grep -v '^---'  | grep -v ^1c1 </span>
+    <span style="color: #ff0000;"># </span><span style="color: #ff0000;">meld $1 $2</span>
+}
+
+<span style="color: #00ffff; font-weight: bold;">for</span> seedFile<span style="color: #00ffff; font-weight: bold;"> in</span> ${<span style="color: #ffff00;">seedFiles</span>[@]}
+<span style="color: #00ffff; font-weight: bold;">do</span>
+
+  <span style="color: #ffff00;">problemName</span>=$( <span style="color: #0000ff; font-weight: bold;">echo</span> $<span style="color: #ffff00;">seedFile</span> | awk -F- <span style="color: #00ff00;">'{ print $2 }'</span> | awk -F.java <span style="color: #00ff00;">'{ print $1 }'</span> )
+  <span style="color: #0000ff; font-weight: bold;">echo</span> -e <span style="color: #00ff00;">"\n\n\n* $problemName"</span>
+
+  <span style="color: #00ffff; font-weight: bold;">for</span> aFile<span style="color: #00ffff; font-weight: bold;"> in</span> $(<span style="color: #ff00ff;">echo</span> ${<span style="color: #ffff00;">optimisedFiles</span>[@]} | grep $<span style="color: #ffff00;">problemName</span>)
+  <span style="color: #00ffff; font-weight: bold;">do</span> 
+<span style="color: #ff0000;">#    </span><span style="color: #ff0000;">diffName=$(</span><span style="color: #ff00ff;">echo</span><span style="color: #ff0000;"> $aFile | awk -F\/ '{ print $NF }' )    </span>
+    <span style="color: #ffff00;">diffName</span>=$(<span style="color: #ff00ff;">echo</span> $<span style="color: #ffff00;">aFile</span> | awk -F<span style="color: #00ff00;">\/</span> <span style="color: #00ff00;">'{ print $NF }'</span> | awk -F<span style="color: #00ff00;">\.</span>java <span style="color: #00ff00;">'{ print $1 }'</span> )    
+    <span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">"** $diffName"</span>
+    <span style="color: #0000ff; font-weight: bold;">echo</span> -e <span style="color: #00ff00;">"Improvement Details:\n\n"</span>
+
+    <span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">"#+begin_src"</span>
+    <span style="color: #ff0000;"># </span><span style="color: #ff0000;">grep -A1 /home/bck/GP/Exhaustive/optimisedList.txt</span>
+    grep -m1 <span style="color: #00ff00;">"\ $diffName\ "</span> $<span style="color: #ffff00;">baseDir</span>/*nfo.log | grep <span style="color: #00ff00;">\ </span>=<span style="color: #00ff00;">\ </span> | tr <span style="color: #00ff00;">'\n'</span> <span style="color: #00ff00;">'\n\n'</span> | sed <span style="color: #00ff00;">'s/[0-9][0-9][0-9][0-9]\/[0-9][0-9]\/[0-9][0-9]\ [0-9][0-9]:[0-9][0-9]:[0-9][0-9]:[0-9][0-9][0-9]\ //g'</span> 
+    <span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">"#+end_src"</span>
+
+    compareFiles $<span style="color: #ffff00;">seedFile</span> $<span style="color: #ffff00;">aFile</span> $<span style="color: #ffff00;">problemName</span>
+  <span style="color: #00ffff; font-weight: bold;">done</span>
+
+    <span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">"** Original - $seedFile"</span>
+    <span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">"#+begin_src java -n"</span>
+    cat $<span style="color: #ffff00;">seedFile</span>
+    <span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">"#+end_src"</span>
+
+<span style="color: #00ffff; font-weight: bold;">done</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Brendan Cody-Kenny</p>
+<p class="date">Created: 2018-01-15 Mon 22:32</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.1.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

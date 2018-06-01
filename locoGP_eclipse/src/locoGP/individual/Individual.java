@@ -1,22 +1,34 @@
 package locoGP.individual;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import locoGP.experiments.GPConfig;
 import locoGP.operators.GPASTNodeData;
 import locoGP.operators.GPMaterialVisitor;
+import locoGP.operators.StatementOnlyCrossoverOperator;
 import locoGP.operators.NodeOperators;
+import locoGP.problems.CompilationDetail;
 import locoGP.problems.CompilationSet;
 import locoGP.problems.Problem;
+import locoGP.problems.tests.TestCaseResult;
 import locoGP.util.GPSecureClassLoader;
 import locoGP.util.JavaClassObject;
 import locoGP.util.Logger;
 import locoGP.util.ParentProbabilityReferencerVisitor;
 import locoGP.util.ProbabilityClonerVisitor;
 
+import org.clapper.util.misc.SparseArrayList;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public class Individual implements Comparable, java.io.Serializable { 
 	/* This is a data object mostly, with some functions to do with the notion of a GP individual
@@ -28,8 +40,9 @@ public class Individual implements Comparable, java.io.Serializable {
 	private Class<?> clazz = null;*/
 	
 	private long runningTime=0;
-	private long functionalityScore2=0;
-	private static long indID=0; // keep a count of the number of new individuals, this is unique individuals and includes those that do not compile
+	//private long functionalityErrorCount=0; // replaced by testCasesResults
+	private static long indIDGlobal=0; // keep a count of the number of new individuals, this is unique individuals and includes those that do not compile
+	private long variantIndID = 0 ;
 	
 	public CompilationSet ASTSet = null;
 	private int crossoverAttempts = 0;
@@ -44,8 +57,18 @@ public class Individual implements Comparable, java.io.Serializable {
 	private Map<String, byte[]> classByteMap=null;
 	private Map<String, JavaClassObject> classMap=null;
 	private boolean compiled = false;
-
+	
 	private Class<?> clazz;
+
+	//private String testCaseResults = "";
+	private String testCaseResultText = "";
+	SparseArrayList<TestCaseResult> testCasesErrorResults = new SparseArrayList<TestCaseResult>();
+
+	private ClassLoader classLoader;
+	
+	public ClassLoader getClassLoader(){
+		return this.classLoader;
+	}
 	
 	public void setNullRefs() {//public void deleteRefs() {
 		// the parents of this program may be in the next generation, cause
@@ -67,12 +90,13 @@ public class Individual implements Comparable, java.io.Serializable {
 	public Individual(Problem aProblem) { // this constructor should only be called once
 		ourProblem = aProblem;
 		//ourProblem.gpConfig = new GPConfig(); // each problem should set a default
-		this.ASTSet = NodeOperators.parseSource( this );
+		this.ASTSet = aProblem.getStrings();
 		// This is the original problem, so revert the name back
 		this.setClassName(ourProblem.getEntryClassName()); 
 		// set the individual names back also.. yeauck.
-		this.ASTSet.setClassNames(ourProblem.getStrings().getCompilationList()); 
-		refreshGPMaterial();
+		//this.ASTSet.setClassNames(ourProblem.getStrings().getCompilationList()); 
+		refreshGlobalGPMaterial(); 
+		//initialise(ourProblem.getStrings());
 	}
 	
 	public void setCrossoverSucceeded(){
@@ -112,51 +136,75 @@ public class Individual implements Comparable, java.io.Serializable {
 		return this.gpMaterial.getNumGPNodes();
 	}
 	
-	public void refreshGPMaterial(){ // this should be totally internal, and needs to happen every time the ast is changed.
-		this.gpMaterial = new GPMaterialVisitor();
-		this.ASTSet.accept(this.gpMaterial);// gathers references to the parts of the AST we are interested in, adds gp data to statements
-	}
+
 	
-	public static void setID(long id){
+	/*public static void setID(long id){
 		Individual.indID = id;
+	}*/
+	
+	public long getID(){
+		return variantIndID;
 	}
 	
-	public static long getID(){
-		return Individual.indID;
+	private String getIDString(){
+		return "_"+variantIndID;
 	}
 	
 	public Individual(Individual parent){
 		// clone parentAST to here
 		
-		// we should evolve patches
-		this.ASTSet = parent.ASTSet.cloneASTs();
-		this.gpMaterial = new GPMaterialVisitor();
-		this.ASTSet.accept(this.gpMaterial);
-		setupNewIndividualCLassName();
+		// TODO evolve patches instead of cloning the whole shebang
+		this.ASTSet = parent.ASTSet.clone();
+		//this.ASTSet = parent.ASTSet.cloneASTs();
+		/*this.gpMaterial = new GPMaterialVisitor();
+		this.ASTSet.accept(this.gpMaterial);*/
+		//refreshGPMaterial(); // TODO Redesign so this method does not need to be called so often
+		setupNewIndividualClassName();
+		//this.ASTSet.updateOriginalCodeString();
+		//refreshGPMaterial();
 	}	
 	
 	public Individual(Individual seedInd, Problem variantProb, Integer variantID) {
 		// special constructor for testing a variant program 
 		this.ourProblem = seedInd.ourProblem;
-		this.ASTSet = NodeOperators.parseSource(variantProb.getStrings());
+		this.ASTSet = variantProb.getStrings();
 		this.setClassName(variantProb.getEntryClassName());
-		refreshGPMaterial();
+		//this.ASTSet.updateOriginalCodeString();
+		refreshGlobalGPMaterial();
 		
 		if(variantID != null){
-			Individual.indID = variantID;
-			this.setClassName(variantProb.getEntryClassName() + indID);
-			this.ASTSet.setClassNames(indID, variantProb.getStrings().getCompilationList());
+			this.variantIndID = variantID;
+			this.setClassName(variantProb.getEntryClassName() + getIDString());
+			this.ASTSet.updateClassNamesinAST(this.gpMaterial, this.ourProblem, getIDString());
+			//this.ASTSet.setClassNames(getIDString(), variantProb.getStrings().getCompilationList());
 		}
 	}
+	
+	private synchronized void setVariantIndID(){
+		Individual.setIndIDGlobal(Individual.getIndIDGlobal() + 1); // each new individual gets its own id
+		variantIndID = Individual.getIndIDGlobal();
+	}
 
-	private void setupNewIndividualCLassName() {
-		indID++; // each new individual gets its own id
-		this.setClassName(this.ourProblem.getEntryClassName() + indID);
-		this.ASTSet.setClassNames(indID, this.ourProblem.getStrings().getCompilationList());
-
-		this.ASTSet.updateClassNames(this.ASTSet, this.gpMaterial);
-		this.ASTSet.updateMethodCallClassNames(this.gpMaterial, this.ourProblem);
-		this.ASTSet.updateClassInstantiationNames(this.gpMaterial, this.ourProblem);
+	private void setupNewIndividualClassName() {
+		setVariantIndID();
+		this.setClassName(this.ourProblem.getEntryClassName() + getIDString());
+		//this.ASTSet.setClassNames(getIDString(), this.ourProblem.getStrings().getCompilationList());
+		
+		this.ASTSet.updateClassNamesinAST(this.gpMaterial, this.ourProblem, getIDString());
+		refreshGlobalGPMaterial();
+		//this.ASTSet.updateClassNames( this.gpMaterial);
+		/* these do not update:
+		 *   methoddeclaration parameters
+		 *   implements clauses
+		 * 	 method return types
+		 *   @CallerSensitive ?
+		 *   static method calls
+		 *   array type declaration
+		 *   static field access
+		 *   @Override ?
+		 */
+		//this.ASTSet.updateMethodCallClassNames(this.gpMaterial, this.ourProblem);
+		//this.ASTSet.updateClassInstantiationNames(this.gpMaterial, this.ourProblem);
 	}
 	
 	/*private synchronized void setupNewIndividualFromAST(Individual parent){
@@ -176,12 +224,17 @@ public class Individual implements Comparable, java.io.Serializable {
 	public Individual cloneWithFitness(){
 		Individual newInd = new Individual(this);
 		newInd.createNewBiasDataLinkedToParentBiasData(this);
-		newInd.setFunctionalityScore(this.getFunctionalityScore());
+		newInd.setTestCasesResults(this.testCasesErrorResults);//FunctionalityErrorCount(this.getFunctionalityErrorCount());
 		newInd.setRunningTime(this.getRunningTime());
 		return newInd;
 	}
 	
-/*	private Individual cloneWithNewChildBiasDataLinkedToParent(){
+private void setTestCasesResults(SparseArrayList<TestCaseResult> testCasesResultsOther) {
+		this.testCasesErrorResults = (SparseArrayList<TestCaseResult>) testCasesResultsOther.clone(); 
+		}
+
+
+	/*	private Individual cloneWithNewChildBiasDataLinkedToParent(){
 		Individual newInd = new Individual(this);
 		
 		return newInd;
@@ -218,26 +271,78 @@ public class Individual implements Comparable, java.io.Serializable {
 		 * For huffman, if the prefix code is shorter than the one created by the seed, 
 		 * we'll get a functionalityScore2 smaller than seed, and then negative functionality 
 		 */
-		if(ourProblem.getSeedFunctionalityScore()==0)// this keeps it compatable across all problems
-			return (float)functionalityScore2;
+		if(ourProblem.getSeedFunctionalityScore()==0)// this keeps it compatible across all problems, Ascon is allowed be 0
+			return (float)getFunctionalityErrorCount();
 		else
-			return ( ( (float)functionalityScore2 - (ourProblem.getSeedFunctionalityScore() )) / ourProblem.getSeedFunctionalityScore() );
+			return ( ( (float)getFunctionalityErrorCount() - (ourProblem.getSeedFunctionalityScore() )) / ourProblem.getSeedFunctionalityScore() );
 	}
 	
 	public float getTimeFitnessRatio(){
 		if(getRuntimeAvg()<=0) //should only happen when a program is so bad it overflows long, happens with infinite loop (maybe this should be normalised?)
-			return 10000; // if the program didnt run, it gets penalised. 
+			return 10000; // if the program didn't run, it gets penalised. 
 		else
 			return (getRuntimeAvg() )/ourProblem.getBaselineRuntimeAvg();
 	}
 	
-	public float getFitness() { 
+	public float getFitnessT100C() { 
+		 
+		float correctness = getCorrectness();
+		/*if(correctness > 0)
+			correctness+= 1; // overall fitness cannot be less than 1
+*/		
+		
+		float returnFitness =0;
+		if (correctness <0 )// a negative correctness means the program is functionally better than the seed
+			correctness =  -correctness; // the new version is more correct than the original (not possible with sort, hopefully happens with huffman :)
+		returnFitness = getTimeFitnessRatio() + 100 * correctness;
+		
+		/*if( returnFitness >= 1 ) //&& returnFitness <=100 )
+			returnFitness = (int)(returnFitness);*/
+		//else if (returnFitness > 100)		
+		//	returnFitness = ((int)(returnFitness / 100)) * 100  ;
+		return returnFitness;
+	}
+	
+	public float getFunctionalityFitness(){
+		// performance only matters if result is correct
+		float correctness = getCorrectness();
+		if (correctness <=0 )
+			return getTimeFitnessRatio();
+		else return correctness;
+	}
+	
+	public float getFitness(){
+		//return getFitnessTCdiv100();
+		return getFitnessT100C();
+		//return getFunctionalityFitness();
+	}
+	
+	public float getFitnessTCdiv100() { 
+		float returnFitness =0; 
+		float correctness = getCorrectness();
+		
+		if(correctness==0)
+			return getTimeFitnessRatio();
+		
+		if (correctness<0) // should only happen if mutant is functionally better than seed
+			correctness = -correctness;
+				
+		if(getTimeFitnessRatio()<1 && correctness >=1 ){
+			correctness = correctness / ((float)100);
+			return 1 + getTimeFitnessRatio() + correctness;
+		}else{
+			correctness = correctness / ((float)100);
+			return correctness + getTimeFitnessRatio();
+		}
+	}
+	
+	public float getFitnessTC() { 
 		 
 		float correctness = getCorrectness();
 		
 		float returnFitness =0;
 		if (correctness >=0 )
-			returnFitness = getTimeFitnessRatio() + 100 * correctness; // if a program is not as correct, make sure we can tell
+			returnFitness = getTimeFitnessRatio() + correctness; // if a program is not as correct, make sure we can tell
 		else // a negative correctness means the program is functionally better than the seed
 			returnFitness = getTimeFitnessRatio() + (-correctness); // the new version is more correct than the original (not possible with sort, hopefully happens with huffman :) 
 		return returnFitness;
@@ -258,21 +363,36 @@ public class Individual implements Comparable, java.io.Serializable {
 		return ourProblem.getMethodName(); 
 	}
 
-	public void addBestTime(long bestTime) {
+	public synchronized void addBestTime(long bestTime) {
 		if( bestTime ==0){
 			System.out.println("GP SEVERE: Setting best time to 0");
-	
 		}
 		this.runningTime+=bestTime;		
 	}
 	
-	public void setFunctionalityScore(long l) {
-		this.functionalityScore2 = l;
-	}
+	/*public void setFunctionalityErrorCount(long l) {
+		this.functionalityErrorCount = l;
+	}*/
 
-	public long getFunctionalityScore() {
-		return functionalityScore2;
+	public long getFunctionalityErrorCount() {
+		// count up the number of errors
+ 
+		// being correct on some data is worth more than returning all test cases 
+		int errorCount = 0 ;
+		for(int i = 0; i < this.testCasesErrorResults.size(); i++) {
+			   errorCount += testCasesErrorResults.get(i).getErrorCount();
+			}
+		
+		// Ascon decrypt can have up to 3 errors per test case, so make missing test cases equal to error count of 5
+		//errorCount += (ourProblem.getNumTests() - this.testCasesResults.size()) * 5;
+		
+		errorCount += 5 *(ourProblem.getMissingTestCaseValue(ourProblem.getNumTests() - this.testCasesErrorResults.size() ));
+		//errorCount += ourProblem.getSeedFunctionalityScore() *(ourProblem.getNumTests() - this.testCasesErrorResults.size() )*5;
+		
+		return errorCount;
 	}
+	
+	
 
 	public long getRunningTime() {
 		return this.runningTime;
@@ -282,17 +402,13 @@ public class Individual implements Comparable, java.io.Serializable {
 		this.runningTime = runningTime;
 	}
 
-	public long getClassID() {
+	/*public long getClassID() {
 		return this.indID; 
-	}
+	}*/
 
 	public Individual crossover(Individual tourneyWinner, GPConfig gpConfig) {
-		// TODO Refactor the mutate class into this one
-		return NodeOperators.crossover(this, tourneyWinner, gpConfig.isSinglePointEnforced(), gpConfig.isPickBestLocation());
+		return gpConfig.xoverOperator.crossover(this, tourneyWinner, gpConfig.isSinglePointEnforced(), gpConfig.isPickBestLocation());
 	}
-	
-	
-	
 	
 	public void clearChangedFlags() {
 		GPASTNodeData tempData = null;
@@ -396,7 +512,7 @@ public class Individual implements Comparable, java.io.Serializable {
 				if (tempData == null){  // should never happen
 					Logger.logTrash("Found a location without gpdata!");
 				}else if ( tempData.hasChanged()){	
-					updateProbabilitiesRuleset48(parentInd, tempData);				
+					updateProbabilitiesRuleset49(parentInd, tempData);				
 				}
 			}
 			parentInd.clearChangedFlags();
@@ -406,6 +522,16 @@ public class Individual implements Comparable, java.io.Serializable {
 		updateProbabilitiesDecayLarge();
 	}
 	
+	private void updateProbabilitiesRuleset49(Individual parentInd, GPASTNodeData tempData ){
+		// set the changed node in new program to 0
+		// half the chance of the parent node being selected again
+		
+			if(tempData.getParentIndividualNodeData() !=null){
+				tempData.getParentIndividualNodeData().setProbabilityVal(tempData.getParentIndividualNodeData().getProbabilityVal()/2);			
+			}
+			tempData.setProbabilityVal(0);
+	}
+		
 	private void updateProbabilitiesRuleset48(Individual parentInd, GPASTNodeData tempData ){
 		// if this program compiles, then location which changed to 
 		// produced this program should be updated in the parent
@@ -457,7 +583,7 @@ public class Individual implements Comparable, java.io.Serializable {
 		 * Taken from R15, added non-return nodes in child
 		 */
 
-		if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){
+		if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(.5);
 			tempData.setProbabilityVal(0); // non-return "dead" node, cannot be modified again in that lineage 
 			// decreaseNormalisedProbability(.1);
@@ -560,11 +686,11 @@ public class Individual implements Comparable, java.io.Serializable {
 	
 	private void updateProbabilitiesRuleset37(Individual parentInd, GPASTNodeData tempData ){
 		
-	if(this.getFunctionalityScore()== parentInd.getFunctionalityScore() ){
+	if(this.getFunctionalityErrorCount()== parentInd.getFunctionalityErrorCount() ){
 		// intron!
 		tempData.decreaseNormalisedProbability(1);
 		tempData.getParentIndividualNodeData().decreaseNormalisedProbability(1);
-	}else if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){ // if we decrease functionality
+	}else if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){ // if we decrease functionality
 		if(this.getRunningTime() < parentInd.getRunningTime()){ // and *decrease* running time, we break the program more
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(1);
 			tempData.decreaseNormalisedProbability(1);
@@ -580,11 +706,11 @@ public class Individual implements Comparable, java.io.Serializable {
 	
 	private void updateProbabilitiesRuleset36(Individual parentInd, GPASTNodeData tempData ){
 		
-	if(this.getFunctionalityScore()== parentInd.getFunctionalityScore() ){
+	if(this.getFunctionalityErrorCount()== parentInd.getFunctionalityErrorCount() ){
 		// intron!
 		tempData.decreaseNormalisedProbability(1);
 		tempData.getParentIndividualNodeData().decreaseNormalisedProbability(1);
-	}else if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){ // if we decrease functionality
+	}else if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){ // if we decrease functionality
 		if(this.getRunningTime() > parentInd.getRunningTime()){ // and increase running time, we break the program more
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(1);
 			tempData.decreaseNormalisedProbability(1);
@@ -600,11 +726,11 @@ public class Individual implements Comparable, java.io.Serializable {
 	
 	private void updateProbabilitiesRuleset35(Individual parentInd, GPASTNodeData tempData ){
 		
-	if(this.getFunctionalityScore()== parentInd.getFunctionalityScore() ){
+	if(this.getFunctionalityErrorCount()== parentInd.getFunctionalityErrorCount() ){
 		// intron!
 		tempData.decreaseNormalisedProbability(1);
 		tempData.getParentIndividualNodeData().decreaseNormalisedProbability(1);
-	}else if (this.getFunctionalityScore()> parentInd.getFunctionalityScore()){
+	}else if (this.getFunctionalityErrorCount()> parentInd.getFunctionalityErrorCount()){
 		tempData.getParentIndividualNodeData().increaseNormalisedProbability(1);
 		tempData.decreaseNormalisedProbability(1);
 	}else{
@@ -621,7 +747,7 @@ public class Individual implements Comparable, java.io.Serializable {
 		tempData.getParentIndividualNodeData().decreaseNormalisedProbability(1);
 	}
 	
-	if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){
+	if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){
 		tempData.getParentIndividualNodeData().increaseNormalisedProbability(1);
 		tempData.decreaseNormalisedProbability(1);
 	}else{
@@ -636,7 +762,7 @@ private void updateProbabilitiesRuleset33(Individual parentInd, GPASTNodeData te
 		 * (opposite of R14)
 		 */
 
-		if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){
+		if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(1);
 			tempData.decreaseNormalisedProbability(1);
 		}else{
@@ -655,7 +781,7 @@ private void updateProbabilitiesRuleset32(Individual parentInd, GPASTNodeData te
 		
 	
 		// taken from R15
-		if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){
+		if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(.2);
 			//tempData.decreaseNormalisedProbability(.5);
 		}else{
@@ -671,7 +797,7 @@ private void updateProbabilitiesRuleset31(Individual parentInd, GPASTNodeData te
 		 */
 		 
 		// taken from R15
-		if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){
+		if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(.5);
 			//tempData.decreaseNormalisedProbability(.5);
 		}else{
@@ -694,7 +820,7 @@ private void updateProbabilitiesRuleset30(Individual parentInd, GPASTNodeData te
 			}
 	
 		// taken from R15
-		if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){
+		if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(.5);
 			tempData.decreaseNormalisedProbability(.5);
 		}else{
@@ -717,7 +843,7 @@ private void updateProbabilitiesRuleset29(Individual parentInd, GPASTNodeData te
 			}
 	
 		// taken from R15
-		if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){
+		if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(.5);
 			tempData.decreaseNormalisedProbability(.1);
 		}else{
@@ -733,7 +859,7 @@ private void updateProbabilitiesRuleset28(Individual parentInd, GPASTNodeData te
 		 */
 		 
 		// taken from R15
-		if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){
+		if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(.5);
 			tempData.decreaseNormalisedProbability(.5);
 		}else{
@@ -745,7 +871,7 @@ private void updateProbabilitiesRuleset28(Individual parentInd, GPASTNodeData te
 	private void updateProbabilitiesRuleset25(Individual parentInd, GPASTNodeData tempData ){
 		// Taken from R22
 		// Reduces bias magnitude (increaseNormalisedProbabilitySmall instead of increaseNormalisedProbability)
-		if(	this.getFunctionalityScore()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
+		if(	this.getFunctionalityErrorCount()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
 				&& this.getRuntimeAvg() != parentInd.getRuntimeAvg() ){  // but the Performance changed
 			
 			float change = parentInd.getFitness() - this.getFitness() ;
@@ -765,7 +891,7 @@ private void updateProbabilitiesRuleset28(Individual parentInd, GPASTNodeData te
 	private void updateProbabilitiesRuleset24(Individual parentInd, GPASTNodeData tempData ){
 		// Taken from R22
 		// Reduces bias magnitude (increaseNormalisedProbabilitySmall instead of increaseNormalisedProbability)
-		if(	this.getFunctionalityScore()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
+		if(	this.getFunctionalityErrorCount()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
 				&& this.getRuntimeAvg() != parentInd.getRuntimeAvg() ){  // but the Performance changed
 			
 			float change = parentInd.getFitness() - this.getFitness() ;
@@ -785,7 +911,7 @@ private void updateProbabilitiesRuleset28(Individual parentInd, GPASTNodeData te
 	private void updateProbabilitiesRuleset22(Individual parentInd, GPASTNodeData tempData ){
 		// Taken from R17
 		// Reduces bias magnitude (increaseNormalisedProbabilitySmall instead of increaseNormalisedProbability)
-		if(	this.getFunctionalityScore()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
+		if(	this.getFunctionalityErrorCount()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
 				&& this.getRuntimeAvg() != parentInd.getRuntimeAvg() ){  // but the Performance changed
 			
 			float change = parentInd.getFitness() - this.getFitness() ;
@@ -806,7 +932,7 @@ private void updateProbabilitiesRuleset28(Individual parentInd, GPASTNodeData te
 	private void updateProbabilitiesRuleset21(Individual parentInd, GPASTNodeData tempData ){
 		// Taken from R17 (which extends R17, R5rr) as it is the best we have.
 		// increase based on change in performance, not fitness
-		if(	this.getFunctionalityScore()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
+		if(	this.getFunctionalityErrorCount()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
 				&& this.getRuntimeAvg() != parentInd.getRuntimeAvg() ){  // but the Performance changed
 			
 			//float change = parentInd.getFitness() - this.getFitness() ;
@@ -825,7 +951,7 @@ private void updateProbabilitiesRuleset28(Individual parentInd, GPASTNodeData te
 	private void updateProbabilitiesRuleset20(Individual parentInd, GPASTNodeData tempData ){
 		// Taken from R17 (which extends R17, R5rr) as it is the best we have.
 		// increase based on change in performance, not fitness
-		if(	this.getFunctionalityScore()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
+		if(	this.getFunctionalityErrorCount()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
 				&& this.getRuntimeAvg() != parentInd.getRuntimeAvg() ){  // but the Performance changed
 			
 			//float change = parentInd.getFitness() - this.getFitness() ;
@@ -844,7 +970,7 @@ private void updateProbabilitiesRuleset28(Individual parentInd, GPASTNodeData te
 		// Taken from R17 (which extends R5rr) as it is the best we have.
 		// this version tests if the runtime changed only, not the overall fitness
 		// and reduces the worst functionality threshold(/4 instead of /2)
-		if(	this.getFunctionalityScore()< (this.ourProblem.getWorstFunctionalityScore()/4) // if we didnt break the program 
+		if(	this.getFunctionalityErrorCount()< (this.ourProblem.getWorstFunctionalityScore()/4) // if we didnt break the program 
 				&& this.getRuntimeAvg() != parentInd.getRuntimeAvg() ){  // but the Performance changed
 			
 			float change = parentInd.getFitness() - this.getFitness() ;
@@ -866,7 +992,7 @@ private void updateProbabilitiesRuleset28(Individual parentInd, GPASTNodeData te
 		 * Adding bigger increases
 		 */
 		
-		if(	this.getFunctionalityScore()< this.ourProblem.getWorstFunctionalityScore() 
+		if(	this.getFunctionalityErrorCount()< this.ourProblem.getWorstFunctionalityScore() 
 				&& this.getFitness() != parentInd.getFitness() ){ 
 			/* some functionality, performance change
 			 TODO how do we know if prefixCode does anything useful at all? Does it get anything right?
@@ -891,7 +1017,7 @@ private void updateProbabilitiesRuleset28(Individual parentInd, GPASTNodeData te
 		// Taken from R5rr, as it is the best we have.
 		// this version tests if the runtime changed only, not the overall fitness
 		// and reduces the worst functionality threshold(/2)
-		if(	this.getFunctionalityScore()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
+		if(	this.getFunctionalityErrorCount()< (this.ourProblem.getWorstFunctionalityScore()/2) // if we didnt break the program 
 				&& this.getRuntimeAvg() != parentInd.getRuntimeAvg() ){  // but the Performance changed
 			
 			float change = parentInd.getFitness() - this.getFitness() ;
@@ -917,7 +1043,7 @@ private void updateProbabilitiesRuleset16(Individual parentInd, GPASTNodeData te
 		 * changes that give big performance change are good
 		 *  (really clutching at straws here :/ )
 		 */
-	long functionalityChange = this.getFunctionalityScore() - parentInd.getFunctionalityScore();
+	long functionalityChange = this.getFunctionalityErrorCount() - parentInd.getFunctionalityErrorCount();
 	if (functionalityChange <0)
 		functionalityChange = - functionalityChange; 
 	float performanceChange = this.getRuntimeAvg() - parentInd.getRuntimeAvg();
@@ -947,7 +1073,7 @@ private void updateProbabilitiesRuleset15(Individual parentInd, GPASTNodeData te
 		 * (opposite of R14)
 		 */
 
-		if (this.getFunctionalityScore()< parentInd.getFunctionalityScore()){
+		if (this.getFunctionalityErrorCount()< parentInd.getFunctionalityErrorCount()){
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(.5);
 			tempData.decreaseNormalisedProbability(.1);
 		}else{
@@ -963,7 +1089,7 @@ private void updateProbabilitiesRuleset14(Individual parentInd, GPASTNodeData te
 		 * 
 		 */
 
-		if (this.getFunctionalityScore()> parentInd.getFunctionalityScore()){
+		if (this.getFunctionalityErrorCount()> parentInd.getFunctionalityErrorCount()){
 			tempData.getParentIndividualNodeData().increaseNormalisedProbability(.5);
 			tempData.decreaseNormalisedProbability(.1);
 		}else{
@@ -1041,10 +1167,10 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 		 * 
 		 */
 
-		long functionalityChangeRatio = this.getFunctionalityScore() / parentInd.getFunctionalityScore();
+		long functionalityChangeRatio = this.getFunctionalityErrorCount() / parentInd.getFunctionalityErrorCount();
 		float performanceChangeRatio = this.getRuntimeAvg() / parentInd.getRuntimeAvg();
 		
-		long functionalityChange = this.getFunctionalityScore() - parentInd.getFunctionalityScore();
+		long functionalityChange = this.getFunctionalityErrorCount() - parentInd.getFunctionalityErrorCount();
 		if (functionalityChange <0)
 			functionalityChange = - functionalityChange; 
 		
@@ -1071,10 +1197,10 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 		 */
 		// this number will be smaller, if we didn't break the program much, unlikely though
 		// plus you have to break the program to redesign right?
-		long functionalityChangeRatio = this.getFunctionalityScore() / parentInd.getFunctionalityScore();
+		long functionalityChangeRatio = this.getFunctionalityErrorCount() / parentInd.getFunctionalityErrorCount();
 		float performanceChangeRatio = this.getRuntimeAvg() / parentInd.getRuntimeAvg();
 		
-		long functionalityChange = this.getFunctionalityScore() - parentInd.getFunctionalityScore();
+		long functionalityChange = this.getFunctionalityErrorCount() - parentInd.getFunctionalityErrorCount();
 		if (functionalityChange <0)
 			functionalityChange = - functionalityChange; 
 		
@@ -1104,7 +1230,7 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 		 * the more we can impact performance without affecting functionality, the better
 		 * 
 		 */
-		long functionalityChange = this.getFunctionalityScore() - parentInd.getFunctionalityScore();
+		long functionalityChange = this.getFunctionalityErrorCount() - parentInd.getFunctionalityErrorCount();
 		if (functionalityChange <0)
 			functionalityChange = - functionalityChange; 
 		
@@ -1124,7 +1250,7 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 	
 	private void updateProbabilitiesRuleset27(Individual parentInd, GPASTNodeData tempData ){
 		// Take from R6, reduce the threshold for acceptable functionality
-		if( this.getFunctionalityScore()< (this.ourProblem.getWorstFunctionalityScore()/2)
+		if( this.getFunctionalityErrorCount()< (this.ourProblem.getWorstFunctionalityScore()/2)
 				&& this.getFitness() != parentInd.getFitness() ){ // some functionality, performance change
 			// increase can be larger than 1
 			tempData.increaseNormalisedProbability( parentInd.getFitness() / this.getFitness() );
@@ -1140,7 +1266,7 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 	
 	private void updateProbabilitiesRuleset6(Individual parentInd, GPASTNodeData tempData ){
 		// reduce the threshold for acceptable functionality
-		if( this.getFunctionalityScore()< (this.ourProblem.getWorstFunctionalityScore()/2)
+		if( this.getFunctionalityErrorCount()< (this.ourProblem.getWorstFunctionalityScore()/2)
 				&& this.getFitness() != parentInd.getFitness() ){ // some functionality, performance change
 			// increase can be larger than 1
 			tempData.increaseProbability( parentInd.getFitness() / this.getFitness() );
@@ -1159,7 +1285,7 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 		// how do we check that the program compiled and ran, and does *something*?
 		// for sort this could be a "same" flag (input=output), for huffman?
 		int baseFuncWorst = this.ourProblem.getWorstFunctionalityScore();
-		int thisFunc = (int) this.getFunctionalityScore();
+		int thisFunc = (int) this.getFunctionalityErrorCount();
 		if( thisFunc< baseFuncWorst
 				&& this.getFitness() != parentInd.getFitness() ){ // some functionality, performance change
 			// increase can be larger than 1
@@ -1203,10 +1329,10 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 			perfRatio = this.getRunningTime()/parentInd.getRunningTime();
 			
 		long funcRatio = 0 ;
-		if(this.getFunctionalityScore() > parentInd.getFunctionalityScore() )
-			funcRatio = parentInd.getFunctionalityScore()/this.getFunctionalityScore();
+		if(this.getFunctionalityErrorCount() > parentInd.getFunctionalityErrorCount() )
+			funcRatio = parentInd.getFunctionalityErrorCount()/this.getFunctionalityErrorCount();
 		else 
-			funcRatio = this.getFunctionalityScore()/parentInd.getFunctionalityScore();
+			funcRatio = this.getFunctionalityErrorCount()/parentInd.getFunctionalityErrorCount();
 		
 		if(perfRatio > funcRatio){ // changed performance more than functionality,
 			// interesting, change there again in parent
@@ -1252,7 +1378,7 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 	private void updateProbabilitiesRuleset4rr(Individual parentInd, GPASTNodeData tempData ){
 		// bck 19-May-2013, reverting to checking functionality score, why was this removed?
 		// Ruleset #4 (Finding a "lever" on performance without runaway bias updates)
-		if(	 this.getFunctionalityScore()< this.ourProblem.getWorstFunctionalityScore() 
+		if(	 this.getFunctionalityErrorCount()< this.ourProblem.getWorstFunctionalityScore() 
 				&& this.getFitness() != parentInd.getFitness() ){ // some functionality, performance change
 			// increase can be larger than 1
 			
@@ -1294,7 +1420,7 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 	}
 	private void updateProbabilitiesRuleset5rr(Individual parentInd, GPASTNodeData tempData ){
 		// bck 19-May-2013, reverting to checking functionality score, why was this removed?
-		if(	this.getFunctionalityScore()< this.ourProblem.getWorstFunctionalityScore() 
+		if(	this.getFunctionalityErrorCount()< this.ourProblem.getWorstFunctionalityScore() 
 				&& this.getFitness() != parentInd.getFitness() ){ 
 			/* some functionality, performance change
 			 TODO how do we know if prefixCode does anything useful at all? Does it get anything right?
@@ -1432,7 +1558,8 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 		try {
 
 			m = this.getEntryClazz().getMethod(ourProblem.getMethodName(),
-					ourProblem.getClassParams());
+					ourProblem.getMethodParameterTypes());
+					//ourProblem.getClassParams());
 		} catch (SecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1441,7 +1568,7 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 			e.printStackTrace();
 		}
 		return m;
-	}
+}	
 
 	public void setClass(Class<?> clazz) {
 		this.clazz = clazz;
@@ -1453,9 +1580,7 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 
 	public Class<?> getEntryClazz() {
 		return this.clazz;
-	}
-
-	
+}
 	
 	public void setClassMap(Map<String, JavaClassObject> classByteMap) {
 		this.classMap = classByteMap;
@@ -1463,8 +1588,7 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 	
 	public Map<String, JavaClassObject> getClassMap() {
 		return this.classMap;
-	}
-	
+	}	
 	
 	public void setClassByteMap(Map<String, byte[]> classByteMap) {
 		this.classByteMap = classByteMap;
@@ -1515,8 +1639,9 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 		}
 	}
 
-	public void setRunninTimeToZero() {
+	public void zeroResults() {
 		setRunningTime(0);
+		testCasesErrorResults = new SparseArrayList<TestCaseResult>();
 	}
 
 	public void setCompiled() {
@@ -1528,7 +1653,65 @@ private void updateProbabilitiesRuleset9(Individual parentInd, GPASTNodeData tem
 		return compiled;
 	}
 
+	public String getTestCaseResultsText() {
+		
+		return testCaseResultText;
+	}
 
+
+	public synchronized void setTestResult(int testCaseIndex, int errorCount, boolean runtimeException) {
+		testCaseResultText += "i"+testCaseIndex+":"+errorCount+"R"+runtimeException;
+		this.testCasesErrorResults.add(testCaseIndex, new TestCaseResult(errorCount,runtimeException));
+	}
+
+	public void refreshGlobalGPMaterial(){ // this should be totally internal, and needs to happen every time the ast is changed.
+		//this.ASTSet.refreshASTs();// //this.ASTSet.flattenASTChangesToString(); = NodeOperators.parseSource( this.ASTSet );
+		this.gpMaterial = new GPMaterialVisitor();
+		this.ASTSet.accept(this.gpMaterial);// gathers references to the parts of the AST we are interested in, adds gp data to statements
+	}
+
+
+	public void setClassLoader(ClassLoader cl) {
+		this.classLoader = cl;
+	}
+
+	public Object execute(Object[] _args) throws ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		/*		for (Entry<String, byte[]> entry : this.getClassByteMap().entrySet())
+				{
+				    this.classLoader.defineClass(entry.getKey(), entry.getValue(), 0, entry.getValue().length);
+				}
+		*/
+		
+		Class<? extends Object> cl = this.classLoader.loadClass(this.getClassName());
+		Method m = cl.getMethod(ourProblem.getMethodName(), ourProblem.getMethodParameterTypes()); //, methodCallParams);
+		Object returnVals = m.invoke(null, _args);
+		return returnVals;
+	}
+
+	public static long getIndIDGlobal() {
+		return indIDGlobal;
+	}
+
+	public static void setIndIDGlobal(long indIDGlobal) {
+		Individual.indIDGlobal = indIDGlobal;
+	}
+
+/*	public void initialise(CompilationSet initialCodeSet) {
+		//NodeModifierUtil.GPPrimitives = new GPMaterialVisitor();
+		this.gpMaterial = new GPMaterialVisitor();
+		for(CompilationDetail cD : initialCodeSet.getCompilationList()){
+			CompilationUnit indAST = NodeModifierUtil.parseSource(cD.getCodeString());
+			indAST.accept(this.gpMaterial);
+		}
+		this.gpMaterial.printAll();
+	}*/
+
+	/*private void initialise(String initialCode) {
+		CompilationUnit indAST = parseSource(initialCode);
+		indAST.accept(GPPrimitives);
+	}*/
+
+	
 
 
 /*	public void reduceBiasForInitialChangeAttempt() {

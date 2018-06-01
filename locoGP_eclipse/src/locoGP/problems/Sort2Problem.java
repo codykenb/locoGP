@@ -7,7 +7,7 @@ import locoGP.individual.Individual;
 import locoGP.problems.tests.SortTestCase;
 import locoGP.problems.tests.TestCase;
 
-public class Sort2Problem extends Problem{
+public class Sort2Problem extends Sort1Problem{
 
 	private String problemName = "Sort1Test";
 	private String className = "Sort1Test";
@@ -27,14 +27,19 @@ public class Sort2Problem extends Problem{
 	public CompilationSet getStrings() {
 		CompilationDetail[] fileSet = new CompilationDetail[1];
 		fileSet[0].setCodeString(problemString);
-		fileSet[0].setClassName(className);
+		fileSet[0].setClassName(className,"");
 		return new CompilationSet(fileSet);
 	}
 
 	public TestCase[] getTestData() {
 		return testData;
 	}
-	
+	public int getMissingTestCaseValue(int numMissing){
+		int missingError=0;
+		for(int i = testData.length-1 ; i>numMissing ; i--)
+			missingError += ((Integer[]) testData[i].getAnswer()).length * 2;
+		return missingError;
+	}
 	public void setTestData(TestCase[] testData){
 		this.testData = testData;
 	}
@@ -169,7 +174,7 @@ public class Sort2Problem extends Problem{
 		return max;
 	}
 
-	public Class[] getClassParams() {
+	public Class[] getMethodParameterTypes() {
 		return new Class[] {Integer[].class, Integer.class};
 	}
 

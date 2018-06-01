@@ -2,7 +2,7 @@
 
 . ./10-setServers.sh
 
-#for sNum in {1..40} ; do ssh -o ConnectTimeout=5 codykenb@lg12l$sNum.cs.tcd.ie "hostname && who" ; done > rawServerList.txt
+#for sNum in {1..40} ; do ssh -o ConnectTimeout=5 codykenb@lg12l$sNum.cs.ie "hostname && who" ; done > rawServerList.txt
 #parallel ssh -o ConnectTimeout=5 {} "hostname \&\& who"  ::: ${servers[@]} > rawServerList.txt 2> /dev/null
 
 unset freeServers

@@ -1,0 +1,22 @@
+<project name="ByLoader" default="jar" basedir="../../../../../../..">
+  <!-- This ant script packages the ByLoader.jar file for use as javaagent. -->
+  <property name="project_root" value="." />
+  <property name="src" value="${project_root}/src" />
+  <property name="bin" value="${project_root}/bin" />
+  <property name="lib" value="${project_root}/lib" />
+  <property name="loader" value="de/uka/ipd/sdq/ByCounter/loader" />
+	  <target name="jar" description="create agent jar">
+	    <jar
+	    	basedir="${bin}"
+	    	includes="${loader}/*.class" 
+	    	destfile="${lib}/ByLoader.jar" 
+	    	manifest="${src}/${loader}/ByLoader.manifest"/>
+	  </target>
+	  <!--<target name="jarAndRunExample" description="create agent JAR and run example on it">
+	    <java
+	    	basedir="${bin}"
+	    	includes="${loader}/ByClassFileTransformer.class" 
+	    	destfile="${lib}/ByLoader.jar" 
+	    	manifest="${src}/${loader}/ByLoader.manifest"/>
+	  </target>-->
+</project>

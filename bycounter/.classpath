@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="*/*.svn" kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/commons-math-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/gnujaxp.jar"/>
+	<classpathentry kind="lib" path="lib/jcommon-1.0.10.jar"/>
+	<classpathentry kind="lib" path="lib/swtgraphics2d.jar"/>
+	<classpathentry kind="lib" path="lib/javassist.jar" sourcepath="/home/martin/Documents/projects/javassist-3.8.0/javassist-src.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://csg.is.titech.ac.jp/~chiba/javassist/html/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/junit-4.4.jar"/>
+	<classpathentry kind="lib" path="lib/perfcountLinuxRDTSC.jar"/>
+	<classpathentry kind="lib" path="lib/asm-all-3.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://asm.ow2.org/asm33/javadoc/user/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.13-experimental.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.13-swt.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.13.jar"/>
+	<classpathentry kind="lib" path="lib/iText-2.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/javautil-3.1.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

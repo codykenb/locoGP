@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<project name="ByCounter" default="jar" basedir=".">
+	<description>Builds, tests, and runs the project ByCounter.</description>
+	<!--import file="nbproject/build-impl.xml"/-->
+
+	<property name="project_root" value="." />
+	<property name="src" location="${project_root}/src" />
+	<property name="bin" location="${project_root}/bin" />
+	<property name="lib" location="${project_root}/lib" />
+	<property name="dist"  location="${project_root}/dist"/>
+	<property name="doc"  location="${project_root}/doc"/>
+	<property name="loader" location="de/uka/ipd/sdq/ByCounter/loader" />
+	<!-- name of the output .jar file -->
+    <buildnumber file="build.num"/>
+	<property name="jar.name" value="ByCounterV0.9-b${build.number}.jar" />
+	<property name="jar-src.name" value="ByCounterV0.9-b${build.number}-src.jar" />
+	<property name="zip.basename" value="ByCounterV0.9-b${build.number}" />
+
+	<!--
+
+    There exist several targets which are by default empty and which can be 
+    used for execution of your tasks. These targets are usually executed 
+    before and after some main targets. They are: 
+
+      -pre-init:                 called before initialization of project properties
+      -post-init:                called after initialization of project properties
+      -pre-compile:              called before javac compilation
+      -post-compile:             called after javac compilation
+      -pre-compile-single:       called before javac compilation of single file
+      -post-compile-single:      called after javac compilation of single file
+      -pre-compile-test:         called before javac compilation of JUnit tests
+      -post-compile-test:        called after javac compilation of JUnit tests
+      -pre-compile-test-single:  called before javac compilation of single JUnit test
+      -post-compile-test-single: called after javac compilation of single JUunit test
+      -pre-jar:                  called before JAR building
+      -post-jar:                 called after JAR building
+      -post-clean:               called after cleaning build products
+
+    (Targets beginning with '-' are not intended to be called on their own.)
+
+    Example of inserting an obfuscator after compilation could look like this:
+
+        <target name="-post-compile">
+            <obfuscate>
+                <fileset dir="${build.classes.dir}"/>
+            </obfuscate>
+        </target>
+
+    For list of available properties check the imported 
+    nbproject/build-impl.xml file. 
+
+
+    Another way to customize the build is by overriding existing main targets.
+    The targets of interest are: 
+
+      -init-macrodef-javac:     defines macro for javac compilation
+      -init-macrodef-junit:     defines macro for junit execution
+      -init-macrodef-debug:     defines macro for class debugging
+      -init-macrodef-java:      defines macro for class execution
+      -do-jar-with-manifest:    JAR building (if you are using a manifest)
+      -do-jar-without-manifest: JAR building (if you are not using a manifest)
+      run:                      execution of project 
+      -javadoc-build:           Javadoc generation
+      test-report:              JUnit report generation
+
+    An example of overriding the target for project execution could look like this:
+
+        <target name="run" depends="ByCounter-impl.jar">
+            <exec dir="bin" executable="launcher.exe">
+                <arg file="${dist.jar}"/>
+            </exec>
+        </target>
+
+    Notice that the overridden target depends on the jar target and not only on 
+    the compile target as the regular run target does. Again, for a list of available 
+    properties which you can use, check the target you are overriding in the
+    nbproject/build-impl.xml file. 
+
+    -->
+
+	<!-- All referenced jar files --> 
+	<path id="jarfiles">
+		<!-- lib contains all jar files-->
+		<fileset dir="${lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	
+	<target name="main" description="Main build entry point">
+		<antcall target="clean"></antcall>
+		<mkdir dir="${dist}" />
+		<!-- password safe the directory -->
+		<copy todir="${dist}/dist" filtering="off">
+			<fileset dir="${project_root}">
+				<include name=".htaccess" />
+				<include name=".htpasswd" />
+			</fileset>
+		</copy>
+		<antcall target="compile"></antcall>
+		<antcall target="jar"></antcall>
+		<!--
+		MK removed 2010.01.16: no sources for now
+		<antcall target="jar-src"></antcall>
+		-->
+		<antcall target="javadoc"></antcall>
+		<antcall target="zip"></antcall>
+		<antcall target="junit"></antcall>
+	</target>
+	
+	
+	<target name="compile" description="Compile all source files">
+		<mkdir dir="${bin}"/>	
+	
+		<!-- create a property containing all .jar files, seperated with a space -->
+		<pathconvert 
+			property="libs.project" 
+			pathsep=":"
+			refid="jarfiles"> <!-- reference the jar files -->
+			<mapper>
+				<chainedmapper>
+					<!-- remove absolute path -->
+					<!--<flattenmapper />-->
+				</chainedmapper>
+			</mapper>
+
+		</pathconvert>
+
+	    <record name="java-build-log.txt" action="start"/>
+		<javac srcdir="${src}"
+		    destdir="${bin}"
+		    classpath="${libs.project}"
+			debug="true"		
+			verbose="true"
+		 	errorproperty="build.stderr"
+		/>
+		<record name="java-build-log.txt" action="stop"/>
+
+	</target>
+	
+	<target name="jar" description="Create jar and MANIFEST.MF">
+
+		<!-- create a property containing all .jar files, seperated with a space -->
+		<pathconvert 
+			property="libs.project" 
+			pathsep=" "
+			refid="jarfiles"> <!-- reference the jar files -->
+			<mapper>
+				<chainedmapper>
+					<!-- remove absolute path -->
+					<flattenmapper />
+				</chainedmapper>
+			</mapper>
+
+		</pathconvert>
+
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}/dist" />
+			
+
+		<!-- Define the classfiles to include in the jar -->
+		<patternset id="classfiles">
+			<exclude name="evaluation/**/*" />
+			<exclude name="experimental/**/*" />
+			<exclude name="**/example/BytecodeTest.class" />
+			<exclude name="**/measurement/**/*" />
+			<!--<exclude name="**/test/**/*" />-->
+			<include name="**/*.class" />
+			<include name="release-notes.txt" />
+		</patternset>
+
+		<!-- Create the jar -->
+		<jar jarfile="${dist}/dist/${jar.name}">
+			<fileset dir="${bin}">
+				<patternset refid="classfiles" />
+			</fileset>
+
+			<!-- define MANIFEST.MF -->
+			<manifest><!--TODO why not specify the main class of ByCounter (see introduction.html) here?-->
+				<!--attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="my.path.to.the.main.Application" />
+				<section name="common">
+					<attribute name="Specification-Title" value="${component.name}" />
+					<attribute name="Specification-Version" value="${component.version}" />
+					<attribute name="Specification-Vendor" value="${component.vendor}" />
+					<attribute name="Implementation-Title" value="${component.name}" />
+					<attribute name="Implementation-Version" value="${component.version} ${TODAY}" />
+					<attribute name="Implementation-Vendor" value="${component.vendor}" />
+				</section-->
+
+				<!-- finally, use the magically generated libs path --><!--TODO what does "magically" mean here?-->
+				<attribute name="Premain-Class" value="experimental.loader.gui.ByClassFileTransformer" />
+				<attribute name="Class-Path" value=".  ${libs.project}" />
+			</manifest>
+		</jar>
+		<copy todir="${dist}" filtering="off">
+			<fileset dir="${project_root}" includes="licences.txt" />
+			<fileset dir="${project_root}" includes="readme.txt" />
+			<fileset dir="${project_root}" includes="error.txt" /><!--TODO MK check if this is needed-->
+		</copy>
+		<copy todir="${dist}/lib" filtering="off">
+			<fileset dir="${lib}" includes="asm-all-3.3.jar" />
+			<fileset dir="${lib}" includes="commons-math-1.1.jar" />
+			<fileset dir="${lib}" includes="gnujaxp.jar" />
+			<fileset dir="${lib}" includes="itext-2.0.2.jar" />
+			<fileset dir="${lib}" includes="javassist.jar" />
+			<fileset dir="${lib}" includes="jcommon-1.0.10.jar" />
+			<fileset dir="${lib}" includes="jfreechart-1.0.6.jar" />
+			<fileset dir="${lib}" includes="junit-4.4.jar" />
+			<fileset dir="${lib}" includes="swtgraphics2d.jar" />
+		</copy>
+	</target>
+	
+	<target name="jar-src" description="Create src file jar">
+
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}/dist" />
+		<mkdir dir="${dist}/src" />
+
+		<!-- Define the sourcefiles to include in the jar -->
+		<patternset id="sourcefiles">
+			<exclude name="evaluation/**/*" />
+			<exclude name="experimental/**/*" />
+			<exclude name="**/measurement/**/*" />
+			<exclude name="**/test/**/*" />
+			<include name="**/*.java" />
+		</patternset>
+
+		<!-- Create the jar -->
+		<!--
+		MK removed 2010.01.16: no sources for now
+		<jar jarfile="${dist}/dist/${jar-src.name}">
+			<fileset dir="${src}">
+				<patternset refid="sourcefiles" />
+			</fileset>
+		</jar>
+		-->
+
+		<!-- Also copy the sources to src -->
+		<!--
+		MK removed 2010.01.16: no sources for now
+		<copy todir="${dist}/src" filtering="off">
+			<fileset dir="${src}">
+				<patternset refid="sourcefiles" />
+			</fileset>
+		</copy>
+		-->
+	</target>
+	
+	<target name="javadoc">
+		<javadoc
+			destdir="${dist}/doc/api"
+			classpathref="jarfiles"
+			author="true"
+			version="true"
+			access="public"
+			use="true"
+			docfilessubdirs="true"
+			additionalparam="-docfilessubdirs"
+			overview="${project_root}/introduction.html" 
+			windowtitle="ByCounter API">
+			
+			<fileset dir="${src}" defaultexcludes="no">
+				<exclude name="evaluation/**/*" />
+				<exclude name="experimental/**/*" />
+				<exclude name="**/test/**/*" />
+				<include name="**/*.java" />
+			</fileset>
+			
+			<doctitle><![CDATA[<h1>ByCounter Documentation</h1>]]></doctitle>
+			<!--tag name="todo" scope="all" description="To do:"/>
+			<group title="Group 1 Packages" packages="com.dummy.test.a*"/>
+			<group title="Group 2 Packages" packages="com.dummy.test.b*:com.dummy.test.c*"/>
+			<link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="C:\tmp"/>
+			<link href="http://developer.java.sun.com/developer/products/xml/docs/api/"/-->
+		</javadoc>
+
+		<!-- Also copy to the dist directory -->
+		<copy todir="${dist}/doc" filtering="off">
+			<fileset dir="${doc}">
+				<include name="manual/ByCounter_Manual.pdf" />
+			</fileset>
+		</copy>
+
+		<!-- Copy doc-files to the dist directory -->
+		<copy todir="${dist}/doc/api" filtering="off">
+			<fileset dir="${src}">
+				<include name="**/doc-files/*" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<!-- Zip the build up to redistributable zip files. -->
+	<target name="zip">
+		<!--
+		MK removed 2010.01.16: no sources for now
+		<zip destfile="${dist}/dist/${zip.basename}_full.zip">
+		    <fileset dir="${dist}" excludes="**/*.zip"/>
+		</zip>
+		-->
+		<zip destfile="${dist}/dist/${zip.basename}_bin.zip">
+		    <fileset dir="${dist}" excludes="**/*.zip, src, src/**/*"/>
+		</zip>
+		<!--
+		MK removed 2010.01.16: no sources for now
+		<zip destfile="${dist}/dist/${zip.basename}_src.zip">
+		    <fileset dir="${dist}" excludes="**/*.zip, dist, dist/**/*"/>
+		</zip>
+		-->
+	</target>
+	
+    <target name="clean">
+        <delete dir="${dist}" />
+    </target>
+	
+	<target name="junit" description="JUnit test suite">
+		<junit printsummary="withOutAndErr" fork="no">
+			<classpath refid="jarfiles" />	
+		  <classpath>
+		   	<pathelement path="/usr/share/java/junit.jar"/>
+		  	<pathelement location="${lib}"/>
+		  	<pathelement location="${dist}/dist/${jar.name}"/>
+		  	<pathelement location="${bin}"/>
+		  </classpath>
+		  <formatter type="xml"/>
+		  <test name="de.uka.ipd.sdq.ByCounter.test.AllTestsSuite" outfile="test-AllTestsSuite" />
+		</junit>
+	</target>
+	
+
+</project>

@@ -26,8 +26,9 @@ public class GPSecureClassLoader extends SecureClassLoader{
 		    	boolean found = false;
 		        byte[] b = null; 
 		        JavaClassObject foundCO = null;
+		        String tmpName = "";
 		        for(JavaClassObject jCO : jclassObjects){
-		        	String tmpName = jCO.getName();
+		        	tmpName = jCO.getName();
 		        	
 		        	// TODO clean up this utter mess...
 		        	/*String[] splitName = tmpName.split("/");
@@ -36,7 +37,8 @@ public class GPSecureClassLoader extends SecureClassLoader{
 		        	addClassToParentLoader( jCO, splitName[1]+"."+secondName[0], jCO.getBytes(), 0, jCO.getBytes().length); // if this works
 		        	*/
 		        	
-		        	if(tmpName.contains((name.replace(".", "/")))){
+		        	//if(tmpName.contains((name.replace(".", "/")))){
+		        	if(tmpName.equals("/"+(name.replace(".", "/"))+".class")){
 		        		b = jCO.getBytes();
 		        		found = true;
 		        		foundCO = jCO;

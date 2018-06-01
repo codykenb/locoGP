@@ -1,10 +1,19 @@
 package locoGP.operators;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.Statement;
+
+import locoGP.Generation;
 import locoGP.experiments.GPConfig;
 import locoGP.fitness.IndividualEvaluator;
 import locoGP.individual.Individual;
@@ -34,7 +43,8 @@ public class Mutator implements Callable<Mutator>{
 			e.printStackTrace();
 		}
 		individuals.add(newInd);
-		System.out.println("New individual added: " + individuals.size());
+		Logger.log("I: "+newInd.getClassName() +" fit: " + newInd.getFitness() + " - Total: " + individuals.size()  );
+		System.out.println(newInd.getClassName() +" fit: " + newInd.getFitness());
 	}
 	
 	@Override
@@ -47,11 +57,11 @@ public class Mutator implements Callable<Mutator>{
 		boolean success = false;
 		boolean mutateSuccess = false;
 		Random ranNumGenerator = new Random();
-		int choice = ranNumGenerator.nextInt(10); 
+		int choice = ranNumGenerator.nextInt(100); 
 		
 		// mutateFail is to guard against getting stuck trying to mutate an empty program. (What if all programs are empty?)
 		// failCount is to measure modifications which do not compile
-		int mutateFail = 0 ,failCount = 0 ;
+		int mutateFailCount = 0 ,mutateCompileFailCount = 0 ;
 		Logger.logTrash(" Mutation Choice - " + choice);
 		
 		Individual returnInd = null; 
@@ -66,12 +76,12 @@ public class Mutator implements Callable<Mutator>{
 			
 			numChanges = 1;
 			try{
-			NodeOperators.mutate(returnInd, choice, numChanges, gpConfig);
-			mutateSuccess = true;
+				mutate(returnInd, choice, numChanges, gpConfig);
+				mutateSuccess = true;
 			}catch(Exception e){
 				Logger.logDebugConsole("Problem mutating " );
 				e.printStackTrace();
-				mutateFail++;
+				mutateFailCount++;
 			}
 			
 			if (mutateSuccess){
@@ -86,7 +96,7 @@ public class Mutator implements Callable<Mutator>{
 				if(numChanges >0 ){ // only log if an actual mutation has occurred
 					Logger.log("Mutating " + parentInd.getClassName() + " = "
 						+ returnInd.getClassName() + " Time: "+returnInd.getRunningTime()+" Fit:" + returnInd.getFitness()
-						+ " TestError:" + returnInd.getFunctionalityScore()+ " ASTNodes: " + returnInd.getNumNodes() 
+						+ " TestError:" + returnInd.getFunctionalityErrorCount()+ " ASTNodes: " + returnInd.getNumNodes() 
 						+ " GPNodes: " 	+ returnInd.getNumGPNodes()
 						+ " xoverApplied: " 	+ returnInd.crossoverApplied()
 						+ " xovers: " 	+ returnInd.getCrossoverAttempts()
@@ -95,7 +105,7 @@ public class Mutator implements Callable<Mutator>{
 				}else{
 					Logger.log("Mutation skipped " + parentInd.getClassName() + " = "
 							+ returnInd.getClassName() + " Time: "+returnInd.getRunningTime()+" Fit:" + returnInd.getFitness()
-							+ " TestError:" + returnInd.getFunctionalityScore()+ " ASTNodes: " + returnInd.getNumNodes() 
+							+ " TestError:" + returnInd.getFunctionalityErrorCount()+ " ASTNodes: " + returnInd.getNumNodes() 
 							+ " GPNodes: " 	+ returnInd.getNumGPNodes()
 							+ " xoverApplied: " 	+ returnInd.crossoverApplied()
 							+ " xovers: " 	+ returnInd.getCrossoverAttempts()
@@ -104,7 +114,7 @@ public class Mutator implements Callable<Mutator>{
 				}
 				
 				
-				returnInd.refreshGPMaterial();
+				returnInd.refreshGlobalGPMaterial();
 				if(gpConfig.isPickBestLocation() && gpConfig.isUpdateLocationBias()){
 					// This function back-propagates:
 					//returnInd.updateProbabilitiesWithGaussianNoise();
@@ -117,22 +127,21 @@ public class Mutator implements Callable<Mutator>{
 				Logger.logTrash("\n\n" + returnInd.getCodeProbabilitiesLogString());
 
 				}else{ // fail to compile
-					failCount++;
-					System.out.println("Failed Mutation - " + failCount);
+					mutateCompileFailCount++;
+					Logger.logTrash(" - Failed Mutation - " + mutateCompileFailCount);
 					if(gpConfig.isPickBestLocation() && gpConfig.isUpdateLocationBias()){
 						//parentInd.updateProbabilitiesDecay();
 						//parentInd.updateProbabilitiesWithGaussianNoise();
 						//returnInd.reduceBiasForInitialChangeAttempt();
-						parentInd.updateProbabilitiesDecayLarge();
+						parentInd.updateProbabilitiesDecaySmall();
 						//returnInd.updateProbabilities(parentInd); // results are in, update any gpDataproperties accordingly, using the difference between parent and child
-						parentInd.clearChangedFlags();
 					}
 				}
 			}else{ // on no replace
-				//if(gpConfig.isPickBestLocation() && gpConfig.isUpdateLocationBias()){
-					parentInd.updateProbabilitiesDecayLarge();
-					parentInd.clearChangedFlags();
-				//}
+				if(gpConfig.isPickBestLocation() && gpConfig.isUpdateLocationBias()){
+					parentInd.updateProbabilitiesDecaySmall();
+					
+				}
 			}
 			
 			/*if(gpConfig.isPickBestLocation() && gpConfig.isUpdateLocationBias()){
@@ -140,12 +149,71 @@ public class Mutator implements Callable<Mutator>{
 				returnInd.reduceBiasForInitialChangeAttempt();
 			}*/
 			
-			if(failCount > 100 || mutateFail > 500){
+			if(mutateCompileFailCount > 100 || mutateFailCount > 500){
 				success = true;
 				returnInd = parentInd.clone();
+				System.out.println(returnInd.getClassName() +" mutate limit reached: Mutation Count: "+mutateFailCount +" Compile count: "+mutateCompileFailCount);
 			}
+			parentInd.clearChangedFlags();
 		}
-		returnInd.addMutationAttempts(failCount); 
+		returnInd.addMutationAttempts(mutateCompileFailCount); 
 		return returnInd;
 	}
+	
+	private static int mutate(Individual newInd, int choice, int numChanges,
+			GPConfig gpConfig) {
+		ASTNode mutNode = newInd.gpMaterial.selectANodeForModification();// implement num changes as different mutator, implement bias/noBias as different gpMaterial objects
+				
+		NodeOperators.setChangedFlag(mutNode);
+		if (mutNode != null) {
+			// choice: 0 = delete, 1-9 = modify
+			if (choice ==0) {
+				/* TODO a hoist operator to remove a method invocation from around arguments
+				 */
+				NodeOperators.deleteNode(mutNode);
+				
+			}else if (choice > 5 && mutNode instanceof Block){ // this happens too rarely 
+				// 1/9 change of replacing a block with something else
+				/* insert:
+				 *   statement in block
+				 *   TODO allow method call around expression **
+				 *   expression around expression
+				 */
+				// System.out.println("Inserting statmement clone in block (mut)");
+				NodeOperators.insertRandomStmtInBlock((Block) mutNode, newInd);
+			} else{
+				modifyNode(mutNode,newInd);
+			}
+		} else {
+			Logger.logTrash("Nothing to mutate (empty program?");
+		}
+		return numChanges;
+	}
+	
+	private static void modifyNode(ASTNode node, Individual ind){ //GPMaterialVisitor gpMaterial) {
+		/*	depending on the node type, we should go in and mess with it?
+		 *  or should we replace the node with some other type?
+		 *  the node can be a primitive in an expression, or statement 
+		 *  (this is crossover with itself?)
+		 *  and operator messing
+		 */
+		
+		/* change operators in assignment, postfix or infix expression
+		 * otherwise
+		 * replace primitives with any other primitive 
+		 * replace statements with statements
+		 * 
+		 */
+
+		if (node instanceof InfixExpression) {
+			NodeOperators.modifyInfixExpressionOperator((InfixExpression) node, ind.gpMaterial);
+		} else if (node instanceof Assignment) {
+			NodeOperators.modifyAssignmentOperator((Assignment) node, ind.gpMaterial);
+		} else if (node instanceof PostfixExpression) {
+			NodeOperators.modifypostFixOperator((PostfixExpression) node, ind.gpMaterial);
+		}else {
+			NodeOperators.replaceStatementOrExpression(node, ind, false);
+		}
+	}
+	
 }

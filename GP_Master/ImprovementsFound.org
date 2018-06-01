@@ -1,0 +1,1111 @@
+#+TITLE:     Example Improvements Found 
+
+
+
+* iaik.ascon128v11.Ascon128v11
+** iaik.ascon128v11.Ascon128v11_52876
+Improvement Details:
+
+7% Improvement!
+
+#+begin_src
+/home/bck/source/locoGP/GP_Master/20180114-221323-GenerationInfo.log:iaik.ascon128v11.Ascon128v11_52876 100 mult 0.0 + 0.9224588 = 0.9224588 ASTNodes: 936 GPNodes: 816 xoverApplied: false xovers: 0 mutationApplied: true mutations: 1 testResults: i0:0Rfalsei1:0Rfalsei2:0Rfalsei3:0Rfalsei4:0Rfalsei5:0Rfalsei6:0Rfalsei7:0Rfalsei8:0Rfalsei9:0Rfalsei10:0Rfalsei11:0Rfalsei12:0Rfalsei13:0Rfalsei14:0Rfalsei15:0Rfalsei16:0Rfalse
+#+end_src
+
+
+Diff
+
+
+#+begin_src diff
+9,10c9,10
+<   public static int CRYPTO_NSECBYTES = 0;
+<   public static int CRYPTO_NPUBBYTES = 16;
+---
+>   public static int load64 = 0;
+>   public static int clen = 16;
+14c14
+<   public static boolean PRINTSTATE = false;
+---
+>   public static boolean size = false;
+44c44
+<     x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));
+---
+>     x2 = x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));
+46c46
+<     x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));
+---
+>     x4 = load64(java.util.Arrays.copyOfRange(S, 0, 40));
+50c50
+<       x2 ^= (((long) (0xf) - i) << 4) | i;
+---
+>       x3 ^= (((long) (0xf) - i) << 6) | i;
+52c52
+<       x0 ^= x4;    x4 ^= x3;    x2 ^= x1;
+---
+>       x0 ^= x4;    x4 ^= x3;    x2 ^= ROTR(x2, 1);
+55,57c55,57
+<       t0 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;
+<       x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;
+<       x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;
+---
+>       load64 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;
+>       x0 ^= t1;    t3 = x0;    x2 ^= t3;    x3 ^= t4;    x4 ^= -0;
+>       x1 ^= x0;    x0 ^= x4;    i ^= x2;    x2 =~ x2;
+59c59
+<       x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);
+---
+>       x0 ^= 1 ^ ROTR(x0, 28);
+61c61
+<       x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);
+---
+>       x2 ^= ROTR(x2, 1) ^ 0;
+63c63
+<       x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);
+---
+>       x4 ^= (((long) (0xf) - i) << 6) ^ ROTR(x4, 41);
+77c77
+<       return -1;
+---
+>       return -0;
+97c97
+<     A[adlen] = (byte) 0x80;
+---
+>     A[adlen] = 1;
+109,111c109,111
+<       S[rate + i] = k[i];
+<     for (i = 0; i < klen; ++i)
+<       S[rate + klen + i] = npub[i];
+---
+> 		S[1] = (byte) a;
+>     for (j = 2; j < rate; ++j)
+> 		S[j] ^= 8;
+113,114c113,114
+<     for (i = 0; i < klen; ++i)
+<       S[rate + klen + i] ^= k[i];
+---
+>     for (i = i = 0; i < klen; ++i)
+>       i ^= k[i];
+118,120c118,120
+<       for (i = 0; i < s; ++i) {
+<         for (j = 0; j < rate; ++j)
+<           S[j] ^= A[i * rate + j];
+---
+>       for (i = S[size - 1] ^= 1; i < s; ++i) {
+>         for (j = 2; j < rate; ++j)
+>           S[j] ^= 8;
+127,131c127,128
+<     for (i = 0; i < t - 1; ++i) {
+<       for (j = 0; j < rate; ++j) {
+<         M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);
+<         S[j] = c[i * rate + j];
+<       }
+---
+>     for (i = 0; i < t - size - capacity; ++i) {
+>       S[3] = (byte) b;
+135c132
+<       M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);
+---
+>       M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[i]);
+138c135
+<     S[l] ^= 0x80;
+---
+>     t ^= 0x80;
+148c145
+<     for (i = 0; i < klen; ++i)
+---
+>     for (i = 0; i < S[l]; ++i)
+154,155c151
+<     for (i = 0; i < mlen; ++i)
+<       m[i] = M[i];
+---
+>     permutation(S, b);
+#+end_src
+
+
+Diff side-by-side
+
+
+#+begin_src diff
+package iaik.ascon128v11;											package iaik.ascon128v11;											
+																						
+																						
+																						
+public class Ascon128v11 {											public class Ascon128v11 {											
+																						
+  // Defines											  // Defines											
+  public static int CRYPTO_KEYBYTES = 16;											  public static int CRYPTO_KEYBYTES = 16;											
+  public static int CRYPTO_NSECBYTES = 0;										      |	  public static int load64 = 0;											
+  public static int CRYPTO_NPUBBYTES = 16;										      |	  public static int clen = 16;											
+  public static int CRYPTO_ABYTES = 16;											  public static int CRYPTO_ABYTES = 16;											
+  public static int CRYPTO_NOOVERLAP = 1;											  public static int CRYPTO_NOOVERLAP = 1;											
+																						
+  public static boolean PRINTSTATE = false;										      |	  public static boolean size = false;											
+																						
+  public static long ROTR(long x, int n) {											  public static long ROTR(long x, int n) {											
+    return Long.rotateRight(x, n);											    return Long.rotateRight(x, n);											
+  }											  }											
+																						
+																						
+  public static long load64(byte S[]) {											  public static long load64(byte S[]) {											
+    long x = 0;											    long x = 0;											
+    x = java.nio.ByteBuffer.wrap(S).getLong();											    x = java.nio.ByteBuffer.wrap(S).getLong();											
+																						
+    return x;											    return x;											
+  }											  }											
+																						
+  public static void store64(byte S[], int offset, long x) {											  public static void store64(byte S[], int offset, long x) {											
+    int i;											    int i;											
+																						
+    for (i = 0; i < 8; ++i) {											    for (i = 0; i < 8; ++i) {											
+      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();											      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();											
+      S[i + offset] = (byte) byteacter[i];											      S[i + offset] = (byte) byteacter[i];											
+    }											    }											
+  }											  }											
+																						
+  public static void permutation(byte S[], int rounds) {											  public static void permutation(byte S[], int rounds) {											
+    long i;											    long i;											
+    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;											    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;											
+    long t0, t1, t2, t3, t4;											    long t0, t1, t2, t3, t4;											
+																						
+    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));											    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));											
+    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));											    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));											
+    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));										      |	    x2 = x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));											
+    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));											    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));											
+    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));										      |	    x4 = load64(java.util.Arrays.copyOfRange(S, 0, 40));											
+																						
+    for (i = 0; i < rounds; ++i) {											    for (i = 0; i < rounds; ++i) {											
+      // addition of round constant											      // addition of round constant											
+      x2 ^= (((long) (0xf) - i) << 4) | i;										      |	      x3 ^= (((long) (0xf) - i) << 6) | i;											
+      // substitution layer											      // substitution layer											
+      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;										      |	      x0 ^= x4;    x4 ^= x3;    x2 ^= ROTR(x2, 1);											
+      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;											      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;											
+      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;											      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;											
+      t0 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;										      |	      load64 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;											
+      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;										      |	      x0 ^= t1;    t3 = x0;    x2 ^= t3;    x3 ^= t4;    x4 ^= -0;											
+      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;										      |	      x1 ^= x0;    x0 ^= x4;    i ^= x2;    x2 =~ x2;											
+      // linear diffusion layer											      // linear diffusion layer											
+      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);										      |	      x0 ^= 1 ^ ROTR(x0, 28);											
+      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);											      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);											
+      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);										      |	      x2 ^= ROTR(x2, 1) ^ 0;											
+      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);											      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);											
+      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);										      |	      x4 ^= (((long) (0xf) - i) << 6) ^ ROTR(x4, 41);											
+    }											    }											
+    store64(S, 0, x0);											    store64(S, 0, x0);											
+    store64(S, 8, x1);											    store64(S, 8, x1);											
+    store64(S, 16, x2);											    store64(S, 16, x2);											
+    store64(S, 24, x3);											    store64(S, 24, x3);											
+    store64(S, 32, x4);											    store64(S, 32, x4);											
+  }											  }											
+																						
+  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in											  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in											
+      int adlen, byte npub[], byte k[]) {											      int adlen, byte npub[], byte k[]) {											
+																						
+    mlen = 0;											    mlen = 0;											
+    if (clen < CRYPTO_KEYBYTES)											    if (clen < CRYPTO_KEYBYTES)											
+      return -1;										      |	      return -0;											
+																						
+    int klen = CRYPTO_KEYBYTES;											    int klen = CRYPTO_KEYBYTES;											
+    int size = 320 / 8;											    int size = 320 / 8;											
+    int capacity = 2 * klen;											    int capacity = 2 * klen;											
+    int rate = size - capacity;											    int rate = size - capacity;											
+    int a = 12;											    int a = 12;											
+    int b = (klen == 16) ? 6 : 8;											    int b = (klen == 16) ? 6 : 8;											
+    int s = adlen / rate + 1;											    int s = adlen / rate + 1;											
+    int t = (clen - klen) / rate + 1;											    int t = (clen - klen) / rate + 1;											
+    int l = (clen - klen) % rate;											    int l = (clen - klen) % rate;											
+																						
+    byte S[] = new byte[size];											    byte S[] = new byte[size];											
+    byte A[] = new byte[(int) (s * rate)];											    byte A[] = new byte[(int) (s * rate)];											
+    byte M[] = new byte[(int) (t * rate)];											    byte M[] = new byte[(int) (t * rate)];											
+    int i, j;											    int i, j;											
+																						
+    // pad associated data											    // pad associated data											
+    for (i = 0; i < adlen; ++i)											    for (i = 0; i < adlen; ++i)											
+      A[i] = ad[i];											      A[i] = ad[i];											
+    A[adlen] = (byte) 0x80;										      |	    A[adlen] = 1;											
+    for (i = adlen + 1; i < s * rate; ++i)											    for (i = adlen + 1; i < s * rate; ++i)											
+      A[i] = 0;											      A[i] = 0;											
+																						
+    // initialization											    // initialization											
+    S[0] = (byte) (klen * 8);											    S[0] = (byte) (klen * 8);											
+    S[1] = (byte) (rate * 8);											    S[1] = (byte) (rate * 8);											
+    S[2] = (byte) a;											    S[2] = (byte) a;											
+    S[3] = (byte) b;											    S[3] = (byte) b;											
+    for (i = 4; i < rate; ++i)											    for (i = 4; i < rate; ++i)											
+      S[i] = 0;											      S[i] = 0;											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + i] = k[i];										      |			S[1] = (byte) a;											
+    for (i = 0; i < klen; ++i)										      |	    for (j = 2; j < rate; ++j)											
+      S[rate + klen + i] = npub[i];										      |			S[j] ^= 8;											
+    permutation(S, a);											    permutation(S, a);											
+    for (i = 0; i < klen; ++i)										      |	    for (i = i = 0; i < klen; ++i)											
+      S[rate + klen + i] ^= k[i];										      |	      i ^= k[i];											
+																						
+    // process associated data											    // process associated data											
+    if (adlen != 0) {											    if (adlen != 0) {											
+      for (i = 0; i < s; ++i) {										      |	      for (i = S[size - 1] ^= 1; i < s; ++i) {											
+        for (j = 0; j < rate; ++j)										      |	        for (j = 2; j < rate; ++j)											
+          S[j] ^= A[i * rate + j];										      |	          S[j] ^= 8;											
+        permutation(S, b);											        permutation(S, b);											
+      }											      }											
+    }											    }											
+    S[size - 1] ^= 1;											    S[size - 1] ^= 1;											
+																						
+    // process plaintext											    // process plaintext											
+    for (i = 0; i < t - 1; ++i) {										      |	    for (i = 0; i < t - size - capacity; ++i) {											
+      for (j = 0; j < rate; ++j) {										      |	      S[3] = (byte) b;											
+        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);										      <
+        S[j] = c[i * rate + j];										      <
+      }										      <
+      permutation(S, b);											      permutation(S, b);											
+    }											    }											
+    for (j = 0; j < l; ++j)											    for (j = 0; j < l; ++j)											
+      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);										      |	      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[i]);											
+    for (j = 0; j < l; ++j)											    for (j = 0; j < l; ++j)											
+      S[j] = c[(int) ((t - 1) * rate + j)];											      S[j] = c[(int) ((t - 1) * rate + j)];											
+    S[l] ^= 0x80;										      |	    t ^= 0x80;											
+																						
+    // finalization											    // finalization											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + i] ^= k[i];											      S[rate + i] ^= k[i];											
+    permutation(S, a);											    permutation(S, a);											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + klen + i] ^= k[i];											      S[rate + klen + i] ^= k[i];											
+																						
+    // return -1 if verification fails											    // return -1 if verification fails											
+    for (i = 0; i < klen; ++i)										      |	    for (i = 0; i < S[l]; ++i)											
+      if (c[clen - klen + i] != S[rate + klen + i])											      if (c[clen - klen + i] != S[rate + klen + i])											
+        return -1;											        return -1;											
+																						
+    // return plaintext											    // return plaintext											
+    mlen = clen - klen;											    mlen = clen - klen;											
+    for (i = 0; i < mlen; ++i)										      |	    permutation(S, b);											
+      m[i] = M[i];										      <
+																						
+    return mlen;											    return mlen;											
+  }											  }											
+}											}											
+
+#+end_src
+** iaik.ascon128v11.Ascon128v11_2833
+Improvement Details:
+
+7% improvement!
+
+#+begin_src
+/home/bck/source/locoGP/GP_Master/20180114-212555-GenerationInfo.log:iaik.ascon128v11.Ascon128v11_2833 100 mult 0.0 + 0.9306863 = 0.9306863 ASTNodes: 924 GPNodes: 804 xoverApplied: true xovers: 1 mutationApplied: true mutations: 7 testResults: i0:0Rfalsei1:0Rfalsei2:0Rfalsei3:0Rfalsei4:0Rfalsei5:0Rfalsei6:0Rfalsei7:0Rfalsei8:0Rfalsei9:0Rfalsei10:0Rfalsei11:0Rfalsei12:0Rfalsei13:0Rfalsei14:0Rfalsei15:0Rfalsei16:0Rfalse
+#+end_src
+
+
+Diff
+
+
+#+begin_src diff
+145c145
+<       S[rate + klen + i] ^= k[i];
+---
+>       i ^= k[i];
+147,150c147
+<     // return -1 if verification fails
+<     for (i = 0; i < klen; ++i)
+<       if (c[clen - klen + i] != S[rate + klen + i])
+<         return -1;
+---
+>     permutation(S, b);
+#+end_src
+
+
+Diff side-by-side
+
+
+#+begin_src diff
+package iaik.ascon128v11;											package iaik.ascon128v11;											
+																						
+																						
+																						
+public class Ascon128v11 {											public class Ascon128v11 {											
+																						
+  // Defines											  // Defines											
+  public static int CRYPTO_KEYBYTES = 16;											  public static int CRYPTO_KEYBYTES = 16;											
+  public static int CRYPTO_NSECBYTES = 0;											  public static int CRYPTO_NSECBYTES = 0;											
+  public static int CRYPTO_NPUBBYTES = 16;											  public static int CRYPTO_NPUBBYTES = 16;											
+  public static int CRYPTO_ABYTES = 16;											  public static int CRYPTO_ABYTES = 16;											
+  public static int CRYPTO_NOOVERLAP = 1;											  public static int CRYPTO_NOOVERLAP = 1;											
+																						
+  public static boolean PRINTSTATE = false;											  public static boolean PRINTSTATE = false;											
+																						
+  public static long ROTR(long x, int n) {											  public static long ROTR(long x, int n) {											
+    return Long.rotateRight(x, n);											    return Long.rotateRight(x, n);											
+  }											  }											
+																						
+																						
+  public static long load64(byte S[]) {											  public static long load64(byte S[]) {											
+    long x = 0;											    long x = 0;											
+    x = java.nio.ByteBuffer.wrap(S).getLong();											    x = java.nio.ByteBuffer.wrap(S).getLong();											
+																						
+    return x;											    return x;											
+  }											  }											
+																						
+  public static void store64(byte S[], int offset, long x) {											  public static void store64(byte S[], int offset, long x) {											
+    int i;											    int i;											
+																						
+    for (i = 0; i < 8; ++i) {											    for (i = 0; i < 8; ++i) {											
+      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();											      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();											
+      S[i + offset] = (byte) byteacter[i];											      S[i + offset] = (byte) byteacter[i];											
+    }											    }											
+  }											  }											
+																						
+  public static void permutation(byte S[], int rounds) {											  public static void permutation(byte S[], int rounds) {											
+    long i;											    long i;											
+    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;											    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;											
+    long t0, t1, t2, t3, t4;											    long t0, t1, t2, t3, t4;											
+																						
+    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));											    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));											
+    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));											    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));											
+    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));											    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));											
+    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));											    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));											
+    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));											    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));											
+																						
+    for (i = 0; i < rounds; ++i) {											    for (i = 0; i < rounds; ++i) {											
+      // addition of round constant											      // addition of round constant											
+      x2 ^= (((long) (0xf) - i) << 4) | i;											      x2 ^= (((long) (0xf) - i) << 4) | i;											
+      // substitution layer											      // substitution layer											
+      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;											      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;											
+      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;											      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;											
+      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;											      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;											
+      t0 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;											      t0 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;											
+      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;											      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;											
+      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;											      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;											
+      // linear diffusion layer											      // linear diffusion layer											
+      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);											      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);											
+      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);											      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);											
+      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);											      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);											
+      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);											      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);											
+      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);											      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);											
+    }											    }											
+    store64(S, 0, x0);											    store64(S, 0, x0);											
+    store64(S, 8, x1);											    store64(S, 8, x1);											
+    store64(S, 16, x2);											    store64(S, 16, x2);											
+    store64(S, 24, x3);											    store64(S, 24, x3);											
+    store64(S, 32, x4);											    store64(S, 32, x4);											
+  }											  }											
+																						
+  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in											  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in											
+      int adlen, byte npub[], byte k[]) {											      int adlen, byte npub[], byte k[]) {											
+																						
+    mlen = 0;											    mlen = 0;											
+    if (clen < CRYPTO_KEYBYTES)											    if (clen < CRYPTO_KEYBYTES)											
+      return -1;											      return -1;											
+																						
+    int klen = CRYPTO_KEYBYTES;											    int klen = CRYPTO_KEYBYTES;											
+    int size = 320 / 8;											    int size = 320 / 8;											
+    int capacity = 2 * klen;											    int capacity = 2 * klen;											
+    int rate = size - capacity;											    int rate = size - capacity;											
+    int a = 12;											    int a = 12;											
+    int b = (klen == 16) ? 6 : 8;											    int b = (klen == 16) ? 6 : 8;											
+    int s = adlen / rate + 1;											    int s = adlen / rate + 1;											
+    int t = (clen - klen) / rate + 1;											    int t = (clen - klen) / rate + 1;											
+    int l = (clen - klen) % rate;											    int l = (clen - klen) % rate;											
+																						
+    byte S[] = new byte[size];											    byte S[] = new byte[size];											
+    byte A[] = new byte[(int) (s * rate)];											    byte A[] = new byte[(int) (s * rate)];											
+    byte M[] = new byte[(int) (t * rate)];											    byte M[] = new byte[(int) (t * rate)];											
+    int i, j;											    int i, j;											
+																						
+    // pad associated data											    // pad associated data											
+    for (i = 0; i < adlen; ++i)											    for (i = 0; i < adlen; ++i)											
+      A[i] = ad[i];											      A[i] = ad[i];											
+    A[adlen] = (byte) 0x80;											    A[adlen] = (byte) 0x80;											
+    for (i = adlen + 1; i < s * rate; ++i)											    for (i = adlen + 1; i < s * rate; ++i)											
+      A[i] = 0;											      A[i] = 0;											
+																						
+    // initialization											    // initialization											
+    S[0] = (byte) (klen * 8);											    S[0] = (byte) (klen * 8);											
+    S[1] = (byte) (rate * 8);											    S[1] = (byte) (rate * 8);											
+    S[2] = (byte) a;											    S[2] = (byte) a;											
+    S[3] = (byte) b;											    S[3] = (byte) b;											
+    for (i = 4; i < rate; ++i)											    for (i = 4; i < rate; ++i)											
+      S[i] = 0;											      S[i] = 0;											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + i] = k[i];											      S[rate + i] = k[i];											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + klen + i] = npub[i];											      S[rate + klen + i] = npub[i];											
+    permutation(S, a);											    permutation(S, a);											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + klen + i] ^= k[i];											      S[rate + klen + i] ^= k[i];											
+																						
+    // process associated data											    // process associated data											
+    if (adlen != 0) {											    if (adlen != 0) {											
+      for (i = 0; i < s; ++i) {											      for (i = 0; i < s; ++i) {											
+        for (j = 0; j < rate; ++j)											        for (j = 0; j < rate; ++j)											
+          S[j] ^= A[i * rate + j];											          S[j] ^= A[i * rate + j];											
+        permutation(S, b);											        permutation(S, b);											
+      }											      }											
+    }											    }											
+    S[size - 1] ^= 1;											    S[size - 1] ^= 1;											
+																						
+    // process plaintext											    // process plaintext											
+    for (i = 0; i < t - 1; ++i) {											    for (i = 0; i < t - 1; ++i) {											
+      for (j = 0; j < rate; ++j) {											      for (j = 0; j < rate; ++j) {											
+        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);											        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);											
+        S[j] = c[i * rate + j];											        S[j] = c[i * rate + j];											
+      }											      }											
+      permutation(S, b);											      permutation(S, b);											
+    }											    }											
+    for (j = 0; j < l; ++j)											    for (j = 0; j < l; ++j)											
+      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);											      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);											
+    for (j = 0; j < l; ++j)											    for (j = 0; j < l; ++j)											
+      S[j] = c[(int) ((t - 1) * rate + j)];											      S[j] = c[(int) ((t - 1) * rate + j)];											
+    S[l] ^= 0x80;											    S[l] ^= 0x80;											
+																						
+    // finalization											    // finalization											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + i] ^= k[i];											      S[rate + i] ^= k[i];											
+    permutation(S, a);											    permutation(S, a);											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + klen + i] ^= k[i];										      |	      i ^= k[i];											
+																						
+    // return -1 if verification fails										      |	    permutation(S, b);											
+    for (i = 0; i < klen; ++i)										      <
+      if (c[clen - klen + i] != S[rate + klen + i])										      <
+        return -1;										      <
+																						
+    // return plaintext											    // return plaintext											
+    mlen = clen - klen;											    mlen = clen - klen;											
+    for (i = 0; i < mlen; ++i)											    for (i = 0; i < mlen; ++i)											
+      m[i] = M[i];											      m[i] = M[i];											
+																						
+    return mlen;											    return mlen;											
+  }											  }											
+}											}											
+
+#+end_src
+
+** iaik.ascon128v11.Ascon128v11_340
+Improvement Details:
+
+3% Improvement! 
+
+#+begin_src
+/home/bck/source/locoGP/GP_Master/20180114-212555-GenerationInfo.log:iaik.ascon128v11.Ascon128v11_340 100 mult 0.0 + 0.96370894 = 0.96370894 ASTNodes: 929 GPNodes: 809 xoverApplied: false xovers: 0 mutationApplied: true mutations: 1 testResults: i0:0Rfalsei1:0Rfalsei2:0Rfalsei3:0Rfalsei4:0Rfalsei5:0Rfalsei6:0Rfalsei7:0Rfalsei8:0Rfalsei9:0Rfalsei10:0Rfalsei11:0Rfalsei12:0Rfalsei13:0Rfalsei14:0Rfalsei15:0Rfalsei16:0Rfalse
+#+end_src
+
+
+Diff
+
+
+#+begin_src diff
+147,150c147
+<     // return -1 if verification fails
+<     for (i = 0; i < klen; ++i)
+<       if (c[clen - klen + i] != S[rate + klen + i])
+<         return -1;
+---
+>     permutation(S, b);
+#+end_src
+
+
+Diff side-by-side
+
+
+#+begin_src diff
+package iaik.ascon128v11;											package iaik.ascon128v11;											
+																						
+																						
+																						
+public class Ascon128v11 {											public class Ascon128v11 {											
+																						
+  // Defines											  // Defines											
+  public static int CRYPTO_KEYBYTES = 16;											  public static int CRYPTO_KEYBYTES = 16;											
+  public static int CRYPTO_NSECBYTES = 0;											  public static int CRYPTO_NSECBYTES = 0;											
+  public static int CRYPTO_NPUBBYTES = 16;											  public static int CRYPTO_NPUBBYTES = 16;											
+  public static int CRYPTO_ABYTES = 16;											  public static int CRYPTO_ABYTES = 16;											
+  public static int CRYPTO_NOOVERLAP = 1;											  public static int CRYPTO_NOOVERLAP = 1;											
+																						
+  public static boolean PRINTSTATE = false;											  public static boolean PRINTSTATE = false;											
+																						
+  public static long ROTR(long x, int n) {											  public static long ROTR(long x, int n) {											
+    return Long.rotateRight(x, n);											    return Long.rotateRight(x, n);											
+  }											  }											
+																						
+																						
+  public static long load64(byte S[]) {											  public static long load64(byte S[]) {											
+    long x = 0;											    long x = 0;											
+    x = java.nio.ByteBuffer.wrap(S).getLong();											    x = java.nio.ByteBuffer.wrap(S).getLong();											
+																						
+    return x;											    return x;											
+  }											  }											
+																						
+  public static void store64(byte S[], int offset, long x) {											  public static void store64(byte S[], int offset, long x) {											
+    int i;											    int i;											
+																						
+    for (i = 0; i < 8; ++i) {											    for (i = 0; i < 8; ++i) {											
+      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();											      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();											
+      S[i + offset] = (byte) byteacter[i];											      S[i + offset] = (byte) byteacter[i];											
+    }											    }											
+  }											  }											
+																						
+  public static void permutation(byte S[], int rounds) {											  public static void permutation(byte S[], int rounds) {											
+    long i;											    long i;											
+    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;											    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;											
+    long t0, t1, t2, t3, t4;											    long t0, t1, t2, t3, t4;											
+																						
+    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));											    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));											
+    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));											    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));											
+    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));											    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));											
+    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));											    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));											
+    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));											    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));											
+																						
+    for (i = 0; i < rounds; ++i) {											    for (i = 0; i < rounds; ++i) {											
+      // addition of round constant											      // addition of round constant											
+      x2 ^= (((long) (0xf) - i) << 4) | i;											      x2 ^= (((long) (0xf) - i) << 4) | i;											
+      // substitution layer											      // substitution layer											
+      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;											      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;											
+      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;											      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;											
+      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;											      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;											
+      t0 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;											      t0 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;											
+      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;											      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;											
+      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;											      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;											
+      // linear diffusion layer											      // linear diffusion layer											
+      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);											      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);											
+      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);											      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);											
+      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);											      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);											
+      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);											      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);											
+      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);											      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);											
+    }											    }											
+    store64(S, 0, x0);											    store64(S, 0, x0);											
+    store64(S, 8, x1);											    store64(S, 8, x1);											
+    store64(S, 16, x2);											    store64(S, 16, x2);											
+    store64(S, 24, x3);											    store64(S, 24, x3);											
+    store64(S, 32, x4);											    store64(S, 32, x4);											
+  }											  }											
+																						
+  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in											  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in											
+      int adlen, byte npub[], byte k[]) {											      int adlen, byte npub[], byte k[]) {											
+																						
+    mlen = 0;											    mlen = 0;											
+    if (clen < CRYPTO_KEYBYTES)											    if (clen < CRYPTO_KEYBYTES)											
+      return -1;											      return -1;											
+																						
+    int klen = CRYPTO_KEYBYTES;											    int klen = CRYPTO_KEYBYTES;											
+    int size = 320 / 8;											    int size = 320 / 8;											
+    int capacity = 2 * klen;											    int capacity = 2 * klen;											
+    int rate = size - capacity;											    int rate = size - capacity;											
+    int a = 12;											    int a = 12;											
+    int b = (klen == 16) ? 6 : 8;											    int b = (klen == 16) ? 6 : 8;											
+    int s = adlen / rate + 1;											    int s = adlen / rate + 1;											
+    int t = (clen - klen) / rate + 1;											    int t = (clen - klen) / rate + 1;											
+    int l = (clen - klen) % rate;											    int l = (clen - klen) % rate;											
+																						
+    byte S[] = new byte[size];											    byte S[] = new byte[size];											
+    byte A[] = new byte[(int) (s * rate)];											    byte A[] = new byte[(int) (s * rate)];											
+    byte M[] = new byte[(int) (t * rate)];											    byte M[] = new byte[(int) (t * rate)];											
+    int i, j;											    int i, j;											
+																						
+    // pad associated data											    // pad associated data											
+    for (i = 0; i < adlen; ++i)											    for (i = 0; i < adlen; ++i)											
+      A[i] = ad[i];											      A[i] = ad[i];											
+    A[adlen] = (byte) 0x80;											    A[adlen] = (byte) 0x80;											
+    for (i = adlen + 1; i < s * rate; ++i)											    for (i = adlen + 1; i < s * rate; ++i)											
+      A[i] = 0;											      A[i] = 0;											
+																						
+    // initialization											    // initialization											
+    S[0] = (byte) (klen * 8);											    S[0] = (byte) (klen * 8);											
+    S[1] = (byte) (rate * 8);											    S[1] = (byte) (rate * 8);											
+    S[2] = (byte) a;											    S[2] = (byte) a;											
+    S[3] = (byte) b;											    S[3] = (byte) b;											
+    for (i = 4; i < rate; ++i)											    for (i = 4; i < rate; ++i)											
+      S[i] = 0;											      S[i] = 0;											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + i] = k[i];											      S[rate + i] = k[i];											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + klen + i] = npub[i];											      S[rate + klen + i] = npub[i];											
+    permutation(S, a);											    permutation(S, a);											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + klen + i] ^= k[i];											      S[rate + klen + i] ^= k[i];											
+																						
+    // process associated data											    // process associated data											
+    if (adlen != 0) {											    if (adlen != 0) {											
+      for (i = 0; i < s; ++i) {											      for (i = 0; i < s; ++i) {											
+        for (j = 0; j < rate; ++j)											        for (j = 0; j < rate; ++j)											
+          S[j] ^= A[i * rate + j];											          S[j] ^= A[i * rate + j];											
+        permutation(S, b);											        permutation(S, b);											
+      }											      }											
+    }											    }											
+    S[size - 1] ^= 1;											    S[size - 1] ^= 1;											
+																						
+    // process plaintext											    // process plaintext											
+    for (i = 0; i < t - 1; ++i) {											    for (i = 0; i < t - 1; ++i) {											
+      for (j = 0; j < rate; ++j) {											      for (j = 0; j < rate; ++j) {											
+        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);											        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);											
+        S[j] = c[i * rate + j];											        S[j] = c[i * rate + j];											
+      }											      }											
+      permutation(S, b);											      permutation(S, b);											
+    }											    }											
+    for (j = 0; j < l; ++j)											    for (j = 0; j < l; ++j)											
+      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);											      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);											
+    for (j = 0; j < l; ++j)											    for (j = 0; j < l; ++j)											
+      S[j] = c[(int) ((t - 1) * rate + j)];											      S[j] = c[(int) ((t - 1) * rate + j)];											
+    S[l] ^= 0x80;											    S[l] ^= 0x80;											
+																						
+    // finalization											    // finalization											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + i] ^= k[i];											      S[rate + i] ^= k[i];											
+    permutation(S, a);											    permutation(S, a);											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + klen + i] ^= k[i];											      S[rate + klen + i] ^= k[i];											
+																						
+    // return -1 if verification fails										      |	    permutation(S, b);											
+    for (i = 0; i < klen; ++i)										      <
+      if (c[clen - klen + i] != S[rate + klen + i])										      <
+        return -1;										      <
+																						
+    // return plaintext											    // return plaintext											
+    mlen = clen - klen;											    mlen = clen - klen;											
+    for (i = 0; i < mlen; ++i)											    for (i = 0; i < mlen; ++i)											
+      m[i] = M[i];											      m[i] = M[i];											
+																						
+    return mlen;											    return mlen;											
+  }											  }											
+}											}											
+
+#+end_src
+
+
+
+
+** iaik.ascon128v11.Ascon128v11_21587
+Improvement Details:
+
+
+0.87% improvement in bytecodes executed found.
+
+#+begin_src
+iaik.ascon128v11.Ascon128v11_21587 100 mult 0.0 + 0.99128187 = 0.99128187 ASTNodes: 939 GPNodes: 895 xoverApplied: false xovers: 0 mutationApplied: true mutations: 1 testResults: i0:0Rfalsei1:0Rfalsei2:0Rfalsei3:0Rfalsei4:0Rfalsei5:0Rfalsei6:0Rfalsei7:0Rfalsei8:0Rfalsei9:0Rfalsei10:0Rfalsei11:0Rfalsei12:0Rfalsei13:0Rfalsei14:0Rfalsei15:0Rfalsei16:0Rfalse
+#+end_src
+
+
+Diff
+
+
+#+begin_src diff
+98,99c98
+<     for (i = adlen + 1; i < s * rate; ++i)
+<       A[i] = 0;
+---
+>     i = (byte) 0x80;
+107c106
+<       S[i] = 0;
+---
+>       S[++i] = 0;
+#+end_src
+
+
+Diff side-by-side
+
+
+#+begin_src diff
+package iaik.ascon128v11;											package iaik.ascon128v11;											
+																						
+																						
+																						
+public class Ascon128v11 {											public class Ascon128v11 {											
+																						
+  // Defines											  // Defines											
+  public static int CRYPTO_KEYBYTES = 16;											  public static int CRYPTO_KEYBYTES = 16;											
+  public static int CRYPTO_NSECBYTES = 0;											  public static int CRYPTO_NSECBYTES = 0;											
+  public static int CRYPTO_NPUBBYTES = 16;											  public static int CRYPTO_NPUBBYTES = 16;											
+  public static int CRYPTO_ABYTES = 16;											  public static int CRYPTO_ABYTES = 16;											
+  public static int CRYPTO_NOOVERLAP = 1;											  public static int CRYPTO_NOOVERLAP = 1;											
+																						
+  public static boolean PRINTSTATE = false;											  public static boolean PRINTSTATE = false;											
+																						
+  public static long ROTR(long x, int n) {											  public static long ROTR(long x, int n) {											
+    return Long.rotateRight(x, n);											    return Long.rotateRight(x, n);											
+  }											  }											
+																						
+																						
+  public static long load64(byte S[]) {											  public static long load64(byte S[]) {											
+    long x = 0;											    long x = 0;											
+    x = java.nio.ByteBuffer.wrap(S).getLong();											    x = java.nio.ByteBuffer.wrap(S).getLong();											
+																						
+    return x;											    return x;											
+  }											  }											
+																						
+  public static void store64(byte S[], int offset, long x) {											  public static void store64(byte S[], int offset, long x) {											
+    int i;											    int i;											
+																						
+    for (i = 0; i < 8; ++i) {											    for (i = 0; i < 8; ++i) {											
+      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();											      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();											
+      S[i + offset] = (byte) byteacter[i];											      S[i + offset] = (byte) byteacter[i];											
+    }											    }											
+  }											  }											
+																						
+  public static void permutation(byte S[], int rounds) {											  public static void permutation(byte S[], int rounds) {											
+    long i;											    long i;											
+    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;											    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;											
+    long t0, t1, t2, t3, t4;											    long t0, t1, t2, t3, t4;											
+																						
+    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));											    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));											
+    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));											    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));											
+    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));											    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));											
+    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));											    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));											
+    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));											    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));											
+																						
+    for (i = 0; i < rounds; ++i) {											    for (i = 0; i < rounds; ++i) {											
+      // addition of round constant											      // addition of round constant											
+      x2 ^= (((long) (0xf) - i) << 4) | i;											      x2 ^= (((long) (0xf) - i) << 4) | i;											
+      // substitution layer											      // substitution layer											
+      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;											      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;											
+      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;											      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;											
+      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;											      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;											
+      t0 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;											      t0 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;											
+      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;											      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;											
+      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;											      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;											
+      // linear diffusion layer											      // linear diffusion layer											
+      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);											      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);											
+      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);											      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);											
+      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);											      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);											
+      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);											      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);											
+      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);											      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);											
+    }											    }											
+    store64(S, 0, x0);											    store64(S, 0, x0);											
+    store64(S, 8, x1);											    store64(S, 8, x1);											
+    store64(S, 16, x2);											    store64(S, 16, x2);											
+    store64(S, 24, x3);											    store64(S, 24, x3);											
+    store64(S, 32, x4);											    store64(S, 32, x4);											
+  }											  }											
+																						
+  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in											  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], in											
+      int adlen, byte npub[], byte k[]) {											      int adlen, byte npub[], byte k[]) {											
+																						
+    mlen = 0;											    mlen = 0;											
+    if (clen < CRYPTO_KEYBYTES)											    if (clen < CRYPTO_KEYBYTES)											
+      return -1;											      return -1;											
+																						
+    int klen = CRYPTO_KEYBYTES;											    int klen = CRYPTO_KEYBYTES;											
+    int size = 320 / 8;											    int size = 320 / 8;											
+    int capacity = 2 * klen;											    int capacity = 2 * klen;											
+    int rate = size - capacity;											    int rate = size - capacity;											
+    int a = 12;											    int a = 12;											
+    int b = (klen == 16) ? 6 : 8;											    int b = (klen == 16) ? 6 : 8;											
+    int s = adlen / rate + 1;											    int s = adlen / rate + 1;											
+    int t = (clen - klen) / rate + 1;											    int t = (clen - klen) / rate + 1;											
+    int l = (clen - klen) % rate;											    int l = (clen - klen) % rate;											
+																						
+    byte S[] = new byte[size];											    byte S[] = new byte[size];											
+    byte A[] = new byte[(int) (s * rate)];											    byte A[] = new byte[(int) (s * rate)];											
+    byte M[] = new byte[(int) (t * rate)];											    byte M[] = new byte[(int) (t * rate)];											
+    int i, j;											    int i, j;											
+																						
+    // pad associated data											    // pad associated data											
+    for (i = 0; i < adlen; ++i)											    for (i = 0; i < adlen; ++i)											
+      A[i] = ad[i];											      A[i] = ad[i];											
+    A[adlen] = (byte) 0x80;											    A[adlen] = (byte) 0x80;											
+    for (i = adlen + 1; i < s * rate; ++i)										      |	    i = (byte) 0x80;											
+      A[i] = 0;										      <
+																						
+    // initialization											    // initialization											
+    S[0] = (byte) (klen * 8);											    S[0] = (byte) (klen * 8);											
+    S[1] = (byte) (rate * 8);											    S[1] = (byte) (rate * 8);											
+    S[2] = (byte) a;											    S[2] = (byte) a;											
+    S[3] = (byte) b;											    S[3] = (byte) b;											
+    for (i = 4; i < rate; ++i)											    for (i = 4; i < rate; ++i)											
+      S[i] = 0;										      |	      S[++i] = 0;											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + i] = k[i];											      S[rate + i] = k[i];											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + klen + i] = npub[i];											      S[rate + klen + i] = npub[i];											
+    permutation(S, a);											    permutation(S, a);											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + klen + i] ^= k[i];											      S[rate + klen + i] ^= k[i];											
+																						
+    // process associated data											    // process associated data											
+    if (adlen != 0) {											    if (adlen != 0) {											
+      for (i = 0; i < s; ++i) {											      for (i = 0; i < s; ++i) {											
+        for (j = 0; j < rate; ++j)											        for (j = 0; j < rate; ++j)											
+          S[j] ^= A[i * rate + j];											          S[j] ^= A[i * rate + j];											
+        permutation(S, b);											        permutation(S, b);											
+      }											      }											
+    }											    }											
+    S[size - 1] ^= 1;											    S[size - 1] ^= 1;											
+																						
+    // process plaintext											    // process plaintext											
+    for (i = 0; i < t - 1; ++i) {											    for (i = 0; i < t - 1; ++i) {											
+      for (j = 0; j < rate; ++j) {											      for (j = 0; j < rate; ++j) {											
+        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);											        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);											
+        S[j] = c[i * rate + j];											        S[j] = c[i * rate + j];											
+      }											      }											
+      permutation(S, b);											      permutation(S, b);											
+    }											    }											
+    for (j = 0; j < l; ++j)											    for (j = 0; j < l; ++j)											
+      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);											      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);											
+    for (j = 0; j < l; ++j)											    for (j = 0; j < l; ++j)											
+      S[j] = c[(int) ((t - 1) * rate + j)];											      S[j] = c[(int) ((t - 1) * rate + j)];											
+    S[l] ^= 0x80;											    S[l] ^= 0x80;											
+																						
+    // finalization											    // finalization											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + i] ^= k[i];											      S[rate + i] ^= k[i];											
+    permutation(S, a);											    permutation(S, a);											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      S[rate + klen + i] ^= k[i];											      S[rate + klen + i] ^= k[i];											
+																						
+    // return -1 if verification fails											    // return -1 if verification fails											
+    for (i = 0; i < klen; ++i)											    for (i = 0; i < klen; ++i)											
+      if (c[clen - klen + i] != S[rate + klen + i])											      if (c[clen - klen + i] != S[rate + klen + i])											
+        return -1;											        return -1;											
+																						
+    // return plaintext											    // return plaintext											
+    mlen = clen - klen;											    mlen = clen - klen;											
+    for (i = 0; i < mlen; ++i)											    for (i = 0; i < mlen; ++i)											
+      m[i] = M[i];											      m[i] = M[i];											
+																						
+    return mlen;											    return mlen;											
+  }											  }											
+}											}											
+
+#+end_src
+
+
+** Original 
+/home/bck/source/locoGP/GP_Master/Seed-iaik.ascon128v11.Ascon128v11.java
+#+begin_src java -n
+package iaik.ascon128v11;
+
+
+
+public class Ascon128v11 {
+
+  // Defines
+  public static int CRYPTO_KEYBYTES = 16;
+  public static int CRYPTO_NSECBYTES = 0;
+  public static int CRYPTO_NPUBBYTES = 16;
+  public static int CRYPTO_ABYTES = 16;
+  public static int CRYPTO_NOOVERLAP = 1;
+
+  public static boolean PRINTSTATE = false;
+
+  public static long ROTR(long x, int n) {
+    return Long.rotateRight(x, n);
+  }
+
+
+  public static long load64(byte S[]) {
+    long x = 0;
+    x = java.nio.ByteBuffer.wrap(S).getLong();
+
+    return x;
+  }
+
+  public static void store64(byte S[], int offset, long x) {
+    int i;
+
+    for (i = 0; i < 8; ++i) {
+      byte byteacter[] = java.nio.ByteBuffer.allocate(8).putLong(x).array();
+      S[i + offset] = (byte) byteacter[i];
+    }
+  }
+
+  public static void permutation(byte S[], int rounds) {
+    long i;
+    long x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;
+    long t0, t1, t2, t3, t4;
+
+    x0 = load64(java.util.Arrays.copyOfRange(S, 0, 8));
+    x1 = load64(java.util.Arrays.copyOfRange(S, 8, 16));
+    x2 = load64(java.util.Arrays.copyOfRange(S, 16, 24));
+    x3 = load64(java.util.Arrays.copyOfRange(S, 24, 32));
+    x4 = load64(java.util.Arrays.copyOfRange(S, 32, 40));
+
+    for (i = 0; i < rounds; ++i) {
+      // addition of round constant
+      x2 ^= (((long) (0xf) - i) << 4) | i;
+      // substitution layer
+      x0 ^= x4;    x4 ^= x3;    x2 ^= x1;
+      t0  = x0;    t1  = x1;    t2  = x2;    t3  = x3;    t4  = x4;
+      t0 =~ t0;    t1 =~ t1;    t2 =~ t2;    t3 =~ t3;    t4 =~ t4;
+      t0 &= x1;    t1 &= x2;    t2 &= x3;    t3 &= x4;    t4 &= x0;
+      x0 ^= t1;    x1 ^= t2;    x2 ^= t3;    x3 ^= t4;    x4 ^= t0;
+      x1 ^= x0;    x0 ^= x4;    x3 ^= x2;    x2 =~ x2;
+      // linear diffusion layer
+      x0 ^= ROTR(x0, 19) ^ ROTR(x0, 28);
+      x1 ^= ROTR(x1, 61) ^ ROTR(x1, 39);
+      x2 ^= ROTR(x2, 1) ^ ROTR(x2, 6);
+      x3 ^= ROTR(x3, 10) ^ ROTR(x3, 17);
+      x4 ^= ROTR(x4, 7) ^ ROTR(x4, 41);
+    }
+    store64(S, 0, x0);
+    store64(S, 8, x1);
+    store64(S, 16, x2);
+    store64(S, 24, x3);
+    store64(S, 32, x4);
+  }
+
+  public static int crypto_aead_decrypt(byte m[], int mlen, byte nsec[], byte c[], int clen, byte ad[],
+      int adlen, byte npub[], byte k[]) {
+
+    mlen = 0;
+    if (clen < CRYPTO_KEYBYTES)
+      return -1;
+
+    int klen = CRYPTO_KEYBYTES;
+    int size = 320 / 8;
+    int capacity = 2 * klen;
+    int rate = size - capacity;
+    int a = 12;
+    int b = (klen == 16) ? 6 : 8;
+    int s = adlen / rate + 1;
+    int t = (clen - klen) / rate + 1;
+    int l = (clen - klen) % rate;
+
+    byte S[] = new byte[size];
+    byte A[] = new byte[(int) (s * rate)];
+    byte M[] = new byte[(int) (t * rate)];
+    int i, j;
+
+    // pad associated data
+    for (i = 0; i < adlen; ++i)
+      A[i] = ad[i];
+    A[adlen] = (byte) 0x80;
+    for (i = adlen + 1; i < s * rate; ++i)
+      A[i] = 0;
+
+    // initialization
+    S[0] = (byte) (klen * 8);
+    S[1] = (byte) (rate * 8);
+    S[2] = (byte) a;
+    S[3] = (byte) b;
+    for (i = 4; i < rate; ++i)
+      S[i] = 0;
+    for (i = 0; i < klen; ++i)
+      S[rate + i] = k[i];
+    for (i = 0; i < klen; ++i)
+      S[rate + klen + i] = npub[i];
+    permutation(S, a);
+    for (i = 0; i < klen; ++i)
+      S[rate + klen + i] ^= k[i];
+
+    // process associated data
+    if (adlen != 0) {
+      for (i = 0; i < s; ++i) {
+        for (j = 0; j < rate; ++j)
+          S[j] ^= A[i * rate + j];
+        permutation(S, b);
+      }
+    }
+    S[size - 1] ^= 1;
+
+    // process plaintext
+    for (i = 0; i < t - 1; ++i) {
+      for (j = 0; j < rate; ++j) {
+        M[i * rate + j] = (byte) (S[j] ^ c[i * rate + j]);
+        S[j] = c[i * rate + j];
+      }
+      permutation(S, b);
+    }
+    for (j = 0; j < l; ++j)
+      M[(int) ((t - 1) * rate + j)] = (byte) (S[j] ^ c[(int) ((t - 1) * rate + j)]);
+    for (j = 0; j < l; ++j)
+      S[j] = c[(int) ((t - 1) * rate + j)];
+    S[l] ^= 0x80;
+
+    // finalization
+    for (i = 0; i < klen; ++i)
+      S[rate + i] ^= k[i];
+    permutation(S, a);
+    for (i = 0; i < klen; ++i)
+      S[rate + klen + i] ^= k[i];
+
+    // return -1 if verification fails
+    for (i = 0; i < klen; ++i)
+      if (c[clen - klen + i] != S[rate + klen + i])
+        return -1;
+
+    // return plaintext
+    mlen = clen - klen;
+    for (i = 0; i < mlen; ++i)
+      m[i] = M[i];
+
+    return mlen;
+  }
+}
+
+#+end_src
+
+* References
+
+** Ascon
+http://ascon.iaik.tugraz.at/implementation.html
+
+
+* Script to show improvements found
+
+#+begin_src sh :results raw :shebang #!/bin/bash
+baseDir='/home/bck/source/locoGP/GP_Master'
+
+# Seed-iaik.ascon128v11.Ascon128v11.java 
+seedFiles=( $(find $baseDir/Seed-*.java) )
+
+# optimisedFiles=( "iaik.ascon128v11.Ascon128v11_21587.java" )
+# optimisedFiles=( "iaik.ascon128v11.Ascon128v11_340.java" )
+# optimisedFiles=( "iaik.ascon128v11.Ascon128v11_2833.java" )
+optimisedFiles=( "iaik.ascon128v11.Ascon128v11_52876.java" )
+# echo ${seedFiles[@]}
+
+
+compareFiles(){
+    # aFile=$2
+    expNum=$(echo $2 | awk -F$3 '{ print $2 }' | awk -F. '{ print $1}'  )
+    # echo $2 $expNum
+
+    echo -e "\n\nDiff\n\n"
+    echo "#+begin_src diff"
+    diff $1 <(sed "s/$expNum//g" $2)  
+    echo "#+end_src"
+
+    echo -e "\n\nDiff side-by-side\n\n"
+    echo "#+begin_src diff"
+    diff -wy -W180 $1 <(sed "s/$expNum//g" $2)  
+    echo "#+end_src"
+
+    # | grep -v Problem | grep -v '^---'  | grep -v ^1c1 
+    # meld $1 $2
+}
+
+for seedFile in ${seedFiles[@]}
+do
+
+  problemName=$( echo $seedFile | awk -F- '{ print $2 }' | awk -F.java '{ print $1 }' )
+  echo -e "\n\n\n* $problemName"
+
+  for aFile in $(echo ${optimisedFiles[@]} | grep $problemName)
+  do 
+#    diffName=$(echo $aFile | awk -F\/ '{ print $NF }' )    
+    diffName=$(echo $aFile | awk -F\/ '{ print $NF }' | awk -F\.java '{ print $1 }' )    
+    echo "** $diffName"
+    echo -e "Improvement Details:\n\n"
+
+    echo "#+begin_src"
+    # grep -A1 /home/bck/GP/Exhaustive/optimisedList.txt
+    grep -m1 "\ $diffName\ " $baseDir/*nfo.log | grep \ =\  | tr '\n' '\n\n' | sed 's/[0-9][0-9][0-9][0-9]\/[0-9][0-9]\/[0-9][0-9]\ [0-9][0-9]:[0-9][0-9]:[0-9][0-9]:[0-9][0-9][0-9]\ //g' 
+    echo "#+end_src"
+
+    compareFiles $seedFile $aFile $problemName
+  done
+
+    echo "** Original - $seedFile"
+    echo "#+begin_src java -n"
+    cat $seedFile
+    echo "#+end_src"
+
+done
+#+end_src
+
+#+RESULTS:
+
+
+
+
+
+

@@ -1,0 +1,118 @@
+
+===== BEGIN DUMP =============================================================
+JRockit dump produced after 0 days, 00:00:01 on Wed Mar 23 17:10:13 2011
+
+    **********************************************************
+    *  If you see this dump, please go to                    *
+    *  http://edocs.bea.com/jrockit/go2troubleshooting.html  *
+    *  for troubleshooting information.                      *
+    **********************************************************
+
+Additional information is available in:
+  /home/martin/Documents/projects/Palladio.BySuite.ByCounter/jrockit.11820.dump
+No snapshot file (core dump) will be created because core dumps have been
+disabled. To enable core dumping, try "ulimit -c unlimited"
+before starting JRockit again.
+
+Error Message: Illegal memory access. [54]
+Signal info  : si_signo=11, si_code=1 si_addr=(nil)
+Version      : BEA JRockit(R) R27.6.5-32_o-121899-1.6.0_14-20091001-2113-linux-ia32
+CPU          : Intel (null) (HT) SSE SSE2 SSE3 SSSE3 SSE4.1 SSE4.2 Intel64
+Number CPUs  : 2
+Tot Phys Mem : 4075417600 (3886 MB)
+OS version   : openSUSE 11.4 (x86_64)
+VERSION = 11.4
+CODENAME = Celadon
+Linux version 2.6.37.1-1.2-desktop (geeko@buildhost) (gcc version 4.5.1 20101208 [gcc-4_5-branch revision 167585] (SUSE Linux) ) #1 SMP PREEMPT 2011-02-21 10:34:10 +0100 (x86_64)
+Thread System: NPTL
+Java locking : Normal
+State        : JVM is running
+Command Line : -agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:46278 -Xmx512M -Xss2M -Dfile.encoding=UTF-8 -Xbootclasspath:/home/martin/bin/bea/jre/lib/resources.jar:/home/martin/bin/bea/jre/lib/rt.jar:/home/martin/bin/bea/jre/lib/jsse.jar:/home/martin/bin/bea/jre/lib/jce.jar:/home/martin/bin/bea/jre/lib/charsets.jar -Dsun.java.launcher=SUN_STANDARD org.eclipse.jdt.internal.junit.runner.RemoteTestRunner -version 3 -port 47809 -testLoaderClass org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader -loaderpluginname org.eclipse.jdt.junit4.runtime -test de.uka.ipd.sdq.ByCounter.test.TestBytecodeCounter:testByteClass[0]
+java.home    : /home/martin/bin/bea/jre
+j.class.path : /home/martin/Documents/projects/Palladio.BySuite.ByCounter/bin:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/commons-math-1.1.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/gnujaxp.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/jcommon-1.0.10.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/swtgraphics2d.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/javassist.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/ocutil-2.5.1.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/junit-4.4.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/perfcountLinuxRDTSC.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/asm-all-3.3.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/iText-5.0.3.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/jfreechart-1.0.13-experimental.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/jfreechart-1.0.13-swt.jar:/home/martin/Documents/projects/Palladio.BySuite.ByCounter/lib/jfreechart-1.0.13.jar:/home/martin/bin/eclipse36/configuration/org.eclipse.osgi/bundles/152/1/.cp/:/home/martin/bin/eclipse36/configuration/org.eclipse.osgi/bundles/491/1/.cp/:/home/martin/bin/eclipse36/configuration/org.eclipse.osgi/bundles/151/1/.cp/
+j.lib.path   : /home/martin/bin/bea/jre/lib/i386/jrockit:/home/martin/bin/bea/jre/lib/i386:/home/martin/bin/bea/jre/../lib/i386:/home/martin/java/glassfish3/jdk/jre/lib/i386/client:/home/martin/java/glassfish3/jdk/jre/lib/i386:
+JAVA_HOME    : /usr/lib64/jvm/java
+_JAVA_OPTIONS: <not set>
+LD_LIBRARY_PATH: /home/martin/bin/bea/jre/lib/i386/jrockit:/home/martin/bin/bea/jre/lib/i386:/home/martin/bin/bea/jre/../lib/i386:/home/martin/java/glassfish3/jdk/jre/lib/i386/client:/home/martin/java/glassfish3/jdk/jre/lib/i386:
+LD_PRELOAD   : <not set>
+LD_ASSUME_KERNEL: <not set>
+StackOverFlow: 0 StackOverFlowErrors have occured
+OutOfMemory  : 0 OutOfMemoryErrors have occured
+C Heap       : Good; no memory allocations have failed
+GC Strategy  : Mode: throughput. Currently using strategy: genparpar
+GC Status    : OC is not running. Last finished OC was OC#0.
+             : YC is not running. Last finished YC was YC#0.
+YC History   : Ran 0 YCs since last OC.
+Heap         : 0x8100000 - 0xc100000  (Size: 64 MB)
+Compaction   : (no compaction area)
+NurseryList  : 0x8100000 - 0xa100000
+KeepArea     : (no keeparea in use)
+NurseryMarker: [ 0x90ffff0,  0x98fffe8 ]
+CompRefs     : References are 32-bit.
+
+Registers (from ThreadContext: 0xf7259810 / OS context: 0xf725990c):
+   eax = ffffffff    ecx = 00000000    edx = 00000000    ebx = 0840dbe0 
+   esp = f7259c00    ebp = 088dd1a8    esi = 088dd6e0    edi = 00000000 
+    es = 0000002b     cs = 00000023     ss = 0000002b     ds = 0000002b 
+    fs = 00000003     gs = 00000063 
+   eip = 00000000 eflags = 00000282 
+
+Loaded modules:
+(* denotes the module causing the exception)
+08048000-08058233  /home/martin/bin/bea/jre/bin/java
+ffffe000-ffffe433  /home/martin/bin/bea/jre/bin/java
+f76cb000-f76e16df  /lib/libpthread.so.0
+f76a1000-f76c8ce3  /lib/libm.so.6
+f769c000-f769e1c3  /lib/libdl.so.2
+f752e000-f76938db  /lib/libc.so.6
+f770b000-f7729237  /lib/ld-linux.so.2
+f725b000-f74b4ea7  /home/martin/bin/bea/jre/lib/i386/jrockit/libjvm.so
+f76ff000-f7706943  /lib/librt.so.1
+f6f94000-f6fcd043  /home/martin/bin/bea/jre/lib/i386/libjdwp.so
+f76f3000-f76f5105  /home/martin/bin/bea/jre/lib/i386/libnpt.so
+f6d5f000-f6d699bb  /home/martin/bin/bea/jre/lib/i386/libverify.so
+f6d3a000-f6d5cf57  /home/martin/bin/bea/jre/lib/i386/libjava.so
+f6cfc000-f6d1120b  /lib/libnsl.so.1
+f5c75000-f5c7aef0  /home/martin/bin/bea/jre/lib/i386/native_threads/libhpi.so
+f587f000-f588d3e4  /home/martin/bin/bea/jre/lib/i386/libzip.so
+f6d16000-f6d18ea4  /home/martin/bin/bea/jre/lib/i386/libdt_socket.so
+f5235000-f5240043  /lib/libnss_files.so.2
+f5253000-f5265a18  /home/martin/bin/bea/jre/lib/i386/libnet.so
+
+Stack:
+(* marks the word pointed to by the stack pointer)
+f7259c00: 0840dc68* 0840dcb8  00000000  00000000  00000000  00000000  
+f7259c18: 00000000  00000000  00000000  00000000  00000000  088dca70  
+f7259c30: 088dd0d0  088dd108  088dd118  088dd128  088dd138  088dd170  
+f7259c48: f5d0c380  088dc9b8  088dca70  088dd0d0  088dd108  088dd118  
+
+Code:
+(* marks the word pointed to by the instruction pointer)
+ffffffd0: Unreadable
+ffffffe8: Unreadable
+00000000: Unreadable
+00000018: Unreadable
+
+
+"Main Thread" id=1 idx=0x4 tid=11827 lastJavaFrame=(nil)
+
+Stack 0: start=0xf705a000, end=0xf725b000, guards=0xf705f000 (ok), forbidden=0xf705d000
+Thread Stack Trace:
+    -- Java stack --
+
+Extended, platform specific info:
+libc release: 2.11.3-stable
+Elf headers:
+libc       ehdrs: EI: 7f454c46010101000000000000000000 ET: 3 EM: 3 V: 1 ENTRY: 00016d80 PHOFF: 00000034 SHOFF: 00169730 EF: 0x0 HS: 52 PS: 32 PHN; 10 SS: 40 SHN: 73 STIDX: 70
+libpthread ehdrs: EI: 7f454c46010101000000000000000000 ET: 3 EM: 3 V: 1 ENTRY: 00004a70 PHOFF: 00000034 SHOFF: 00017444 EF: 0x0 HS: 52 PS: 32 PHN; 9 SS: 40 SHN: 40 STIDX: 37
+libjvm     ehdrs: EI: 7f454c46010101000000000000000000 ET: 3 EM: 3 V: 1 ENTRY: 0004c3a0 PHOFF: 00000034 SHOFF: 012c9a58 EF: 0x0 HS: 52 PS: 32 PHN; 4 SS: 40 SHN: 29 STIDX: 26
+
+    **********************************************************
+    *  If you see this dump, please go to                    *
+    *  http://edocs.bea.com/jrockit/go2troubleshooting.html  *
+    *  for troubleshooting information.                      *
+    **********************************************************
+
+===== END DUMP ===============================================================
+
+

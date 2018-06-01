@@ -1,0 +1,33 @@
+/* Stylesheet for ByCounter documentation */
+
+body {
+background-color:#7F7F7F;
+}
+
+/*
+Main content area
+*/
+.content {
+width:96%;
+border-left:1px solid #000000;
+border-right:1px solid #000000;
+border-top:1px solid #000000;
+border-bottom:1px solid #000000;
+background-color:#FFFFFF;
+padding:8pt;
+}
+
+
+/*
+Code block style
+*/
+.code {
+font-family:"Courier New", Courier, monospace;
+font-size:11px;
+margin:15pt;
+padding:5pt;
+background-color:#E9E9E9;
+border-left:4px solid #48B3FF;
+color:#333333;
+}
+

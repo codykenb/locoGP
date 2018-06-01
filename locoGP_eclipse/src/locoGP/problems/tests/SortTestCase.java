@@ -5,11 +5,11 @@ import java.util.Arrays;
 public class SortTestCase implements TestCase {
 
 	private Object[] test = null; // this should be an array containing an array, and its length
-	private Integer[] answer = null;
+	private Integer[] oracleAnswer = null;
 	
 	public SortTestCase(Object[] testParameters, Object ansArray) {
 		this.setTest(testParameters);
-		this.answer = (Integer[])ansArray;
+		this.oracleAnswer = (Integer[])ansArray;
 	}
 	
 	private void setTest(Object[] test) {
@@ -21,25 +21,29 @@ public class SortTestCase implements TestCase {
 	}
 
 	public Integer[] getAnswer() {
-		return answer;
+		return oracleAnswer;
 	}
 	
 	public int checkAnswer(Object ans){
 		return checkAnswer((Integer[]) ans );
 	}
 	
-	public int checkAnswer(Integer[] ans){
-		Integer[] originalTest = (Integer[]) test[0];
-			int errorCount = 0;
-			for (int i = 0; i < answer.length; i++) { 
-				if (answer[i].equals(ans[i]))
-					errorCount++; // 1 for correct
-				else if(!answer[i].equals(originalTest[i]))
-					errorCount +=2; // 2 for moved, but not correct
-				else
-					errorCount += 3; // highest cost for no change 
-			}
-			return errorCount;
+	private int checkAnswer(Integer[] returnedAns){
+		Integer[] originalUnsortedTest = (Integer[]) test[0];
+		int errorCount = 0;
+		for (int i = 0; i < oracleAnswer.length; i++) {
+			/*if(returnedAns.length -1 < i)
+				errorCount += 5;
+			else */
+			if (oracleAnswer[i].equals(returnedAns[i])) // 
+				errorCount++; // 1 for correct
+			//else if (!oracleAnswer[i].equals(originalUnsortedTest[i]))
+			else if (!originalUnsortedTest[i].equals(returnedAns[i]))
+				errorCount += 2; // not correct, but has been moved 
+			else
+				errorCount += 10; // highest cost for no change
+		}
+		return errorCount;
 		//}
 	}
 	

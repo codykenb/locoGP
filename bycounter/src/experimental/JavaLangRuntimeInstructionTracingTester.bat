@@ -1,0 +1,3 @@
+cd bin
+dir
+java experimental.JavaLangRuntimeInstructionTracingTester

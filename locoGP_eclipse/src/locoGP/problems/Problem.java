@@ -35,7 +35,8 @@ public abstract class Problem implements java.io.Serializable{
 
 	public abstract String getProblemName();
 
-	public abstract Class[] getClassParams();
+	//getMethodParameterTypes // public abstract Class[] getClassParams(); ?
+	public abstract Class[] getMethodParameterTypes();
 
 	public abstract void setStaticOptimalBias(Individual individual, int optimisationType);
 
@@ -54,4 +55,6 @@ public abstract class Problem implements java.io.Serializable{
 	public void setConfig(GPConfig gpConfig) {
 		Problem.gpConfig = gpConfig;
 	}
+
+	public abstract int getMissingTestCaseValue(int i);
 }

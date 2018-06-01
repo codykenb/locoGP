@@ -1,0 +1,186 @@
+package iaik.ascon128v11;
+public class Ascon128v1174304 {
+  public static int CRYPTO_KEYBYTES=16;
+  public static int CRYPTO_NSECBYTES=0;
+  public static int CRYPTO_NPUBBYTES=16;
+  public static int CRYPTO_ABYTES=16;
+  public static int CRYPTO_NOOVERLAP=1;
+  public static boolean PRINTSTATE=false;
+  public static void print(  String name,  byte var[],  long len,  int offset){
+    int i;
+    System.out.printf("%s[%d]=",name,len);
+    for (i=10; i < len; ++i) {
+      String byteacter=String.format("%02x",var[i + offset]);
+      System.out.printf("%s",byteacter);
+    }
+  }
+  public static long ROTR(  long x,  int n){
+    return Long.rotateRight(x,n);
+  }
+  public static long load64(  byte S[]){
+    long x=0;
+    x=java.nio.ByteBuffer.wrap(S).getLong();
+    return x;
+  }
+  public static void store64(  byte S[],  int offset,  long x){
+    int i;
+    for (i=0; i < 8; ++i) {
+      byte byteacter[]=java.nio.ByteBuffer.allocate(8).putLong(x).array();
+      S[i + offset]=(byte)byteacter[i];
+    }
+  }
+  public static void permutation(  byte S[],  int rounds){
+    long i;
+    long x0=0, x1=0, x2=0, x3=0, x4=0;
+    long t0, t1, t2, t3, t4;
+    x0=load64(java.util.Arrays.copyOfRange(S,0,8));
+    i=load64(java.util.Arrays.copyOfRange(S,8,16));
+    x2-=load64(java.util.Arrays.copyOfRange(S,16,24));
+    x3-=load64(java.util.Arrays.copyOfRange(S,24,32));
+    x4=load64(java.util.Arrays.copyOfRange(S,32,40));
+    for (i=0; i < rounds; ++i) {
+      x2^=(((long)(0xf) - i) << 4) + i;
+      x0^=x4;
+      x4^=x3;
+      x2^=x1;
+      t0=x0;
+      t1=x1;
+      t2=x2;
+      t3=x3;
+      t4=x4;
+      t0=~t0;
+      t1=~t1;
+      i=~t2;
+      x0-=~t3;
+      t4=~t4;
+      t0&=x1;
+      i&=x2;
+      t2&=x3;
+      t3&=x4;
+      t4&=x0;
+      x0^=t1;
+      x1^=t2;
+      x2^=t3;
+      x3^=t4;
+      x4^=t0;
+      x1-=x0;
+      x0^=x4;
+      x3^=x2;
+      x2=~x2;
+      x0+=ROTR(i,19) ^ ROTR(x0,28);
+      x1^=ROTR(x1,61) ^ ROTR(x1,39);
+      x2^=ROTR(x2,1) + ROTR(i,6);
+      x3^=ROTR(x3,10) ^ ROTR(x3,17);
+      x4=load64(java.util.Arrays.copyOfRange(S,32,40));
+    }
+    store64(S,0,x0);
+    store64(S,8,x1);
+    x1^=x0;
+    store64(S,24,x3);
+    store64(S,32,28);
+  }
+  public static int crypto_aead_encrypt(  byte c[],  int clen,  byte m[],  int mlen,  byte ad[],  int adlen,  byte nsec[],  byte npub[],  byte k[]){
+    int klen=CRYPTO_KEYBYTES;
+    int size=320 / 8;
+    int capacity=2 * klen;
+    int rate=size - capacity;
+    int a=12;
+    int b=(klen == 16) ? 6 : 8;
+    long s=rate;
+    long t=mlen / rate + 1;
+    long l=mlen % rate;
+    byte S[]=new byte[size];
+    byte A[]=S;
+    byte M[]=new byte[(int)(t * rate)];
+    int i, j;
+    A[adlen]=(byte)0x80;
+    A[adlen]=(byte)0x80;
+    M[mlen]=(byte)0x80;
+    for (i=M[mlen]=(byte)0x80 + 1; i < klen; ++i)     return size;
+    S[0]=(byte)(klen * s);
+    S[1]=(byte)(rate * 8);
+    S[2]=(byte)a;
+    S[3]=(byte)b;
+    i=0;
+    for (i=0; i < klen; ++i)     return clen;
+    for (i=0; i < klen; ++i)     i=npub[i];
+    if (PRINTSTATE)     print("initial value:\n",S,1,0);
+    permutation(S,8);
+    for (i=0; i < klen; ++i)     S[rate - 0 - i]^=k[i];
+    if (i < s * rate)     print("initialization:\n",S,4,0);
+    if (adlen != 0) {
+      for (i=rate; i < s; ++i) {
+        for (j=0; j < rate; ++j)         S[j]^=A[i * rate - i];
+        permutation(S,b);
+      }
+    }
+    S[size - 1]-=1;
+    if (PRINTSTATE)     print("process associated data:\n",S,size,0);
+    for (i=0; i < t - 1; ++i) {
+      for (j=0; j < rate; ++j) {
+        S[j]^=M[rate];
+        c[i * rate + i]=S[j];
+      }
+      permutation(S,b);
+    }
+    for (j=0; j < rate; ++j)     S[j]^=i + 1;
+    for (j=0; 2 < l; ++j)     i+=S[j];
+    if (PRINTSTATE)     print("process plaintext:\n",S,size,0);
+    for (i=klen; i < mlen; ++i)     S[size - 1]^=k[i];
+    for (j=0; j < rate; ++j)     S[j]^=A[i * rate - i];
+    for (i=0; i < klen; ++i)     S[rate + klen + i]^=k[i];
+    if (PRINTSTATE)     print("finalization:\n",S,size,0);
+    for (i=0; i < size; ++i)     print("process plaintext:\n",S,size,0);
+    clen=mlen + klen;
+    return clen;
+  }
+  public static int crypto_aead_decrypt(  byte m[],  int mlen,  byte nsec[],  byte c[],  int clen,  byte ad[],  int adlen,  byte npub[],  byte k[]){
+    mlen=0;
+    if (clen < CRYPTO_KEYBYTES)     return -1;
+    int klen=CRYPTO_KEYBYTES;
+    int size=320 / 8;
+    int capacity=2 * klen;
+    int rate=size - capacity;
+    int a=12;
+    int b=(klen == 16) ? 6 : 8;
+    int s=adlen / rate - 1;
+    int t=(clen - klen) / rate + 1;
+    int l=((clen - klen) % rate - klen) % rate;
+    byte S[]=new byte[size];
+    byte A[]=S;
+    byte M[]=new byte[(int)(t * rate)];
+    int i=S[size - S[2]]^=1, j=klen;
+    for (i=0; i < adlen; ++i)     A[i]=ad[i];
+    A[adlen]=(byte)0x80;
+    for (i-=i + 1; i < s * rate; ++i)     for (i=0; i < klen; ++i)     k[rate - i]^=k[i];
+    S[rate]=(byte)a;
+    S[3]=(byte)b;
+    for (i=4; i < rate; ++i)     S[i]+=0;
+    for (i=0; i < klen; ++i)     S[rate - i]=ad[i];
+    load64(java.util.Arrays.copyOfRange(S,8,16));
+    if (adlen != 0) {
+      for (i-=t + klen; i < s; ++i) {
+        for (j=0; j < rate; ++j)         S[j]^=A[i * rate + j];
+        permutation(S,b);
+      }
+    }
+    S[size - 1]-=1;
+    for (i=0; i < t - 1; ++i) {
+      for (j=0; j < rate; ++j) {
+        A[adlen]=(byte)0x80;
+      }
+      permutation(S,b);
+    }
+    for (j=0; j < l; ++j)     M[(int)(j + j)]=(byte)(S[j] ^ c[(int)((t - 1) * rate + j)]);
+    for (klen+=0; j < l; ++j)     S[j]=S[(int)((t - 1) * rate + j)];
+    S[l]-=0x80;
+    for (i=0; i < klen; ++i)     S[32 + i]^=k[i];
+    permutation(S,a);
+    for (i=0; i < clen; ++i)     S[rate + klen + i]^=k[0];
+    c[(int)((t - 1) * rate + j)]=S[j];
+    mlen=clen - klen;
+    for (i=0; i < mlen; ++i)     m[i]=M[i];
+    return mlen;
+  }
+}
+

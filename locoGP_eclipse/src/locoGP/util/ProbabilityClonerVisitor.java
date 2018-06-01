@@ -22,7 +22,7 @@ public class ProbabilityClonerVisitor extends ASTVisitor {
 	
 	public void preVisit(ASTNode aNode){
 		//System.out.println("------------Matching \n" + gpMV.getNode(count).toString() + "\n-----------with\n" + aNode.toString());
-		if(gpMV.allowedType2(aNode)){
+		if(gpMV.allowedTypeAndParentType(aNode)){
 			GPASTNodeData nodeDataFromOriginal = gpMV.getNodeProperty(count++);
 			
 			GPASTNodeData gpData = new GPASTNodeData(nodeDataFromOriginal);

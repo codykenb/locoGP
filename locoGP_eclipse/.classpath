@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/asm-all-3.3.jar"/>
-	<classpathentry kind="lib" path="lib/bycounter-locoGP.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-math-1.1.jar"/>
@@ -31,5 +30,6 @@
 	<classpathentry kind="lib" path="lib/org.eclipse.text_3.5.0.v20090513-2000.jar"/>
 	<classpathentry kind="lib" path="lib/perfcountLinuxRDTSC.jar"/>
 	<classpathentry kind="lib" path="lib/swtgraphics2d.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Palladio.BySuite.ByCounter"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

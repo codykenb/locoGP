@@ -1,0 +1,29 @@
+<project name="UpdateSite" default="upload">
+	
+	<!-- <taskdef resource="org/pluginbuilder/anttasks/pluginbuildertasks.properties" classpath="build-files/pluginbuilder-anttasks.jar" /> -->
+	
+	<!-- <GetHostName /> -->
+	<property file="upload.properties" />
+
+	<target name="clean_remote">
+		<sshexec host="${uploadTargetHost}"
+				username="${uploadUsername}"
+				keyfile="/home/ccontrol/.ssh/id_rsa" 
+				passphrase="" 
+				trust="true" 
+		command="cd ${uploadTargetDir}; 
+			rm -rf *; 
+			"/>
+	</target>
+
+	<target name="upload" depends="clean_remote">
+		<mkdir dir="testByCounter" />
+		<scp todir="${uploadUsername}@${uploadTargetHost}:${uploadTargetDir}"
+				keyfile="/home/ccontrol/.ssh/id_rsa" 
+				passphrase="" 
+				trust="true">
+		    <fileset dir="${buildDirectory}/dist"/>
+	  	</scp>
+	</target>
+	
+</project>

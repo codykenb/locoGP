@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression.Operator;
 
 import locoGP.fitness.IndividualEvaluator;
+import locoGP.fitness.bytecodeCount.ByteCodeIndividualEvaluator;
 import locoGP.individual.Individual;
 import locoGP.operators.GPASTNodeData;
 import locoGP.problems.Problem;
@@ -30,7 +31,7 @@ public class Benchmarker {
 	 */
 	
 	
-	static IndividualEvaluator indEval = new IndividualEvaluator();
+	static IndividualEvaluator indEval = new ByteCodeIndividualEvaluator();
 	
 	public static void main(String[] args){
 		
@@ -104,7 +105,7 @@ public class Benchmarker {
 		//ind = ind.clone();
 		indEval.evaluateIndNoTimeLimit(ind);
 		
-		System.out.println("Get in there " + ind.getFunctionalityScore()+" "+ ind.getRuntimeAvg());
+		System.out.println("Get in there " + ind.getFunctionalityErrorCount()+" "+ ind.getRuntimeAvg());
 		/*try {
 			testFunction(te);
 		} catch (SecurityException e) {
@@ -215,7 +216,7 @@ public class Benchmarker {
 		for ( int i = 0 ; i< 20 ; i++){
 			anInd = anInd.clone();
 			indEval.evaluateInd(anInd);
-			System.out.println("Fit: " + anInd.getFitness() + " score: " + anInd.getFunctionalityScore() + " Running Time: " + anInd.getRunningTime());
+			System.out.println("Fit: " + anInd.getFitness() + " score: " + anInd.getFunctionalityErrorCount() + " Running Time: " + anInd.getRunningTime());
 		}
 		System.out.println("Max: " + anInd.ourProblem.getSeedFunctionalityScore());
 		return anInd;

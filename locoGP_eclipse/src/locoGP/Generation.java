@@ -17,12 +17,17 @@ import org.eclipse.jdt.core.dom.Statement;
 
 import locoGP.experiments.GPConfig;
 import locoGP.fitness.IndividualEvaluator;
+import locoGP.fitness.bytecodeCount.ByteCodeIndividualEvaluator;
 import locoGP.individual.Individual;
 import locoGP.operators.GPASTNodeData;
 import locoGP.operators.Mutator;
 import locoGP.operators.NodeOperators;
 import locoGP.operators.OperatorPipeline;
 import locoGP.problems.Problem;
+import locoGP.problems.crypto.Ascon128V11COptDecryptProblem;
+import locoGP.problems.crypto.Ascon128V11COptEncryptProblem;
+import locoGP.problems.crypto.Ascon128V11DecryptProblem;
+import locoGP.problems.crypto.Ascon128V11EncryptProblem;
 import locoGP.util.Logger;
 import locoGP.util.gpDataSetterVisitor;
 
@@ -33,10 +38,9 @@ public class Generation implements java.io.Serializable{
 	private static final long serialVersionUID = 5101375138958967830L;
 	public Vector<Individual> individuals = new Vector<Individual>(101);
 	private Random ranNumGenerator = new Random();
-	private static IndividualEvaluator ourIndEval = new IndividualEvaluator();
+	
 	private static String logID = "";
 	public static Individual originalIndividual = null;
-	private long individualID = 0 ;
 	private static int generationCount = 0;
 	//public static GPConfig gpConfig;
 	private static ExecutorService executor; //= Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*5);
@@ -46,7 +50,10 @@ public class Generation implements java.io.Serializable{
 	public Generation(Generation currentGen) {
 		incrementGenerationCount();
 		createGeneration(currentGen);
-		addElite(currentGen.getElite()); // helps diversity
+		if(originalIndividual.ourProblem.gpConfig.useDiverseElitism())
+			addDiverseElite(currentGen);
+		else
+			addElite(currentGen.getElite()); // helps diversity
 		writeCurrentPopulationDetails();
 
 		/*
@@ -62,6 +69,8 @@ public class Generation implements java.io.Serializable{
 	
 	private void incrementGenerationCount() {
 		Generation.generationCount++;
+		Logger.log("Generation: " + Generation.generationCount);
+		System.out.print("Generation: " + Generation.generationCount + "\n");
 	}
 	
 	public int getGenerationCount(){
@@ -87,7 +96,7 @@ public class Generation implements java.io.Serializable{
 			for (int i = (int) (programsNeeded * Problem.gpConfig
 					.getOverProvisioningRatio()); i > 0; i--) {
 				allTasks.add(new OperatorPipeline(currentGen, this.individuals,
-						this.ranNumGenerator, getOurIndEval()));
+						this.ranNumGenerator, Problem.gpConfig.getEvaluator()));
 			}
 			try {
 				results = new ArrayList<Future<OperatorPipeline>>(
@@ -122,6 +131,38 @@ public class Generation implements java.io.Serializable{
 		//Problem.gpConfig = gpConfig;
 		Generation.originalIndividual = originalIndividual;
 		Generation.logID = logID;
+		Problem.gpConfig.getEvaluator().evaluateIndNoTimeLimit(originalIndividual);
+		originalIndividual.ourProblem.setBaselineRuntimeAvg(originalIndividual.getRuntimeAvg());
+		Logger.logDebugConsole(" - - Seed Individual: " + originalIndividual.getClassName()
+		//System.out.println(" - - Seed Individual: " + originalIndividual.getClassName()
+				+ " Time: " + originalIndividual.getRunningTime()
+				+ " RuntimeAvg: " + originalIndividual.getRuntimeAvg()
+				+ " Fit:" + originalIndividual.getFitness() 
+				+ " TestError:" + originalIndividual.getFunctionalityErrorCount() 
+				+ " ASTNodes: " + originalIndividual.getNumNodes() 
+				+ " GPNodes: " 	+ originalIndividual.getNumGPNodes()
+				+ " xovers: " 	+ originalIndividual.getCrossoverAttempts()
+				+ " mutations: " 	+ originalIndividual.getMutationAttempts());
+		Logger.logTrash("\nSeed Individual\n" + originalIndividual.ourProblem.getStrings().getCodeListing() + "\n");
+		
+		
+		
+		/*Individual newInd = originalIndividual.clone();
+		getOurIndEval().evaluateIndNoTimeLimit(newInd);
+		System.out.println(" - - Clone Individual: " + newInd.getClassName()
+				+ " Time: " + newInd.getRunningTime()
+				+ " RuntimeAvg: " + newInd.getRuntimeAvg()
+				+ " Fit:" + newInd.getFitness() 
+				+ " TestError:" + newInd.getFunctionalityErrorCount() 
+				+ " ASTNodes: " + newInd.getNumNodes() 
+				+ " GPNodes: " 	+ newInd.getNumGPNodes()
+				+ " xovers: " 	+ newInd.getCrossoverAttempts()
+				+ " mutations: " 	+ newInd.getMutationAttempts());*/
+		Logger.flushLog();
+		//System.exit(0);
+		
+		
+		
 		
 		if(gpConfig.issetSeedBiasFromDeletionAnalysis()){
 			this.setSeedBiasFromDeletionAnalysis(originalIndividual);
@@ -147,8 +188,10 @@ public class Generation implements java.io.Serializable{
 		Individual indClone = null;
 		gpDataSetterVisitor biasSetterVisitor = null;
 		Statement tmpStmt;
-		ourIndEval.evaluateIndNoTimeLimit(originalIndividual); // This is our reference individual
-		originalIndividual.ourProblem.setBaselineRuntimeAvg(originalIndividual.getRuntimeAvg());
+		//ourIndEval.evaluateIndNoTimeLimit(originalIndividual); // This is our reference individual
+		
+		System.out.print("Deleting each line of seed to set location bias");
+		
 		originalIndividual.setAllGPDataNodesTo((float).1); // why?
 		for(int i = 0 ; i< seedStmts.size(); i++){
 			// clone the program
@@ -156,11 +199,11 @@ public class Generation implements java.io.Serializable{
 			cloneStmts = indClone.gpMaterial.getStatements();
 			//delete a statement
 			NodeOperators.deleteNode(cloneStmts.get(i));
-			if(ourIndEval.evaluateInd(indClone)){
-				tmpStmt= seedStmts.get(i);
+			tmpStmt= seedStmts.get(i);
+			if(Problem.gpConfig.getEvaluator().evaluateInd(indClone)){
 				if(indClone.getRuntimeAvg() < originalIndividual.getRuntimeAvg()){
 					// set bias in proportion to the reduction in execution
-					if(indClone.getFunctionalityScore() > originalIndividual.getFunctionalityScore()){
+					if(indClone.getFunctionalityErrorCount() > originalIndividual.getFunctionalityErrorCount()){
 					  biasSetterVisitor = new gpDataSetterVisitor(1-(indClone.getRuntimeAvg()/originalIndividual.getRuntimeAvg()));
 					  tmpStmt.accept(biasSetterVisitor);
 					}else { // if we reduce performance without introducing any error, then we've already found an improvement!
@@ -175,9 +218,24 @@ public class Generation implements java.io.Serializable{
 				}
 				
 			}
+			if(tmpStmt.getNodeType() == 8 ){ // instanceof BlockStatement)
+				GPASTNodeData tempData = (GPASTNodeData) tmpStmt.getProperty("gpdata");
+				if(tempData != null)
+					tempData.setProbabilityVal(1); // encourage cloning into blocks
+			}
+			Logger.log("Deletion index: " + i + " " + indClone.getClassName()
+					+ " Time: " + indClone.getRunningTime() 
+					+ " Fit: " + indClone.getFitness() 
+					+ " TestError: " + indClone.getFunctionalityErrorCount() 
+					+ " ASTNodes: " + indClone.getNumNodes() 
+					+ " Compiled: " + indClone.compiled() 
+					+ " testResults:" + indClone.getTestCaseResultsText()
+					+ " bias: "+ (1-(indClone.getRuntimeAvg()/originalIndividual.getRuntimeAvg())));
+			System.out.print(".");
 		}
 		Logger.logBiasFile("Seed-"+originalIndividual.getClassName()+"-Deletion",0 , originalIndividual.getCodeProbabilities() );
 		Logger.flushLog();
+		System.out.println("Done\n");
 	}
 	
 	private void createGenFromPerfRedFreqOverCompFreq(Individual originalIndividual) {
@@ -206,8 +264,6 @@ public class Generation implements java.io.Serializable{
 		Individual indClone = null;
 		ASTNode seedNodeToReplace, nodeToReplace,replacementNode = null;		
 		
-		ourIndEval.evaluateIndNoTimeLimit(originalIndividual); // This is our reference individual
-		originalIndividual.ourProblem.setBaselineRuntimeAvg(originalIndividual.getRuntimeAvg());
 		//originalIndividual.setAllGPDataNodesTo((float)0);
 		
 		int compileCount =0, redExeCount=0;
@@ -229,20 +285,20 @@ public class Generation implements java.io.Serializable{
 						ASTNode newlyReplacedNode = NodeOperators.replaceNode(nodeToReplace, replacementNode);
 						if(newlyReplacedNode!=null){
 							// Eval the new ind 
-							if(ourIndEval.evaluateInd(indClone)){
+							if(Problem.gpConfig.getEvaluator().evaluateInd(indClone)){
 								compileCount++;
 								if(indClone.getRuntimeAvg() < originalIndividual.getRuntimeAvg()){	
 									redExeCount++;
 									// add the individual to the generation
 									
 									// TODO why check fun score?
-									if(indClone.getFunctionalityScore() >0 && indClone.getFunctionalityScore() < originalIndividual.ourProblem.getWorstFunctionalityScore()){
+									if(indClone.getFunctionalityErrorCount() >0 && indClone.getFunctionalityErrorCount() < originalIndividual.ourProblem.getWorstFunctionalityScore()){
 										// provided we don't already have a program representing the same error count
 										Iterator<Individual> iter = this.individuals.iterator();
 										boolean interestingIndForGen = true;
 										while(iter.hasNext()){
 											Individual current = iter.next();
-											if(current.getFunctionalityScore() == indClone.getFunctionalityScore())
+											if(current.getFunctionalityErrorCount() == indClone.getFunctionalityErrorCount())
 												interestingIndForGen = false;
 										}
 										if( interestingIndForGen )
@@ -312,11 +368,11 @@ public class Generation implements java.io.Serializable{
 		Individual indClone = null;
 		ASTNode seedNodeToReplace, nodeToReplace,replacementNode = null;		
 		
-		ourIndEval.evaluateIndNoTimeLimit(originalIndividual); // This is our reference individual
-		originalIndividual.ourProblem.setBaselineRuntimeAvg(originalIndividual.getRuntimeAvg());
+		//ourIndEval.evaluateIndNoTimeLimit(originalIndividual); // This is our reference individual
+		//originalIndividual.ourProblem.setBaselineRuntimeAvg(originalIndividual.getRuntimeAvg());
 		//originalIndividual.setAllGPDataNodesTo((float)0);
 		
-		// for each node in the program // TODO reduce this nesting, in the name of bejaykers
+		// for each node in the program // TODO reduce this nesting
 		for(int i=0 ; i<seedNodes.size() ; i++){
 			seedNodeToReplace = seedNodes.get(i); // pick a node from the seed
 			long bestFunctionalityForNode = 2* originalIndividual.ourProblem.getWorstFunctionalityScore();
@@ -332,24 +388,23 @@ public class Generation implements java.io.Serializable{
 						ASTNode newlyReplacedNode = NodeOperators.replaceNode(nodeToReplace, replacementNode);
 						if(newlyReplacedNode!=null){
 							// Eval the new ind 
-							if(ourIndEval.evaluateInd(indClone)){
+							if(Problem.gpConfig.getEvaluator().evaluateInd(indClone)){
 								if(indClone.getRuntimeAvg() < originalIndividual.getRuntimeAvg()){	
 									
 									// add the individual to the generation
-									if(indClone.getFunctionalityScore() >0 && indClone.getFunctionalityScore() < originalIndividual.ourProblem.getWorstFunctionalityScore()){
+									if(indClone.getFunctionalityErrorCount() >0 && indClone.getFunctionalityErrorCount() < originalIndividual.ourProblem.getWorstFunctionalityScore()){
 										// provided we don't already have a program representing the same error count
 										Iterator<Individual> iter = this.individuals.iterator();
 										boolean interestingIndForGen = true;
 										while(iter.hasNext()){
 											Individual current = iter.next();
-											if(current.getFunctionalityScore() == indClone.getFunctionalityScore())
+											if(current.getFunctionalityErrorCount() == indClone.getFunctionalityErrorCount())
 												interestingIndForGen = false;
 										}
 										if( interestingIndForGen )
 											this.individuals.add(indClone);
 									}
-									if(indClone.getFunctionalityScore() < bestFunctionalityForNode){
-										bestFunctionalityForNode = indClone.getFunctionalityScore();
+									if(indClone.getFunctionalityErrorCount() < bestFunctionalityForNode){
 									}
 									
 									GPASTNodeData newData = new GPASTNodeData();
@@ -375,13 +430,13 @@ public class Generation implements java.io.Serializable{
 			
 			tmpData.setProbabilityVal(
 					tmpData.getProbabilityVal() // which was originally set by deletion analysis
-							* originalIndividual.getFunctionalityScore()/bestFunctionalityForNode); 
+							* originalIndividual.getFunctionalityErrorCount()/bestFunctionalityForNode); 
 		}	
 	}
 	
 	private void fillGenFromRandomMut() {
 		Collection<Callable<Mutator>> allTasks = new Vector<Callable<Mutator>>();
-
+		System.out.println("Generation: " + Generation.generationCount);
 		while (this.individuals.size() < 
 				Problem.gpConfig.getPopulationSize()-
 				(Problem.gpConfig.getPopulationSize() * (Problem.gpConfig.getInitialPopulationSeedRatio()))) {
@@ -391,7 +446,7 @@ public class Generation implements java.io.Serializable{
 			for (int i = (int) ((Problem.gpConfig.getPopulationSize() - this.individuals
 					.size()) * Problem.gpConfig.getOverProvisioningRatio()); i > 0; i--) {
 				allTasks.add(new Mutator(originalIndividual, this.individuals,
-						getOurIndEval(), Problem.gpConfig));
+						Problem.gpConfig.getEvaluator(), Problem.gpConfig));
 			}
 
 			Logger.logDebugConsole("New executor about to start: "
@@ -447,25 +502,24 @@ public class Generation implements java.io.Serializable{
 	private void createGenfromRandomMutation(Individual originalIndividual){
 		
 		// gather primitives from original program
-		NodeOperators.initialise(originalIndividual.ourProblem.getStrings());
-		// Evaluate our reference individual (assumption is it halts)
-		getOurIndEval().evaluateIndNoTimeLimit(originalIndividual); 
-		originalIndividual.ourProblem.setBaselineRuntimeAvg(originalIndividual.getRuntimeAvg()); 
+		//Individual.initialise(originalIndividual.ourProblem.getStrings());
 		
+		// Evaluate our reference individual (assumption is it halts)
+		 
+		//originalIndividual.ourProblem.setBaselineRuntimeAvg(originalIndividual.getRuntimeAvg()); 
+		/*if (originalIndividual.ourProblem instanceof Ascon128V11COptDecryptProblem
+				|| originalIndividual.ourProblem instanceof Ascon128V11COptEncryptProblem
+				|| originalIndividual.ourProblem instanceof Ascon128V11EncryptProblem
+				|| originalIndividual.ourProblem instanceof Ascon128V11DecryptProblem)
+			originalIndividual.setFunctionalityErrorCount(0); // yet another clutch
+*/		
 		//Logger.log("Seed Individual: " + originalIndividual.getClassName()
-		Logger.logDebugConsole(" - - Seed Individual: " + originalIndividual.getClassName()
-				+ " Time: " + originalIndividual.getRunningTime()
-				+ " RuntimeAvg: " + originalIndividual.getRuntimeAvg()
-				+ " Fit:" + originalIndividual.getFitness() 
-				+ " TestError:" + originalIndividual.getFunctionalityScore() 
-				+ " ASTNodes: " + originalIndividual.getNumNodes() 
-				+ " GPNodes: " 	+ originalIndividual.getNumGPNodes()
-				+ " xovers: " 	+ originalIndividual.getCrossoverAttempts()
-				+ " mutations: " 	+ originalIndividual.getMutationAttempts());
-		Logger.logTrash("\nSeed Individual\n" + originalIndividual.ourProblem.getStrings().getCodeListing() + "\n");
 		
 		// the fitness should be normalised so the seed is 1
-		if (originalIndividual.getFitness() != 1) { 
+		if (originalIndividual.getFitness() != 1 && !(originalIndividual.ourProblem instanceof Ascon128V11COptDecryptProblem
+				|| originalIndividual.ourProblem instanceof Ascon128V11COptEncryptProblem
+				|| originalIndividual.ourProblem instanceof Ascon128V11EncryptProblem
+				|| originalIndividual.ourProblem instanceof Ascon128V11DecryptProblem)) { 
 			throw new IllegalStateException("Seed fitness is not 1");
 		}
 		Logger.flushLog();
@@ -473,7 +527,6 @@ public class Generation implements java.io.Serializable{
 		fillGenFromRandomMut();									//  |
 		// parralellzone --------------------------------------/
 		
-		setIndividualIDCount(Individual.getID());
 	}
 
 	
@@ -521,7 +574,8 @@ public class Generation implements java.io.Serializable{
 		Individual curInd ;
 		while(iter.hasNext()){
 			curInd = (Individual) iter.next();
-			if(uniqueIndividuals.size() ==0 || curInd.getFitness() != uniqueIndividuals.get(uniqueIndividuals.size()-1).getFitness() )
+			if (uniqueIndividuals.size() == 0 || Math.round(curInd.getFitness()) != Math
+					.round(uniqueIndividuals.get(uniqueIndividuals.size() - 1).getFitness()))
 				uniqueIndividuals.add(curInd);
 		}
 		return uniqueIndividuals;
@@ -561,7 +615,7 @@ public class Generation implements java.io.Serializable{
 	}
 
 	public void writeCurrentPopulationDetails(){
-		// TODO write Java/Logs in a separate thread
+		// TODO write Java/Logs asynchronously (in a separate thread)
 		Iterator<Individual> iter = this.individuals.iterator();
 		Individual tempInd;
 		while( iter.hasNext()){
@@ -575,7 +629,8 @@ public class Generation implements java.io.Serializable{
 					+ " xoverApplied: " 	+ tempInd.crossoverApplied()
 					+ " xovers: " 	+ tempInd.getCrossoverAttempts()
 					+ " mutationApplied: " 	+ tempInd.mutationApplied()
-					+ " mutations: " 	+ tempInd.getMutationAttempts());
+					+ " mutations: " 	+ tempInd.getMutationAttempts()
+					+ " testResults: "+ tempInd.getTestCaseResultsText());
 			Logger.logJavaFile(tempInd.getClassName(), tempInd.ASTSet.getCodeListing() );
 			Logger.logBiasFile(tempInd.getClassName(),this.getGenerationCount() , tempInd.getCodeProbabilities() );
 			// + "\n\n " + tempInd.getCodeProbabilitiesComment()
@@ -665,13 +720,13 @@ public class Generation implements java.io.Serializable{
 		return worstIndIndex;
 	}
 
-	private void setIndividualIDCount(long individualIDCount) {
+/*	private void setIndividualIDCount(long individualIDCount) {
 		this.individualID = individualIDCount;
-	}
+	}*/
 
-	public long getIndividualIDCount() {
+	/*public long getIndividualIDCount() {
 		return individualID;
-	}
+	}*/
 
 	public boolean foundBetterThanSeed() {
 		Iterator<Individual> iter = this.individuals.iterator();
@@ -683,13 +738,13 @@ public class Generation implements java.io.Serializable{
 		return betterIndividualThanSeedFound;
 	}
 
-	public static IndividualEvaluator getOurIndEval() {
+/*	public static IndividualEvaluator getOurIndEval() {
 		return ourIndEval;
 	}
 
 	public static void setOurIndEval(IndividualEvaluator ourIndEval) {
 		Generation.ourIndEval = ourIndEval;
-	}
+	}*/
 
 	public void clearBacklinks(Generation nextGen) {
 		/* For individuals which are in this generation only,

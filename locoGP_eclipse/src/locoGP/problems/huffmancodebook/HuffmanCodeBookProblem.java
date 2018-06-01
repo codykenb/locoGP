@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import locoGP.individual.Individual;
 import locoGP.problems.CompilationDetail;
@@ -26,7 +27,7 @@ public class HuffmanCodeBookProblem extends Problem{
 	protected String className = "huffmanCodeTable.BasicHuffman";
 	private String methodName = "getCodeBook";
 	
-	protected CompilationSet problemStrings = loadFiles();
+	protected CompilationSet problemStrings = loadFiles("");
 	
 
 	
@@ -41,36 +42,13 @@ public class HuffmanCodeBookProblem extends Problem{
 					" U T S R Q P O N M L K J I H G F E D C B A")
 		};
 	
-	private CompilationSet loadFiles(){
-		CompilationDetail[] fileSet = new CompilationDetail[3];
-		
-			String fileContents = StringFromFile.getStringFromFile("/locoGP/problems/huffmancodebook/BasicHuffman.txt");
-			fileSet[0]= new CompilationDetail(fileContents,"huffmanCodeTable","BasicHuffman");
-		
-			fileContents = StringFromFile.getStringFromFile("/locoGP/problems/huffmancodebook/BubbleSort.txt");
-			fileSet[1]=new CompilationDetail(fileContents,"huffmanCodeTable","BubbleSort");
-			
-			fileContents = StringFromFile.getStringFromFile("/locoGP/problems/huffmancodebook/huffmanNode.txt");
-			fileSet[2]=new CompilationDetail(fileContents,"huffmanCodeTable","huffmanNode");
-			
-		CompilationSet cS = new CompilationSet(fileSet);
-		return cS;
+	protected CompilationSet loadFiles(String variantNum){
+		return new CompilationSet(Arrays.asList(
+				"/locoGP/problems/huffmancodebook/BasicHuffman"+variantNum+".txt",
+				"/locoGP/problems/huffmancodebook/BubbleSort"+variantNum+".txt",
+				"/locoGP/problems/huffmancodebook/huffmanNode"+variantNum+".txt"));
 	}
 	
-/*	protected String getStringFromFil2e(String fileName){
-		StringWriter writer = new StringWriter();
-		InputStream iStream = getClass().getResourceAsStream(fileName);
-		
-		try {
-			//IOUtils.copy(iStream, writer, null);
-			IOUtils.copy(iStream, writer);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return writer.toString();
-	}*/
-
 	private TestCase createCase(String string) {
 		Byte[] testInput = ArrayUtils.toObject(string.getBytes());
 		String[] sampleResult = BasicHuffman.getCodeBook(testInput);
@@ -82,6 +60,13 @@ public class HuffmanCodeBookProblem extends Problem{
 	@Override
 	public String getEntryClassName() {
 		return className;
+	}
+	
+	public int getMissingTestCaseValue(int numMissing){
+		int missingError=0;
+		for(int i = testData.length-1 ; i>numMissing ; i--)
+			missingError += ((String[])testData[i].getAnswer()).length;
+		return missingError;
 	}
 
 	@Override
@@ -152,7 +137,7 @@ public class HuffmanCodeBookProblem extends Problem{
 	}
 
 	@Override
-	public Class[] getClassParams() {
+	public Class[] getMethodParameterTypes() {
 		return new Class[] {Byte[].class};
 	}
 
@@ -170,6 +155,8 @@ public class HuffmanCodeBookProblem extends Problem{
 	public ArrayList<String> getClassNames() {
 		return problemStrings.getClassNames();
 	}
+
+
 
 	
 

@@ -1,0 +1,27 @@
+<project name="UpdateSite">
+	<!-- action to do for failed builds: upload logging files (txt files) -->
+
+	<target name="clean_remote">
+		<sshexec host="i43pc12.ipd.uka.de"
+				username="ccontrol"
+				keyfile="/home/ccontrol/.ssh/id_rsa" 
+				passphrase="" 
+				trust="true" 
+				command="cd /var/www/eclipse/ByCounter/; 
+				rm ./*.txt; "
+				failonerror="false"
+		/>
+	</target>
+
+	<target name="upload" depends="clean_remote">
+		<scp todir="ccontrol@i43pc12.ipd.uka.de:/var/www/eclipse/ByCounter/"
+				keyfile="/home/ccontrol/.ssh/id_rsa" 
+				passphrase="" 
+				trust="true">
+			<fileset dir="/home/ccontrol/svn/code/de.uka.sdq.ipd.ByCounter/">
+				<include name="*.txt" /><!--these are logging files-->
+			</fileset>
+	  	</scp>	
+	</target>
+
+</project>

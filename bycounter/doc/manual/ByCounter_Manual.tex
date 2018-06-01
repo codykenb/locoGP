@@ -1,0 +1,165 @@
+\documentclass{entcs}
+\usepackage{prentcsmacro}
+\usepackage{graphicx}
+\def\lastname{ByCounter Guide (Kuperberg, Krogmann)}
+
+\usepackage{cite}
+\usepackage{moreverb}
+\usepackage{wrapfig}
+\usepackage{subfigure}
+\usepackage{url}
+\usepackage{tabularx}
+\usepackage{listings}
+\lstloadlanguages{Java}
+
+\begin{document}
+\begin{frontmatter}
+  \title{ByCounter: Portable Runtime Counting of Bytecode Instructions and Method Invocations\\~\\Manual\\~\\May 9th, 2011} 
+  \author{Michael Kuperberg}%\thanksref{michaelemail}}
+  \author{Martin Krogmann}%\thanksref{martinemail}}
+  \address{Chair for Software Design and Quality\\Institute for Program Structures and Data Organisation\\Faculty of Informatics, Universit\"{a}t Karlsruhe (TH)}
+%  \thanks[michaelemail]{Email: \href{mailto:michael.kuperberg@informatik.uni-karlsruhe.de}
+%        {\texttt{\normalshape michael.kuperberg@informatik.uni-karlsruhe.de}}}
+%  \thanks[martinemail]{Email: \href{mailto:martin.krogmann@informatik.uni-karlsruhe.de}
+%  			{\texttt{\normalshape martin.krogmann@informatik.uni-karlsruhe.de}}}
+\begin{abstract} 
+%   1. Forschungsproblem und / oder Problembereich
+For bytecode-based applications, runtime instruction counts can be used as a plat\-form-independent application execution metric, and also can serve as the basis for bytecode-based performance prediction.  
+%   2. Das Problem
+However, different instruction types have different exe\-cution durations, so they must be counted separately, and method invocations should be identified and counted because of their substantial contribution to the total application performance. 
+%   3. Unzureichendes an bestehenden Loesungen
+For Java bytecode, most JVMs and profilers do not provide such functionality at all, and existing bytecode analysis frameworks require expensive JVM instrumentation for instruction-level counting. 
+%   4. Was habe ich selbst gemacht
+\textsc{ByCounter} is a lightweight approach for exact runtime counting of executed bytecode instructions and method invocations. \textsc{ByCounter} significantly reduces total counting costs by instrumenting only the application bytecode and not the JVM, and it can be used without modifications on any JVM.
+%   5. Validierung / Ergebnisse
+It has been successfully applied to multiple Java applications on different JVMs, and is used for bytecode-based performance prediction.
+\end{abstract}
+\begin{keyword}
+  Java, bytecode, counting, portable, fine-grained
+\end{keyword}
+\end{frontmatter}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The performance of a Java application can be described by analysing the execution of the application's Java bytecode instructions. Execution counts of these instructions are needed for bytecode-based performance prediction of Java applications \cite{kuperberg2007a,kuperberg2008c,hauck2009b}, and also for dynamic bytecode metrics \cite{dufour2003a}. As different instruction types have different exe\-cution durations, they must be counted separately. Also, method invocations should be identified due to the substantial contribution of methods to the total application performance. Thus, each method signature (incl. the Java API methods) should have its own counts. To obtain all these runtime counts, static analysis is impractical and too complex, so it is usually faster and easier to use dynamic (i.e. runtime) analysis for counting executed instructions and invoked methods.
+
+However, dynamic counting of executed Java bytecode instructions is not offered by Java profilers or conventional Java Virtual Machines (JVMs).
+\textsc{ByCounter}'s competitors such as (such as JRAF \cite{binder2006a}) either have serious shortcoming, or are not publicly available, as outlined in \cite{kuperberg2008a}. 
+Many of them rely on the instrumentation of the JVM, however, such instrumentation requires substantial effort and must be reimplemented for different JVMs. 
+In contrast to that, \textsc{ByCounter} it works by instrumenting the application bytecode instead of instrumenting the JVM, making the resulting approach truly portable while neither altering the signatures of instrumented classes nor requiring wrappers.
+To make performance characterisation through bytecode counts more precise, runtime parameters of some bytecode instructions must be considered, as they can have significant impact on their performance \cite{kuperberg2007a}. For these cases, \textsc{ByCounter} provides basic parameter recording (e.g. for the array-creating instructions), and it also offers extension hooks for the recording mechanism. 
+
+This manual is structured as follows: Sec.~\ref{sec:Obtaining} explains how to obtain ByCounter while Sec.~\ref{sec:Description} describes the structure of the project. 
+Sec.~\ref{sec:Architecture} gives an overview of tool's architecture, while Sec.~\ref{sec:Running} explains how to execute \textsc{ByCounter} examples and tests. Sec.~\ref{sec:Limitations} lists and explains limitations of the current version of \textsc{ByCounter}.
+The manual concludes with a listing of used libraries in Sec.~\ref{sec:Libraries}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Obtaining \textsc{ByCounter}}
+\label{sec:Obtaining}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+To obtain \textsc{ByCounter}, please contact Michael Kuperberg for information (Email: \href{mailto:michael.kuperberg@kit.edu}{michael.kuperberg@kit.edu}).
+If you are a member of the Palladio research group, you can obtain the current \textsc{ByCounter} release from the \href{https://svnserver.informatik.kit.edu/i43/svn/code/Palladio.ByCounter/trunk/de.uka.ipd.sdq.ByCounter}{SVN repository}.
+
+For trouble-free development with ByCounter, we recommend version 3.5 of Eclipse for Java Developers, Eclipse for Java EE or Eclipse Classic to avoid the possibility of conflicts with the ASM library that is included in some Eclipse packages.
+Important note: the compiler settings in Eclipse should be left to default (which is ``checked'') for the following compilation settings (Windows $\rightarrow$ Preferences $\rightarrow$ Java $\rightarrow$ Compiler) which describe the contents of compiled class files: adding variable attributes, adding line number attributes, and adding source file names (s. Screenshot). Also check that the project-specific settings (Project $\rightarrow$ Properties $\rightarrow$ Java Compiler) do not differ from this.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=1.0\linewidth]{./images/compilerSettings}
+  \caption{Bytecode instrumentation and instruction counting using \textsc{ByCounter}}
+  \label{fig:settings}
+\end{figure}
+In Eclipse 3.5, ``1.6'' (aka version 50, see \\\verb|http://en.wikipedia.org/wiki/Class_%28file_format%29| for details) is the default classfile version to which Java classes are compiled. When changing this to ``1.5'' (aka Java 5), Eclipse displays a warning that the Javassist library contains classes with version 50. This seems to be a false positive, under investigation by Javassist authors and us.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Description of file structure}
+\label{sec:Description}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{itemize}
+%	\item \texttt{/.settings} : Eclipse administration files (not part of the review)
+	\item \texttt{/bin : compiled} \textsc{ByCounter} classes
+	\item \texttt{/bin\_instrumented} : instrumented classfiles written by \textsc{ByCounter} on request
+	\item \texttt{/ByCounter\_logged\_counting\_results} : the location of textual counting logs written when \textsc{ByCounter} is run in collectorless mode (see below)
+	\item \texttt{/doc} : a small entry-level manual, as well as the location for generated Javadoc HTML files
+%	\item \texttt{/input} : a collection of files used by the evaluation (not part of the review; will not be distributed with end-user \textsc{ByCounter})
+	\item \texttt{/lib} : libraries (both end-user requirements and developer dependencies, see Section \ref{sec:Libraries}
+	\item \texttt{/src} : source files
+\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\textsc{ByCounter} Architecture}
+\label{sec:Architecture}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In Figure \ref{fig:dataFlow}, the data flow in \textsc{ByCounter} is detailed (for overall \textsc{ByCounter} architecture, see \cite{kuperberg2008a}).
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=1.0\linewidth]{./images/dataFlow}
+  \caption{Bytecode instrumentation and instruction counting using \textsc{ByCounter}}
+  \label{fig:dataFlow}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Examples and Running \textsc{ByCounter}}
+\label{sec:Running}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The class \texttt{ByCounterExample} in package \texttt{de.uka.ipd.sdq.ByCounter.example} can be executed directly.
+It instruments itself and runs the instrumented version, printing the counting results to standard out (i.e. to the console). 
+The implementation of the class is documented so that the class can be used as an entry example. 
+Further examples can be found in the \texttt{test} subpackage.
+\textbf{
+Both examples and test cases should be run with JVM parameters set to increase memory bounds, e.g. \texttt{-Xmx512M -Xss1M}.} Note that ByCounter creates a significant number of CSV files in the root project directory during test runs. 
+
+The Swing dialogue window that pops up when instrumentation (step) is failing is to be reworked soon; it is meant to accentuate the failure which otherwise gets easily lost in the console logging output. For logging, log4j was discarded in favor of Java platform API's logging facilities because log4j is known to cause problems with bytecode instrumentation.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Limitations of \textsc{ByCounter}}
+\label{sec:Limitations}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The current version of ByCounter has troubles instrumenting classes in the default package (i.e. no containing package). Therefore make sure to have classes that have to be instrumented in packages until this issue is resolved
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Description of Libraries}
+\label{sec:Libraries}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The following libraries, listed in alphabetical order, are found in the \texttt{/lib} directory of \textsc{ByCounter}. The JARs in bold are required, the others are needed for experimental purposes (and are partially not included in the ZIP file on BSCW).
+%\begin{center}
+%\begin{tabular}{llllll}
+%\underline{Name/URL} & \underline{Version} & \underline{Was} & \underline{Woher/URL} & \underline{needed for building} & \underline{needed by user}\\
+\begin{itemize}
+	\item ant.jar (Ant is a standard plugin in Eclipse, but the ant.jar may be needed in other environments to compile the ByLoader.jar ``JVM instrumentation agent'')%\footnote{} & × & × & × & × & ×\\
+	\item ant-launcher.jar%\footnote{} & × & × & × & × & ×\\
+	\item \textbf{asm-all-3.3.jar}\footnote{http://asm.objectweb.org/}, needed by end users and for building
+	\item ByLoader.jar: GUI/``instrumentation JVM agent'' that wraps \textsc{ByCounter}, self-created (\texttt{build.xml} in \texttt{loader} package)% & × & ×\\
+	\item \textbf{commons-math-1.1.jar}\footnote{http://commons.apache.org/math/} needed for mathematical evaluations% & × & × &  & × & ×\\
+	\item derby.jar%\footnote{} & × & × & × & × & ×\\
+	\item \textbf{gnujaxp.jar}\footnote{http://www.gnu.org/software/classpath/} Needed for classpath/classloading operations% & × & × &  & × & ×\\
+	\item \textbf{itext-2.1.7.jar}\footnote{http://www.jfree.org/jfreechart/} needed for creating charts as PDF files% & × & × &  & × & ×\\
+	\item janino.jar% & × & × & × & × & ×\\
+	\item javac.jar% & × & × & × & × & ×\\
+	\item javassist.jar\footnote{http://javassist.org/, currently using version 3.8} needed for Javassist-based classloading% & × &  & y & y\\
+	\item jcommon-1.0.10.jar\footnote{http://jcommons.sourceforge.net/}% & × & × &  & × & ×\\
+	\item \textbf{jfreechart-1.0.13.jar}\footnote{http://www.jfree.org/jfreechart/}, needed for displaying charts summarising counting results% & × & × &  & × & ×\\
+	\item jfreechart-1.0.13-experimental.jar%\footnote{} & × & × & http://www.jfree.org/jfreechart/ & × & ×\\
+	\item jfreechart-1.0.13-swt.jar%\footnote{} & × & × & http://www.jfree.org/jfreechart/ & × & ×\\
+	\item \textbf{junit-4.4.jar} Needed to run the tests, e.g. outside of Eclipse(JUnit is a standard plugin)%\footnote{} & × & × & × & × & ×\\
+	\item ocutil-2.5.1.jar% & × & × & × & × & ×\\
+	\item servlet.jar% & × & × & × & × & ×\\
+	\item swtgraphics2d.jar% & × & × & × & × & ×\\
+	\item Tidy.jar% & × & × & × & × & ×
+%\end{tabular}
+%\end{center}
+\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{IEEEtran}
+\bibliography{ByCounter_Manual}
+%\bibliography{./../../../../../../palladio.bib/trunk/palladio,./../../../../../../palladio.bib/trunk/sdq_publications}
+\end{document}

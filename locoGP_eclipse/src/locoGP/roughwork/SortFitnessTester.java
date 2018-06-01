@@ -1,8 +1,8 @@
 package locoGP.roughwork;
 
 import locoGP.fitness.IndividualEvaluator;
+import locoGP.fitness.bytecodeCount.ByteCodeIndividualEvaluator;
 import locoGP.individual.Individual;
-import locoGP.operators.NodeOperators;
 import locoGP.problems.Problem;
 import locoGP.problems.Sort1Optimised;
 import locoGP.problems.Sort1Problem;
@@ -26,8 +26,9 @@ public class SortFitnessTester {
 		// Set up our seed
 				//Problem aProblem = new Sort1Problem();
 				Individual originalIndividual = new Individual(aProblem);
-				NodeOperators.initialise(originalIndividual.ourProblem.getStrings());
-				IndividualEvaluator indEval = new IndividualEvaluator();
+				//Individual.initialise(originalIndividual.ourProblem.getStrings());
+				originalIndividual.gpMaterial.printAll();
+				IndividualEvaluator indEval = new ByteCodeIndividualEvaluator();
 				indEval.evaluateIndNoTimeLimit(originalIndividual); // This is our reference individual
 				originalIndividual.ourProblem.setBaselineRuntimeAvg(originalIndividual.getRuntimeAvg());
 				
@@ -35,7 +36,7 @@ public class SortFitnessTester {
 				//Problem optimisedSortProblem = new Sort1Optimised();
 				Individual sortVariant = new Individual(originalIndividual, optimisedSortProblem,null);
 				indEval.evaluateIndNoTimeLimit(sortVariant);
-				System.out.println("Variant "+sortVariant +" "+  sortVariant.getFunctionalityScore()+" "+  sortVariant.getRuntimeAvg());
+				System.out.println("Variant "+sortVariant +" "+  sortVariant.getFunctionalityErrorCount()+" "+  sortVariant.getRuntimeAvg());
 				System.out.println("timeratio: " + sortVariant.getTimeFitnessRatio()+ " correctness "+ sortVariant.getCorrectness());
 				System.out.println("Fitness " + sortVariant.getFitness()+"\n");
 				

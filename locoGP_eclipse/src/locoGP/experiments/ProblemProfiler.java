@@ -23,8 +23,9 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 
 import locoGP.Generation;
 import locoGP.experiments.GPConfig;
+import locoGP.fitness.IndividualEvaluator;
+import locoGP.fitness.stmtCount.StmtCountIndividualEvaluator;
 import locoGP.individual.Individual;
-import locoGP.operators.NodeOperators;
 import locoGP.problems.Problem;
 
 import locoGP.problems.Sort1Problem; // bubblesort
@@ -63,6 +64,8 @@ public class ProblemProfiler {
 		//             popSize, numGens, tournSize, pickBestLocation, updateLocationBias, debug
 		
         //int expNum = Integer.parseInt(args[0]);
+		
+		IndividualEvaluator indEval = new StmtCountIndividualEvaluator();
 
 		Problem[] problems = {new Sort1Problem(), new Sort1HeapProblem(),
 				new Sort1ShellProblem(),new Sort1QuickProblem(),
@@ -71,50 +74,47 @@ public class ProblemProfiler {
 				new Sort1SelectionProblem(),new Sort1Selection2Problem(),
 				new Sort1LoopsProblem(1),new HuffmanCodeBookProblem()};
 		
-		for( int probInd = 11 ; probInd<problems.length ; probInd++){
+		for( int probInd = 0 ; probInd< problems.length ; probInd++){
 			Individual originalIndividual = new Individual(problems[probInd]); 	
 			System.out.println("\n"+originalIndividual.getClassName()+"\n");
 			Logger.logAll("Our problem is "
 					+ originalIndividual.ourProblem.getProblemName());
-
-			// get all blocks in the program
-			List<ASTNode> allNodes = originalIndividual.gpMaterial
-					.getAllAllowedNodes();
-			for (int i = 0; i < allNodes.size(); i++) {
-				if (allNodes.get(i) instanceof Block) {
-					// add print statements for each line in the block
-					addLinePrintStmts((Block) allNodes.get(i));
-				}
-			}
-
-			Logger.logJavaFile(
-					originalIndividual.getClassName(),
-					originalIndividual.ASTSet.getCodeListing());
-			// run the program
-			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-			compiler.run(null, null, null, "-cp", "", originalIndividual.getClassName()+".java");
-			Class<?> clazz;
-			try {
-				clazz = Class.forName(originalIndividual.getClassName());
-				
-				Method m = clazz.getMethod("getCodeBook", new Class[] {Byte[].class});
-				Object[] _args = originalIndividual.ourProblem.getTestData()[0].getTest(); //new Object[] { testArray };
-				m.invoke(null, _args);							
-				//System.out.println("result " + result);
-					
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+			indEval.evaluateIndNoTimeLimit(originalIndividual);			
 		}
-
-		
-		
-		System.exit(0);
 	}
+}
+	/*// get all blocks in the program
+	List<ASTNode> allNodes = originalIndividual.gpMaterial
+			.getAllAllowedNodes();
+	for (int i = 0; i < allNodes.size(); i++) {
+		if (allNodes.get(i) instanceof Block) {
+			// add print statements for each line in the block
+			addLinePrintStmts((Block) allNodes.get(i));
+		}
+	}
+
+	Logger.logJavaFile(
+			originalIndividual.getClassName(),
+			originalIndividual.ASTSet.getCodeListing());
+	// run the program
+	JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+	compiler.run(null, null, null, "-cp", "", originalIndividual.getClassName()+".java");
+	Class<?> clazz;
+	try {
+		clazz = Class.forName(originalIndividual.getClassName());
+		
+		Method m = clazz.getMethod("getCodeBook", new Class[] {Byte[].class});
+		Object[] _args = originalIndividual.ourProblem.getTestData()[0].getTest(); //new Object[] { testArray };
+		m.invoke(null, _args);							
+		//System.out.println("result " + result);
+			
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}*/
+
 	
-	static int lineCount =0;	
+	/*static int lineCount =0;	
 	
 	private static void addLinePrintStmts(Block aBlock) {
 		int numLines = aBlock.statements().size();
@@ -133,9 +133,9 @@ public class ProblemProfiler {
 			StringLiteral literal = ourAST.newStringLiteral();
 			literal.setLiteralValue("Line: " + lineCount);
 			  
-			/*StringLiteral aPrintStmtNode = aBlock.getAST().newStringLiteral();
+			StringLiteral aPrintStmtNode = aBlock.getAST().newStringLiteral();
 			aPrintStmtNode.setLiteralValue(newPrintStmtString);
-			*/
+			
 			
 			aMI.arguments().add(literal);
 			Statement newStmt = aBlock.getAST().newExpressionStatement(aMI);
@@ -144,4 +144,4 @@ public class ProblemProfiler {
 			lineCount++;
 		}
 	}	
-}
+*/

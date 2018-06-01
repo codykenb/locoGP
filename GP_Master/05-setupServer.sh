@@ -4,7 +4,7 @@
 
 # This section requires root to install required packages, standard stuff
 sudo su - 
-export http_proxy=http://proxy.cs.tcd.ie:8080
+# export http_proxy=http://aproxy.ie:8080
 apt-get install ssh openjdk-6-jre openjdk-6-jdk screen rsync
 
 adduser bck

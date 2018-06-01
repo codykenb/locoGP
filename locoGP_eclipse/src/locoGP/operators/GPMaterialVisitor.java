@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -24,10 +25,13 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -36,41 +40,57 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 
+/**
+ * Moves down the AST and gathers lists of leaf (simplenames, operators) and non-leaf nodes.
+ * Leaf nodes should be excluded from crossover.
+ * None of the methods here clone the AST. 
+ * This class (and subclasses) defines how material is selected from a program.
+ * This particular class selects nodes randomly. (without bias or tournament selection)
+ * 
+ *  TODO capture methodDeclarations so they can be inserted around expressions
+ */
 public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializable{
-	/*
-	 * This goes down through the AST tree and gathers GP primitives in a useful format.
-	 */
 	
 	private List<ASTNode> allNodes = new ArrayList<ASTNode>(); 
 	// keep a reference to all nodes, so we can easily pick one at random
-	private List<ASTNode> allAllowedNodes = new ArrayList<ASTNode>(); 
+	private List<ASTNode> allAllowedNodes = new ArrayList<ASTNode>();
 	
 	// Operators have special uses, not ASTNodes
 	private List<Operator> infixOperators = new ArrayList<Operator>();
 	private List<PostfixExpression.Operator> postfixOperators = new ArrayList<PostfixExpression.Operator>();
+	private List<PrefixExpression.Operator> prefixOperators = new ArrayList<PrefixExpression.Operator>();
 	
-	// Any expression with an operator which returns boolean, or any boolean simpleName 
+	// Collect any expression with an operator which returns boolean, or any boolean simpleName 
 	private List<InfixExpression> conditionals = new ArrayList<InfixExpression>(); 
-	
-	// All expression types can be interchanged, no biggie
-	private List<Expression> primitives = new ArrayList<Expression>(); 
+
+	private List<SimpleName> updateadbleNames = new ArrayList<SimpleName>(); // sub-statement non-leaves
+	private List<Expression> expressions = new ArrayList<Expression>(); // sub-statement non-leaves 
 	private List<Statement> statements = new ArrayList<Statement>();
 	
-	// stuff which can be extracted as clone
-	private List<Expression> extractableStatements = new ArrayList<Expression>(); 
+	private List<Block> blocks = new ArrayList<Block>();
 	
+	// stuff which can be extracted as clone
+	//private List<Expression> extractableStatements = new ArrayList<Expression>(); 
+	
+	//private ArrayList<TypeDeclaration> declaredClasses = new ArrayList<TypeDeclaration>();
 	private ArrayList<MethodInvocation> methodInvocations= new ArrayList<MethodInvocation>();
 	
 	private ArrayList<Type> allTypes = new ArrayList<Type>();
+
+	private Random generator = new Random();
+	private ArrayList<TypeDeclaration> typeDecsnew = new ArrayList<TypeDeclaration>();
+	private SimpleName classNameNode;
+	private Name packageName;
+	
+	public static NodeSelectorI nodeSelector= new NodeSelector();
 	
 	public void purgeRefs() {
-		// TODO Auto-generated method stub
-
 		ASTNode tempNode, originalNode;
 		GPASTNodeData tempData =null;
 		for (int i = 0 ; i < allNodes.size() ; i++) {
@@ -88,12 +108,10 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		postfixOperators = null;
 		conditionals.clear();
 		conditionals = null;
-		primitives.clear();
-		primitives = null;
+		expressions.clear();
+		expressions = null;
 		statements.clear();
 		statements = null;
-		extractableStatements.clear();
-		extractableStatements = null;
 		methodInvocations.clear();
 		methodInvocations = null;
 		allTypes.clear();
@@ -117,11 +135,16 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		printAll(conditionals);
 		
 		System.out.println("primitives");
-		printAll(primitives);
+		printAll(expressions);
 			
 		System.out.println("statements");
 		printAll(statements);
 		
+		System.out.println("All disallowed nodes");
+		List<ASTNode> allDisallowedNodes = new ArrayList<ASTNode>();
+		allDisallowedNodes.addAll(allNodes);
+		allDisallowedNodes.removeAll(allAllowedNodes);
+		printAll(allDisallowedNodes );
 	}
 	
 	private void printAllTypes(List<ASTNode> nodesList) {
@@ -160,41 +183,61 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 			System.out.println(" " +iOp.next().toString());
 	}
 	
-	
 	public GPASTNodeData getNodeProperty(int i){
 		ASTNode tempNode  =  getNode(i);
 		return (GPASTNodeData) tempNode.getProperty("gpdata");
 	}
 	
-	public ASTNode getNode(int i){
+	private ASTNode getNode(int i){
 		return allAllowedNodes.get(i);
 	}
 	
-	public int getNumGPNodes() {
+	public int getNumGPNodes() { // TODO Doublecheck this is correct, are the more in allowednodes?
 		return infixOperators.size() + postfixOperators.size()
-				+ conditionals.size() + primitives.size()
+				+ conditionals.size() + expressions.size()
 				//+ numberLiterals.size() + arithmeticExprs.size() + updaters.size() 
 				+ statements.size();
 	}
 	
-	private Random generator = new Random(); 
+	 
 	
+	/**
+	 * 	In this constructor we define all operators that are to be used,
+	 * 	Any that do not exist in the original program should be
+	 * 	added here.
+	 **/ 
 	public GPMaterialVisitor(){
-		/* 
-			This is where we define all operators that are to be used,
-			Any that do not exist in the original program should be 
-			added here.
-		*/ 
+		
 
-		this.infixOperators.add(Operator.toOperator("=="));
-		this.infixOperators.add(Operator.toOperator("||"));
-		this.infixOperators.add(Operator.toOperator("&&"));
+		this.infixOperators.add(Operator.toOperator("*"));
+		this.infixOperators.add(Operator.toOperator("/"));
+		this.infixOperators.add(Operator.toOperator("%"));
+		this.infixOperators.add(Operator.toOperator("+"));
+		this.infixOperators.add(Operator.toOperator("-"));
+		this.infixOperators.add(Operator.toOperator("<<"));
+		this.infixOperators.add(Operator.toOperator(">>"));
+		this.infixOperators.add(Operator.toOperator(">>>"));
 		this.infixOperators.add(Operator.toOperator("<"));
-		this.infixOperators.add(Operator.toOperator("<="));
 		this.infixOperators.add(Operator.toOperator(">"));
+		this.infixOperators.add(Operator.toOperator("<="));
 		this.infixOperators.add(Operator.toOperator(">="));
+		this.infixOperators.add(Operator.toOperator("=="));
+		this.infixOperators.add(Operator.toOperator("!="));
+		this.infixOperators.add(Operator.toOperator("^"));
+		this.infixOperators.add(Operator.toOperator("&"));
+		this.infixOperators.add(Operator.toOperator("|"));
+		this.infixOperators.add(Operator.toOperator("&&"));
+		this.infixOperators.add(Operator.toOperator("||"));
+		
 		this.postfixOperators.add(PostfixExpression.Operator.toOperator("--"));
 		this.postfixOperators.add(PostfixExpression.Operator.toOperator("++"));
+		
+		this.prefixOperators.add(PrefixExpression.Operator.toOperator("--"));
+		this.prefixOperators.add(PrefixExpression.Operator.toOperator("++"));
+		this.prefixOperators.add(PrefixExpression.Operator.toOperator("-"));
+		this.prefixOperators.add(PrefixExpression.Operator.toOperator("+"));
+		this.prefixOperators.add(PrefixExpression.Operator.toOperator("~"));
+		this.prefixOperators.add(PrefixExpression.Operator.toOperator("!"));
 	}
 
 	private static boolean isAllowedType(ASTNode aNode){
@@ -202,22 +245,24 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		if (aNode == null) // TODO why is this sometimes null?
 			return ok;
 		try {
-				ok = ( aNode.getNodeType() != 22 && // Integer
+				ok = ( //aNode.getNodeType() != 22 && // Integer // allowed for ascon?
 				aNode.getNodeType() != 43 && // Comparable
 				aNode.getNodeType() != 44 && // SingleVariableDeclaration
 				aNode.getNodeType() != 78 && // @Override	
-				aNode.getNodeType() != 36 && // CastExpression
-				aNode.getNodeType() != 11 && // CastExpression :/
+				//aNode.getNodeType() != 36 && // CastExpression // allowed for ascon
+				//aNode.getNodeType() != 11 && // CastExpression :/ // allowed for ascon
 				aNode.getNodeType() != 40 && //
 				(
+						aNode instanceof PrimitiveType || // only for use in CastExpressions (and variable declarations? - specialise code to input size)
 						aNode instanceof SimpleName||
-						//aNode instanceof NullLiteral||
+						aNode instanceof NullLiteral||
 						aNode instanceof NumberLiteral||
 						aNode instanceof StringLiteral||
 						aNode instanceof QualifiedName ||
 						aNode instanceof org.eclipse.jdt.core.dom.BooleanLiteral ||
 						aNode instanceof VariableDeclarationFragment ||
-						isExpressionOrStatement(aNode)
+						aNode instanceof MethodInvocation || 
+						isExpressionOrStatement(aNode) 						
 				)
 				);
 
@@ -237,15 +282,15 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 						aNode instanceof StringLiteral)
 				&& 
 				// aNode instanceof QualifiedName||
-				// aNode instanceof ArrayAccess||
+				aNode instanceof ArrayAccess||
 				// aNode instanceof StringLiteral||
-				// aNode instanceof FieldAccess||
-				(aNode instanceof InfixExpression
-				||
-				// aNode instanceof ParenthesizedExpression||
-				// aNode instanceof CastExpression||
+				aNode instanceof FieldAccess||
+				(aNode instanceof InfixExpression ||
+				aNode instanceof ParenthesizedExpression||
+				aNode instanceof CastExpression||
 				aNode instanceof Expression
 				|| aNode instanceof PostfixExpression
+				|| aNode instanceof PrefixExpression
 				|| aNode instanceof Statement ||
 				/*
 				 * Block aNode instanceof ExpressionStatement|| aNode instanceof
@@ -260,16 +305,16 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 						
 	}
 	
-	public static boolean allowedType2(ASTNode aNode){
+	public static boolean allowedTypeAndParentType(ASTNode aNode){
 		
 		// A block is allowed, regardless if its parent 
 		if(aNode instanceof Block)
 			return true;
 		
 		// The Simplename of a method invocation shouldn't be changed.
-		if(aNode instanceof SimpleName && aNode.getParent() instanceof MethodInvocation )
+		/*if(aNode instanceof SimpleName && aNode.getParent() instanceof MethodInvocation )
 			if(((MethodInvocation)aNode.getParent()).getName().equals(aNode))
-				return false;
+				return false;*/
 		
 		// allowed nodes, with parents which are allowed
 		if(GPConfig.useFineGranularityChange()){
@@ -285,14 +330,42 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 	public void preVisit(ASTNode aNode){
 		allNodes.add(aNode);
 		
-		if( allowedType2( aNode) ){ //&& (GPConfig.getLinkNewChildBiasDataWithParent() || GPConfig.getReferenceChildBiasToParentData())){
+		if( allowedTypeAndParentType( aNode) ){ //&& (GPConfig.getLinkNewChildBiasDataWithParent() || GPConfig.getReferenceChildBiasToParentData())){
 			GPASTNodeData tmpData = (GPASTNodeData) aNode.getProperty("gpdata");
 			if(tmpData == null){
 				aNode.setProperty("gpdata", new GPASTNodeData());
 			}
 			allAllowedNodes.add(aNode);
 		}
+		
+		//	return Bits.byteOrder()
+		if(aNode.toString().equals("return Bits.byteOrder()")) //"ByteOrder") 
+/*				&& !(aNode instanceof SimpleType 
+						|| aNode instanceof SimpleName))*/{
+			System.out.println("Found ByteOrder: " + aNode.getNodeType());
+		}
+		
 	}
+	
+	/*
+	 *  ------------------------------------------- Material that needs to be updated in new cloned programs
+	 *  Method declarations (to update constructor names to match class names)
+	 *  Class declarations (update static method calls and new object generations) 
+	 */
+	public List<MethodDeclaration> getConstructors(String oldName) {
+		ArrayList<MethodDeclaration> constructorList = new ArrayList<MethodDeclaration>();
+		for(ASTNode aNode : allNodes)
+			if(aNode.getNodeType() == ASTNode.METHOD_DECLARATION)
+				if(((MethodDeclaration)aNode).isConstructor() && ((MethodDeclaration)aNode).getName().toString().compareTo(oldName)==0 )
+					constructorList.add((MethodDeclaration)aNode);
+		return constructorList;
+	}
+	// -------------------------------------------------------------Class declarations:
+	/*public boolean visit(TypeDeclaration typeDeclaration) {
+		this.declaredClasses.add(typeDeclaration);
+		//return visit((Statement) stmt);
+		return true;
+	}*/
 	// -------------------------------------------------------------Statements:	
 	public boolean visit(IfStatement stmt) {
 		return visit((Statement) stmt);
@@ -310,19 +383,21 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		return visit((Statement) stmt);
 	}
 	public boolean visit(Block stmt) {
+		this.blocks.add(stmt);
 		return visit((Statement) stmt);
 	}
+
 	public boolean visit(Statement stmt){ 
 		// doesn't override anything. No visit function for statement object
-		if(!statements.contains(stmt))
-			statements.add(stmt);
+		//if(!statements.contains(stmt))
+		statements.add(stmt);
 		return true;
 	}
 	
 	// -------------------------------------------------------------Expressions:
 	public boolean visit(Expression expr){
-		if(allowedType2(expr)  &&!this.primitives.contains(expr))
-			this.primitives.add(expr);
+		if(allowedTypeAndParentType(expr)  )//&&!this.expressions.contains(expr))
+			this.expressions.add(expr);
 		return true;
 	}
 
@@ -331,13 +406,55 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		return true;
 	}
 	
-	public boolean visit(SimpleName sN){
-		//TODO it could be a boolean, which could be used as a conditional, but what are the chances?
-		if( !(sN.getParent() instanceof BodyDeclaration)){
-			visit((Expression)sN);		
+	public boolean visit(TypeDeclaration tD){
+		if(tD.getParent() instanceof CompilationUnit){
+			this.classNameNode = tD.getName();
+			if(((CompilationUnit)tD.getParent()).getPackage() != null)
+				this.packageName = ((CompilationUnit)tD.getParent()).getPackage().getName();
 		}
+		
 		return true;
 	}
+
+	public String getClassName(){
+		return this.classNameNode.toString();
+	}
+	
+	public String getClassPackage(){
+		if( this.packageName == null )
+			return "";
+		else
+			return this.packageName.toString();
+	}
+	
+	public boolean visit(SimpleName sN){
+		//TODO it could be a boolean, which could be used as a conditional, but what are the chances?
+		if( sN.getParent() instanceof BodyDeclaration 
+				|| sN.getParent() instanceof Type
+				|| sN.getParent() instanceof QualifiedName
+				|| sN.getParent() instanceof ConditionalExpression
+				|| sN.getParent() instanceof MethodInvocation
+				|| sN.getParent() instanceof TypeDeclaration){ 
+			/*if(!(sN.getParent() instanceof MethodDeclaration // eh.. why? 
+					&& !((MethodDeclaration)sN.getParent()).isConstructor() )){*/
+			this.updateadbleNames.add(sN);
+			//}	
+		} else{
+			visit((Expression)sN);		
+		}
+		
+		// gather these so references can be updated easily
+		/*if(sN.getParent() instanceof MethodDeclaration || 
+				sN.getParent() instanceof ){
+		}*/
+		return true;
+	}
+	
+	/*public boolean visit(ConditionalExpression cE){
+
+		System.out.println(cE.toString());
+		return true;
+	}*/
 	
 	public boolean visit(NullLiteral nL){
 		visit((Expression)nL);		
@@ -389,15 +506,21 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		String[] allowedOperators = { "==", "||", "&&", "<", "<=", ">" , ">=","<>","!=" };
 		boolean isBoolean = false;
 		for(String op : allowedOperators){
-			if(operator.toString().compareTo(op)==0)
+			if(operator.toString().compareTo(op)==0){
 				isBoolean=true;
+				break;
+			}
 		}
 		return isBoolean;
 	}
 	public boolean visit(MethodInvocation expr){
 		visit((Expression)expr);
-		addToExtractableStmts(expr);
+		// addToExtractableStmts(expr);
 		this.methodInvocations.add(expr);
+		/*if(expr.toString().contains("Bits.byteOrder")){
+			System.out.println("found!" + expr.getExpression().toString());
+			System.out.println("found!");
+		}*/
 		return true;
 	}
 /*	public boolean visit(ClassInstanceCreation classICreation){
@@ -420,11 +543,15 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		this.allTypes.add(aType);
 		return true;
 	}
+	public boolean visit(PrefixExpression prefixExpr){
+		visit((Expression)prefixExpr); 
+		if(!this.prefixOperators.contains(prefixExpr.getOperator()))
+			this.prefixOperators.add(prefixExpr.getOperator());
+		return true;
+	}
+	
 	public boolean visit(PostfixExpression postfixExpr){
 		visit((Expression)postfixExpr); 
-		// TODO can be used as a new statement for the purposes of cloning
-		addToExtractableStmts(postfixExpr);
-				
 		if(!this.postfixOperators.contains(postfixExpr.getOperator()))
 			this.postfixOperators.add(postfixExpr.getOperator());
 		/*if(postfixExpr.getOperator().toString().contains("+")){
@@ -435,22 +562,19 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 	}
 	public boolean visit(Assignment expr){
 		visit((Expression)expr);	
-		addToExtractableStmts(expr);
+		//addToExtractableStmts(expr);
 		return true;
 	}
 	
+	/*
+	 * Gathers expressions which can be used as a statement
+	 * @param expr
+	  Allow any expression to be placed as a statement!
 	private void addToExtractableStmts(Expression expr) {
 		this.extractableStatements.add(expr);
-	}
+	}*/
 
-	public Expression getDifferentRandomConditionalClone(Expression oldExp) {
-		Expression newExp ; 
-		CompilationUnit indAST = (CompilationUnit)oldExp.getRoot();
-		do {
-			newExp = (Expression) getRandomClone( indAST, this.conditionals);//getRandomConditionalClone(indAST);
-		}while ( oldExp.equals(newExp));
-		return newExp;
-	}
+	
 /*	private Expression getRandomConditionalClone(CompilationUnit indAST) {
 		
 		 * This method gets things that are for making up left or right hand side of
@@ -470,15 +594,62 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		return cloneExpr;
 	}*/
 
-	public Operator getDifferentRandomInfixOperator(Operator oldOp) {
-		Operator newOp ; 
-		do {
-			newOp = infixOperators.get(generator.nextInt(infixOperators.size()));
-		}while ( newOp.equals(oldOp));
-		return newOp;
-	}
+
 	
-	public List<Statement> getStatementsClones2(CompilationUnit cloneAST) { 
+	
+	/*private Statement extractStatementClone(CompilationUnit cloneAST) {
+		int numChoices = this.statements.size() + this.expressions.size();
+		int choice = generator.nextInt(numChoices);
+		Statement returnStatement;
+		ASTNode cloneableNode = selectStatementOrExpression();
+		if(choice >= this.statements.size()){
+			cloneableNode = this.expressions.get(choice - this.statements.size());
+			Expression newExpr = (Expression) NodeModifierUtil.getClone(cloneAST, cloneableNode);
+			returnStatement = cloneAST.getAST().newExpressionStatement( newExpr );
+		}else{
+			cloneableNode = this.statements.get(choice);
+			returnStatement = (Statement) CompilationUnit.copySubtree(cloneAST.getAST(), cloneableNode);
+		}
+		NodeModifierUtil.cloneExistingGPDataRef( cloneableNode, returnStatement);
+		return returnStatement;
+	} */
+	
+	/**
+	 * Picks a random statement or (non-leaf) expression. If expression is picked, a new parent statement is created and returned.  
+	 * @return a new statement
+	 */
+/*	public Statement extractStatement() {
+		int numChoices = this.statements.size() + this.expressions.size();
+		int choice = generator.nextInt(numChoices);
+		Statement returnStatement;
+		// Expression cloneableNode = selectStatementOrExpression();
+		if(choice >= this.statements.size()){
+			Expression anExpr= this.expressions.get(choice - this.statements.size());
+			returnStatement = anExpr.getAST().newExpressionStatement( anExpr );
+		}else{
+			returnStatement= this.statements.get(choice);
+		}
+		return returnStatement;
+	}*/
+	
+	public ASTNode selectStatementOrExpression(){
+		int numChoices = this.statements.size() + this.expressions.size();
+		int choice = generator.nextInt(numChoices);
+		ASTNode selectedNode ;
+		if(choice >= this.statements.size()){
+			selectedNode = this.expressions.get(choice - this.statements.size());
+		}else{
+			selectedNode = this.statements.get(choice);
+		}
+		return selectedNode;
+	}
+ 
+
+	public ASTNode selectStatement(){
+		return this.statements.get(generator.nextInt(this.statements.size()));
+	}
+ 
+/*	public List<Statement> getStatementsClones(CompilationUnit cloneAST) { 
 		ArrayList<Statement> returnList = new ArrayList<Statement>();
 		for(Statement originalStmt : this.statements){
 			Statement newStmt = (Statement) CompilationUnit.copySubtree(cloneAST.getAST(), originalStmt);
@@ -491,12 +662,12 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 			Expression newExpr = (Expression) CompilationUnit.copySubtree(cloneAST.getAST(), clonableExpr);
 			Statement newStmt = cloneAST.getAST().newExpressionStatement( newExpr );
 			//cloneProbabilities(clonableExpr, newExpr);
-			NodeOperators.getExistingGPDataRef( clonableExpr, newExpr);
-			NodeOperators.getExistingGPDataRef( clonableExpr, newStmt);
+			NodeOperators.cloneExistingGPDataRef( clonableExpr, newExpr);
+			NodeOperators.cloneExistingGPDataRef( clonableExpr, newStmt);
 			returnList.add( newStmt );
 		}
 		return returnList;
-	}
+	}*/
 	
 	// This returns the actual objects, not clones! 
 	// Use for mutation or directly manipulating the relevant individual 
@@ -506,73 +677,30 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		return returnList;
 	}
 	
-	public List<ASTNode> getStatementsAsNodes() { 
+/*	private List<ASTNode> getStatementsAsNodes() { 
 		ArrayList<ASTNode> returnList = new ArrayList<ASTNode>();
 		returnList.addAll(this.statements);
 		return returnList;
-	}
-
-	/*	public ASTNode getRandomGPNode(boolean pickBestLocation) {
-		ASTNode returnNode = allAllowedNodes.get(generator.nextInt(allAllowedNodes.size()));
-		ArrayList<ASTNode> returnNodes = new ArrayList<ASTNode>(); // we can extend this for multiple nodes in future
-		if ( pickBestLocation ){ // implement tournament selection
-			ASTNode curNode =null;
-			do{
-			 curNode = allAllowedNodes.get(generator.nextInt(allAllowedNodes.size()));
-			} while (curNode instanceof MethodDeclaration);
-			
-			 if( ((GPASTNodeData)curNode.getProperty("gpdata")).getModifyProbability() > ((GPASTNodeData)returnNode.getProperty("gpdata")).getModifyProbability()) {
-					returnNode = curNode;
-			}
-			returnNodes.add(returnNode);
-		}else{
-			returnNodes.add(returnNode);
-		}
-		return returnNodes.get( generator.nextInt(returnNodes.size() ));
 	}*/
 
-	public List<ASTNode> getAllAllowedNodes() {
+	public List<ASTNode> getAllAllowedNodes() { // TODO needed?
 		return this.allAllowedNodes;
 	}
 	
-
-	
-/*	public static void cloneProbabilitiesDownTreeNo(ASTNode originalNode,
-			ASTNode targetNode) {
-		
-		 * This method is used when creating a cloned tree (child) from a parent tree
-		 
-		GPMaterialVisitor tempVisit = new GPMaterialVisitor();
-		originalNode.accept(tempVisit); // gather the probabilities
-		targetNode.accept(new ProbabilityClonerVisitor(tempVisit, true)); 
-	}*/
-	
-	// not always easy is it?
-	private ASTNode getRandomClone(CompilationUnit indAST, List elementList) {
-		ASTNode originalNode = null, cloneNode = null;
-		originalNode = (ASTNode) elementList.get(generator.nextInt(elementList.size()));
-		cloneNode = (Expression) ASTNode.copySubtree(indAST.getAST(), originalNode);
-		NodeOperators.getExistingGPDataRef( originalNode, cloneNode);
-		return cloneNode;
+	/**
+	 * Return a sub-statement non-leaf ASTNode subtree.  
+	 * @param oldExp
+	 * @return
+	 */
+	public Expression selectDifferentExpression(Expression oldExp) {
+		return (Expression) getDifferentObject(oldExp, this.expressions);
 	}
 	
-	public Expression getDifferentRandomPrimitiveClone(Expression oldExpr) {
-		Expression newExpr ; 
-		do {
-			newExpr = (Expression) getRandomClone((CompilationUnit)oldExpr.getRoot(), this.primitives);
-		}while (  oldExpr.equals(newExpr)); 
-		return newExpr;
-	}
+	public Expression selectDifferentConditional(Expression oldExp) {
+		return (Expression) getDifferentObject(oldExp, this.conditionals);
+	}	
 	
-	public Operator getDifferentRandomOperator(InfixExpression.Operator oldOp) {
-		// TODO add boolean operators
-		if(oldOp.equals(InfixExpression.Operator.toOperator("+")))
-			return InfixExpression.Operator.toOperator("-");
-		else
-			return InfixExpression.Operator.toOperator("+");
-	}
-	
-	public org.eclipse.jdt.core.dom.Assignment.Operator getDifferentRandomOperator(
+	public org.eclipse.jdt.core.dom.Assignment.Operator selectDifferentOperator(
 			org.eclipse.jdt.core.dom.Assignment.Operator oldOp) {
 		if( oldOp.equals(org.eclipse.jdt.core.dom.Assignment.Operator.toOperator("+="))){
 			if(generator.nextBoolean())
@@ -592,52 +720,40 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		}
 	}
 	
-	public PostfixExpression.Operator getDifferentRandomOperator( PostfixExpression.Operator operator) {
-		PostfixExpression.Operator newOp ; 
+	public PostfixExpression.Operator selectDifferentOperator( PostfixExpression.Operator operator) {
+		return (PostfixExpression.Operator) getDifferentObject(operator, postfixOperators);
+	}
+	
+	public PrefixExpression.Operator selectDifferentOperator( PrefixExpression.Operator operator) {
+		return (PrefixExpression.Operator) getDifferentObject(operator, prefixOperators);
+	}
 
-		boolean diffFound = false;
-		for(int i =0 ; i < postfixOperators.size(); i++){
-			if (!postfixOperators.get(i).equals(operator))
-				diffFound = true;
+	public Operator selectDifferentOperator(InfixExpression.Operator oldOp) {
+		return (Operator) getDifferentObject(oldOp,infixOperators);
+	}
+	
+	/**
+	 * Get a different looking node from a list. Accepts objects because operators are not ASTNode subtypes.
+	 * @param anItem
+	 * @param objList
+	 * @return
+	 */
+	private Object getDifferentObject(Object anItem, List objListOriginal){
+		Object chosenItem = anItem;
+		List objList = new ArrayList();
+		objList.addAll(objListOriginal);
+		
+		while(objList.size() > 0 && anItem.toString().equals(chosenItem.toString())) {
+			chosenItem = objList.get(generator.nextInt(objList.size()));
+			objList.remove(chosenItem);
 		}
 		
-		if(diffFound){
-		do {
-			newOp = postfixOperators.get(generator.nextInt(postfixOperators.size()));
-		}while(  newOp.toString().equals(operator.toString()) );
-		return newOp;
-		}else {
-			return postfixOperators.get(generator.nextInt(postfixOperators.size()));
-		}
+		return chosenItem; 
 	}
+	
 
-	
-	public Statement getRandomStatement() {
-		return this.statements.get(generator.nextInt(this.statements.size())); 
-	}
-	
-	/*public Block getRandomBlock() {
-		ArrayList<Block> aR = new ArrayList<Block>();
-		for(Statement stmt: this.statements){
-			if(stmt instanceof Block)
-				aR.add((Block)stmt);
-		}
-		return aR.get(generator.nextInt(aR.size())); 
-	}*/
-	
-/*	private Block getRandomBlockClone() {
-		Block aNode = getRandomBlock();
-		return (Block) ASTNode.copySubtree(aNode.getAST(), aNode); 
-	}*/
-	
-	public List<MethodDeclaration> getConstructors(String oldName) {
-		ArrayList<MethodDeclaration> constructorList = new ArrayList<MethodDeclaration>();
-		for(ASTNode aNode : allNodes)
-			if(aNode.getNodeType() == ASTNode.METHOD_DECLARATION)
-				if(((MethodDeclaration)aNode).isConstructor() && ((MethodDeclaration)aNode).getName().toString().compareTo(oldName)==0 )
-					constructorList.add((MethodDeclaration)aNode);
-		return constructorList;
-	}
+
+
 
 	public ArrayList<MethodInvocation> getMethodCalls() {
 		return this.methodInvocations;
@@ -647,6 +763,82 @@ public class GPMaterialVisitor extends ASTVisitor implements java.io.Serializabl
 		return this.allTypes;
 	}
 
+	
+	
+	public ASTNode selectANodeForModification(){
+		return nodeSelector.selectANodeForModification(this.allAllowedNodes);
+	}
+	public ASTNode selectStatementForCrossover() {
+		return nodeSelector.selectStatementForCrossover(this.statements);
+	}
+
+	public List<SimpleName> getUpdateableNames() {
+		return this.updateadbleNames;
+	}
+
+	public List<Block> getBlocks() {
+		return this.blocks;
+	}
+	
+	
+/*	private static List<ASTNode> pickNodes(int numChanges,
+			boolean pickBestLocation) {
+		// split this out into two types of material visitor
+		if (pickBestLocation)
+			return pickBestNodes(numChanges); 
+		else
+			return pickNodes(numChanges);
+	}
+	
+	private static List<ASTNode> pickBestNodes(
+			List<ASTNode> mutationCandidates, int numChanges) {
+
+		List<ASTNode> returnList = new ArrayList<ASTNode>();
+
+		int numberToPick = (int) (mutationCandidates.size() * nodeSelectionTournamentSizeRatio);
+		ArrayList<Integer> indexToPick = new ArrayList<Integer>();
+		Integer newInt;
+		while (indexToPick.size() < numberToPick) { // get unique set of index's
+			newInt = generator.nextInt(mutationCandidates.size());
+			if (!indexToPick.contains(newInt)) {
+				indexToPick.add(newInt);
+			}
+		}
+		ASTNode returnNode = null;
+		try{
+		returnNode = mutationCandidates.get(indexToPick.get(0));
+		} catch (Exception e){
+			System.out.println("Missing node choices");
+		}
+		ASTNode curNode;
+		for (Integer curIndex : indexToPick) { // find best from this tournament
+			curNode = mutationCandidates.get(curIndex);
+			//bork! problem here with block which doesnt have gpdata, because its parent isnt allowed!
+			if (((GPASTNodeData) curNode.getProperty("gpdata"))
+					.getProbabilityVal() > ((GPASTNodeData) returnNode
+					.getProperty("gpdata")).getProbabilityVal()) {
+				returnNode = curNode;
+			}
+		}
+
+		returnList.add(returnNode);
+		return returnList;
+	}
+
+	private static List<ASTNode> pickNodes(List<ASTNode> mutationCandidates,
+			int numChanges) {
+
+		List<ASTNode> returnList = new ArrayList<ASTNode>();
+		if (mutationCandidates.size() > 0) {
+			int randNum;
+			do {
+				randNum = generator.nextInt(mutationCandidates.size());
+				if (!returnList.contains(mutationCandidates.get(randNum)))
+					returnList.add(mutationCandidates.get(randNum));
+			} while (returnList.size() < numChanges);
+		}
+		return returnList;
+	}*/
 	
 
 }

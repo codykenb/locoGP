@@ -38,10 +38,10 @@ public class GPASTNodeData {
 	}
 	
 	public double getProbabilityVal(){
-		if(performanceReductionCount > 0 && compileCount >0 )
+		/*if(performanceReductionCount > 0 && compileCount >0 )
 			// this is intended to override the value set by deletion analysis
 			return performanceReductionCount / compileCount;
-		else
+		else*/
 			return this.probabilityVal;
 	}
 	

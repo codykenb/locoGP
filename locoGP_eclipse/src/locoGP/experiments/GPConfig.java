@@ -4,19 +4,30 @@ import java.lang.reflect.Field;
 import java.util.logging.LogManager;
 
 import locoGP.locoGP;
+import locoGP.fitness.IndividualEvaluator;
+import locoGP.fitness.bytecodeCount.ByteCodeIndividualEvaluator;
+import locoGP.operators.StatementOnlyCrossoverOperator;
 import locoGP.util.Logger;
 
 public class GPConfig {
 	
-	private boolean UseDiverseElitismFine  = false,
-			debug = false,
-			singlePointEnforced = true, // true - always true until multipoint is implemented
-			pickBestLocation = true, // do we select nodes to apply operators to?
-			updateLocationBias = true, // should we update the bias at locations which have been changed? 
-			createFirstGenFromExhaustivelyMutatingSeed=false, // initial generation will be created from exhaustive sensitivity analysis
-			setSeedBiasFromDeletionAnalysis=false,
-			setSeedBiasFromPerfRedFreqOverCompFreq=false,
-			updateSeedBiasFromPerfRedFreqOverCompFreq=false;
+	private boolean UseDiverseElitismFine  = false;
+
+	private static boolean debug = false;
+
+	private boolean singlePointEnforced = true;
+
+	private boolean pickBestLocation = true;
+
+	private boolean updateLocationBias = true;
+
+	private boolean createFirstGenFromExhaustivelyMutatingSeed=false;
+
+	private boolean setSeedBiasFromDeletionAnalysis=false;
+
+	private boolean setSeedBiasFromPerfRedFreqOverCompFreq=false;
+
+	private boolean updateSeedBiasFromPerfRedFreqOverCompFreq=false;
 
 	private static boolean fineGranularityChange=true;
 
@@ -26,14 +37,19 @@ public class GPConfig {
 	
 	private int populationSize =100, 
 			numGenerations =100, 
-			tournamentSize = 2,
-			threadPoolSize = 10 ;
+			tournamentSize = 2 ;
+
+	private static int threadPoolSize = 10;
 	
 	private double elitismRate = .30,
 			initialPopulationSeedRatio = .1,
-			overProvisioningRatio = 1.5; // at least 1/3 of programs fail to compile
+			overProvisioningRatio = 1.1; //1.5; // at least 1/3 of programs fail to compile
 
-	private boolean useByteCodeCounter;
+	private boolean useDiverseElitism = false;
+
+	public StatementOnlyCrossoverOperator xoverOperator = null;
+
+	private IndividualEvaluator individualEvaluator;
 	
 	public static boolean useFineGranularityChange(){ // TODO make all static?
 		return fineGranularityChange;
@@ -53,6 +69,10 @@ public class GPConfig {
 
 	public int getThreadPoolSize(){
 		return threadPoolSize;
+	}
+	
+	public void setThreadPoolSize(int threadPS){
+		threadPoolSize = threadPS;
 	}
 
 	public void setUpdateLocationBias(boolean updateLocationBias) {
@@ -125,12 +145,19 @@ public class GPConfig {
 	public GPConfig() {
 		// Defaults
 	}
-	
-	public void setDebug(){
+
+    	public void setDebug(){
 		threadPoolSize = 1 ; 
 		Logger.logDebugConsole(" Debug Logging is on! ---------------------------------------------------------------");
 		Logger.logAll("Debug on! ---------------------------------------------------------------");
 		this.debug = true;
+	}
+    
+	public void checkDebug(){
+		if (debug) {
+			Logger.logDebugConsole(" Debug on! ---------------------------------------------------------------");
+			Logger.logAll("Debug on! ---------------------------------------------------------------");
+		}
 	}
 	
 	public boolean debug(){
@@ -150,6 +177,8 @@ public class GPConfig {
 		java.util.logging.Logger globalLogger = java.util.logging.Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);
 		globalLogger.setLevel(java.util.logging.Level.SEVERE); //SEVERE OFF);
 		Logger.disableDebugLogging();
+		threadPoolSize = 1;
+		debug = false;
 	}
 	
 	public boolean isSinglePointEnforced() {
@@ -244,6 +273,8 @@ public class GPConfig {
 		// Elitism which takes only one of each program for each of the top fitness values
 		// This works at a fine level, so any decimal difference in fitness is distinct and 
 		this.UseDiverseElitismFine = true;	
+		if (this.useDiverseElitism) // surely a better way TODO replace with single Elitism selector variable
+			throw new IllegalStateException("Multiple Elitism Settings used");	
 	}
 	public boolean getUseDiverseElitismFine() {
 		// Elitism which takes only one of each program for each of the top fitness values
@@ -262,13 +293,25 @@ public class GPConfig {
 		// TODO Auto-generated method stub
 		return this.elitismRate;
 	}
-
-	public void setUseByteCodeCounter(boolean b) {
-		this.useByteCodeCounter = b;
+	
+	public void setElitismRate(double rate) {
+		this.elitismRate = rate;
+	}
+	
+	public void setUseDiverseElitism() {
+		this.useDiverseElitism = true;
+		if (this.UseDiverseElitismFine)
+			throw new IllegalStateException("Multiple Elitism Settings used");	
+	}
+	public boolean useDiverseElitism() {
+		return this.useDiverseElitism ;
 	}
 
-	public boolean useByteCodeCounter() {
-		return this.useByteCodeCounter;
+	public void setEvaluator(
+			IndividualEvaluator individualEvaluator) {
+		this.individualEvaluator = individualEvaluator;
 	}
-
+	public IndividualEvaluator getEvaluator() {
+		return this.individualEvaluator ;
+	}
 }

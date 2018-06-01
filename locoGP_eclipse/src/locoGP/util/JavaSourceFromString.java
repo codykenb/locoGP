@@ -9,7 +9,7 @@ import javax.tools.SimpleJavaFileObject;
 public class JavaSourceFromString extends SimpleJavaFileObject {
 	final String code;
 
-	JavaSourceFromString(String name, String code) {
+	JavaSourceFromString(String code, String name) {
 		super(URI.create("string:///" + name.replace('.', '/')
 				+ Kind.SOURCE.extension), Kind.SOURCE);
 		this.code = code;

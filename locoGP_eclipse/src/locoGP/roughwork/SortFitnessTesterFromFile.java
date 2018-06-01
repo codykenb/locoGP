@@ -2,6 +2,7 @@ package locoGP.roughwork;
 
 import locoGP.experiments.GPConfig;
 import locoGP.fitness.IndividualEvaluator;
+import locoGP.fitness.bytecodeCount.ByteCodeIndividualEvaluator;
 import locoGP.individual.Individual;
 import locoGP.problems.Problem;
 import locoGP.problems.Sort1CocktailProblem;
@@ -21,7 +22,7 @@ public class SortFitnessTesterFromFile {
 	 * @param args
 	 */
 	
-	private static IndividualEvaluator ourIndEval = new IndividualEvaluator();
+	private static IndividualEvaluator ourIndEval = new ByteCodeIndividualEvaluator();
 	
 	public static void main(String[] args) {
 		
@@ -68,7 +69,7 @@ public class SortFitnessTesterFromFile {
 	ourIndEval.evaluateInd(variantInd);
 		System.out.println( variantInd.getClassName() 
 				+ " Time: "+variantInd.getRunningTime()+" Fit: " + variantInd.getFitness()
-				+ " TestError: " + variantInd.getFunctionalityScore()+ " ASTNodes: " + variantInd.getNumNodes() 
+				+ " TestError: " + variantInd.getFunctionalityErrorCount()+ " ASTNodes: " + variantInd.getNumNodes() 
 				+ " Replaced: 1" + " Compiled: 1"
 				);
 	

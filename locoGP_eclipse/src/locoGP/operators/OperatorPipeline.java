@@ -16,24 +16,24 @@ import locoGP.util.Logger;
 public class OperatorPipeline implements Callable<OperatorPipeline>{
 	Generation currentGen;
 	Vector<Individual> nextgenIndividuals;
-	Random generator;
+	static Random generator;
 	IndividualEvaluator ourIndEval;
-	int mutationRate= 90;
-	int xoverRate = 30;
+	int mutationRate= 99; //50;
+	int xoverRate = 30; //50; // 30
 	
 	public OperatorPipeline(Generation currentGen, Vector<Individual> individuals, Random generator, IndividualEvaluator ourIndEval) {
 		this.currentGen = currentGen;
 		this.nextgenIndividuals = individuals; 
-		this.generator = generator;
+		OperatorPipeline.generator = generator;
 		this.ourIndEval= ourIndEval; 
 	}
 
 	public void run() {
-			Individual firstParent=getTourneyWinner(), secondParent=getTourneyWinner();
-			/*Logger.logTrash("Entering Pipeline with "+firstParent.getClassName() +" and " + secondParent.getClassName());*/
-			applyOperators(getTourneyWinner(), getTourneyWinner());
-			/*Logger.logTrash("Entering Pipeline with "+firstParent.getClassName() +" and " + secondParent.getClassName());
-			Logger.flushLog();*/
+		Individual firstParent=getTourneyWinner(), secondParent=getTourneyWinner();
+		/*Logger.logTrash("Entering Pipeline with "+firstParent.getClassName() +" and " + secondParent.getClassName());*/
+		applyOperators(getTourneyWinner(), getTourneyWinner());
+		/*Logger.logTrash("Entering Pipeline with "+firstParent.getClassName() +" and " + secondParent.getClassName());
+		Logger.flushLog();*/
 	}
 	
 	@Override
@@ -53,6 +53,7 @@ public class OperatorPipeline implements Callable<OperatorPipeline>{
 		
 		//System.out.println(parentOne.getCodeProbabilitiesLogString());
 		
+		// TODO this is like brood selection! change so only one modification made at a time.		
 		if(generator.nextInt(100) < xoverRate){
 			while(crossoverAttempts < maxCrossoverTries && !crossoverSuccess ){
 				newInd = parentOne.crossover(parentTwo, Problem.gpConfig);
@@ -66,7 +67,7 @@ public class OperatorPipeline implements Callable<OperatorPipeline>{
 							+ newInd.getClassName() + " Time: "
 							+ newInd.getRunningTime() + " Fit:"
 							+ newInd.getFitness() + " TestError:"
-							+ newInd.getFunctionalityScore()
+							+ newInd.getFunctionalityErrorCount()
 							+ " ASTNodes: " + newInd.getNumNodes() 
 							+ " GPNodes: " + newInd.getNumGPNodes()
 							+ " xoverApplied: " 	+ newInd.crossoverApplied()
@@ -83,7 +84,7 @@ public class OperatorPipeline implements Callable<OperatorPipeline>{
 					parentOne.clearChangedFlags();
 				}
 				crossoverAttempts ++;
-				System.out.println("Crossover Attempts - "+crossoverAttempts);
+				Logger.logDebugConsole("Crossover Attempts - "+crossoverAttempts);
 			}
 			//newInd.addCrossoverAttempts(crossoverAttempts);
 		}
@@ -95,7 +96,7 @@ public class OperatorPipeline implements Callable<OperatorPipeline>{
 					+ parentTwo.getClassName() + " = " + newInd.getClassName() 
 					+ " Time: "	+ newInd.getRunningTime() 
 					+ " Fit:" + newInd.getFitness() 
-					+ " TestError:" + newInd.getFunctionalityScore()
+					+ " TestError:" + newInd.getFunctionalityErrorCount()
 					+ " ASTNodes: " + newInd.getNumNodes() 
 					+ " GPNodes: " + newInd.getNumGPNodes()
 					+ " xoverApplied: " 	+ newInd.crossoverApplied()
@@ -106,7 +107,7 @@ public class OperatorPipeline implements Callable<OperatorPipeline>{
 					+ parentTwo.getClassName() + " = " + newInd.getClassName() 
 					+ " Time: "	+ newInd.getRunningTime() 
 					+ " Fit:" + newInd.getFitness() 
-					+ " TestError:" + newInd.getFunctionalityScore()
+					+ " TestError:" + newInd.getFunctionalityErrorCount()
 					+ " ASTNodes: " + newInd.getNumNodes() 
 					+ " GPNodes: " + newInd.getNumGPNodes()
 					+ " xoverApplied: " 	+ newInd.crossoverApplied()
@@ -116,7 +117,7 @@ public class OperatorPipeline implements Callable<OperatorPipeline>{
 		}
 		
 			
-			newInd.refreshGPMaterial();
+			newInd.refreshGlobalGPMaterial();
 		if (Problem.gpConfig.isPickBestLocation() && Problem.gpConfig.isUpdateLocationBias()) {
 			//newInd.updateProbabilitiesWithGaussianNoise();
 			//newInd.updateProbabilities(parentOne, parentTwo); 
@@ -131,7 +132,7 @@ public class OperatorPipeline implements Callable<OperatorPipeline>{
 			}else
 			Logger.log("Skipping Mutate = " +newInd.getClassName() +
 					" Time: "+newInd.getRunningTime()+" Fit:"+newInd.getFitness()
-					+ " TestError:"+newInd.getFunctionalityScore()
+					+ " TestError:"+newInd.getFunctionalityErrorCount()
 					+ " ASTNodes: " + newInd.getNumNodes() 
 					+ " GPNodes: " + newInd.getNumGPNodes()
 					+ " xoverApplied: " 	+ newInd.crossoverApplied()
@@ -139,7 +140,7 @@ public class OperatorPipeline implements Callable<OperatorPipeline>{
 					+ " mutationApplied: " 	+ newInd.mutationApplied()
 					+ " mutations: " 	+ newInd.getMutationAttempts());
 			
-			newInd.refreshGPMaterial();
+			newInd.refreshGlobalGPMaterial();
 			
 			newInd.addCrossoverAttempts(crossoverAttempts); // mutation attempts have already been added in "successfullMutate"
 			if(crossoverSuccess)
@@ -148,9 +149,10 @@ public class OperatorPipeline implements Callable<OperatorPipeline>{
 			
 			//System.out.println(newInd.getCodeProbabilitiesLogString());
 			if(nextgenIndividuals.size() < Problem.gpConfig.getPopulationSize()){ // dont go over
-				nextgenIndividuals.add(newInd);
+				nextgenIndividuals.add(newInd); // doing the work of a generation here
 				Logger.logTrash("\n\n" + newInd.ASTSet.getCodeListing()+ "\n");
 				Logger.logTrash("\n\n" + newInd.getCodeProbabilitiesLogString() + "\n");
+				System.out.println(newInd.getClassName() +" fit: " + newInd.getFitness());
 			}
 
 
@@ -175,22 +177,6 @@ private Individual getTourneyWinner() {
 				bestIndIndex = i;
 			}
 		}
-		
-		/*if ( useFunctionality(candidateInds) ) {
-			long bestFitness = candidateInds.get(0).getFunctionalityScore();
-			for (int i = 0; i < tournamentSize; i++) {
-				if (candidateInds.get(i).getFunctionalityScore() < bestFitness) {
-					bestIndIndex = i;
-				}
-			}
-		}else{
-			float bestFitness = candidateInds.get(0).getRuntimeAvg();
-			for (int i = 0; i < tournamentSize; i++) {
-				if (candidateInds.get(i).getRuntimeAvg() < bestFitness) {
-					bestIndIndex = i;
-				}
-			}
-		}*/
 		
 		return candidateInds.get(bestIndIndex);
 	}

@@ -4,11 +4,16 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import locoGP.*;
 import locoGP.fitness.IndividualEvaluator;
+import locoGP.fitness.bytecodeCount.ByteCodeIndividualEvaluator;
+import locoGP.fitness.bytecodeCount.IndEvaluatorThread;
 import locoGP.individual.Individual;
 import locoGP.operators.GPMaterialVisitor;
 import locoGP.operators.NodeOperators;
 import locoGP.problems.*;
+import locoGP.problems.crypto.Ascon128V11DecryptProblem;
+import locoGP.problems.crypto.Ascon128V11EncryptProblem;
 import locoGP.problems.huffmancodebook.HuffmanCodeBookProblem;
 import locoGP.problems.scalablesort.Sort1LoopsProblem;
 import locoGP.util.Logger;
@@ -19,7 +24,7 @@ public class ExhaustiveChange {
 	 * combinations see what the range of effects are on the fitness,
 	 * performance and functionality
 	 */
-	private static IndividualEvaluator ourIndEval = new IndividualEvaluator();
+	private static IndividualEvaluator ourIndEval = new ByteCodeIndividualEvaluator();
 
 	public static void main(String[] args) {
 		
@@ -32,28 +37,6 @@ public class ExhaustiveChange {
 		}		
 	}
 	
-	private static void mutateSelectedElements() {
-		/*Integer[] sortArr = {12,4,6,2,3,5,6,45,5};
-		blarghSort(sortArr, sortArr.length);*/		
-		Individual originalIndividual = getIndividual(12);
-		Individual returned = replaceNodeAtIndex(originalIndividual,5,21);
-		replaceNodeAtIndex(returned,21,10);
-	}
-	
-	
-
-	private static Integer[]  blarghSort(Integer[] a, Integer length) {
-	    for (int i=0; i < length; i++) {
-	      for (int j=0; j < length - i; j++) {
-	        if (a[j] > a[j + 1]) {
-	          int k=a[j];
-	          a[j]=a[j + 1];
-	          a[j + 1]=k;
-	        }
-	      }
-	    }
-	    return a;
-	}
 
 	private static Individual replaceNodeAtIndex(Individual originalIndividual, int indexToReplace, int replacementIndex) {
 		Individual indClone =originalIndividual.clone(); 
@@ -69,7 +52,7 @@ public class ExhaustiveChange {
 		if(ourIndEval.evaluateInd(indClone)){
 			System.out.println("Replacing " +indexToReplace+" with " +replacementIndex + " "+ indClone.getClassName() 
 					+ " Time: "+indClone.getRunningTime()+" Fit: " + indClone.getFitness()
-					+ " TestError: " + indClone.getFunctionalityScore()+ " ASTNodes: " + indClone.getNumNodes() 
+					+ " TestError: " + indClone.getFunctionalityErrorCount()+ " ASTNodes: " + indClone.getNumNodes() 
 					+ " Replaced: 1" + " Compiled: 1");
 		}else{
 /*			Logger.log("Replacing " +indexToReplace+" with " +replacementIndex + " "+ indClone.getClassName() 
@@ -78,7 +61,7 @@ public class ExhaustiveChange {
 					+ " Replaced: 1" + " Compiled: 0");*/
 			System.out.println("Replacing " +indexToReplace+" with " +replacementIndex + " "+ indClone.getClassName() 
 					+ " Time: "+indClone.getRunningTime()+" Fit: " + indClone.getFitness()
-					+ " TestError: " + indClone.getFunctionalityScore()+ " ASTNodes: " + indClone.getNumNodes() 
+					+ " TestError: " + indClone.getFunctionalityErrorCount()+ " ASTNodes: " + indClone.getNumNodes() 
 					+ " Replaced: 1" + " Compiled: 0");
 		}
 		return indClone;
@@ -90,7 +73,8 @@ public class ExhaustiveChange {
 				new Sort1MergeProblem(),new Sort1CocktailProblem(),
 				new Sort1RadixProblem(),new Sort1InsertionProblem(),
 				new Sort1SelectionProblem(),new Sort1Selection2Problem(),
-				new Sort1LoopsProblem(1),new HuffmanCodeBookProblem()};
+				new Sort1LoopsProblem(1),new HuffmanCodeBookProblem(),
+				new Ascon128V11DecryptProblem(),new Ascon128V11EncryptProblem()};
 		return problems[i];
 	}
 	
@@ -117,7 +101,8 @@ public class ExhaustiveChange {
 				new Sort1MergeProblem(),new Sort1CocktailProblem(),
 				new Sort1RadixProblem(),new Sort1InsertionProblem(),
 				new Sort1SelectionProblem(),new Sort1Selection2Problem(),
-				new Sort1LoopsProblem(1),new HuffmanCodeBookProblem()};*/
+				new Sort1LoopsProblem(1),new HuffmanCodeBookProblem(),
+				new Ascon128V11Problem()};*/
 		
 		Problem ourProblem = getProblem(expNum);
 				
@@ -194,17 +179,19 @@ public class ExhaustiveChange {
 									+ indClone.getClassName() + " Time: "
 									+ indClone.getRunningTime() + " Fit: "
 									+ indClone.getFitness() + " TestError: "
-									+ indClone.getFunctionalityScore()
+									+ indClone.getFunctionalityErrorCount()
 									+ " ASTNodes: " + indClone.getNumNodes()
-									+ " Replaced: 1" + " Compiled: 1");
+									+ " Replaced: 1" + " Compiled: 1"
+									+ " testResults:"+indClone.getTestCaseResultsText());
 						} else {
 							Logger.log("Replacing " + j + " with " + i + " "
 									+ indClone.getClassName() + " Time: "
 									+ indClone.getRunningTime() + " Fit: "
 									+ indClone.getFitness() + " TestError: "
-									+ indClone.getFunctionalityScore()
+									+ indClone.getFunctionalityErrorCount()
 									+ " ASTNodes: " + indClone.getNumNodes()
-									+ " Replaced: 1" + " Compiled: 0");
+									+ " Replaced: 1" + " Compiled: 0"
+									+ " testResults:"+indClone.getTestCaseResultsText());
 						}
 					} else {
 
@@ -212,9 +199,10 @@ public class ExhaustiveChange {
 								+ indClone.getClassName() + " Time: "
 								+ indClone.getRunningTime() + " Fit: "
 								+ indClone.getFitness() + " TestError: "
-								+ indClone.getFunctionalityScore()
+								+ indClone.getFunctionalityErrorCount()
 								+ " ASTNodes: " + indClone.getNumNodes()
-								+ " Replaced: 0");
+								+ " Replaced: 0"+ " Compiled: 0"
+								+ " testResults:"+indClone.getTestCaseResultsText());
 					}
 					/*+ " GPNodes: " 	+ indClone.getNumGPNodes()
 					+ " xoverApplied: " 	+ indClone.crossoverApplied()
@@ -249,6 +237,62 @@ public class ExhaustiveChange {
 					i, originalIndividual.getCodeProbabilities() );
 			Logger.flushLog();
 		}*/
+		
+		
+		/*private static void mutateSelectedElements() {
+		Integer[] sortArr = {12,4,6,2,3,5,6,45,5};
+		blarghSort(sortArr, sortArr.length);		
+		Individual originalIndividual = getIndividual(12);
+		Individual returned = replaceNodeAtIndex(originalIndividual,5,21);
+		replaceNodeAtIndex(returned,21,10);
+	}
+	
+	
+
+	private static Integer[]  blarghSort(Integer[] a, Integer length) {
+	    for (int i=0; i < length; i++) {
+	      for (int j=0; j < length - i; j++) {
+	        if (a[j] > a[j + 1]) {
+	          int k=a[j];
+	          a[j]=a[j + 1];
+	          a[j + 1]=k;
+	        }
+	      }
+	    }
+	    return a;
+	}
+
+	private static Individual replaceNodeAtIndex(Individual originalIndividual, int indexToReplace, int replacementIndex) {
+		Individual indClone =originalIndividual.clone(); 
+		List<ASTNode> seedNodes = originalIndividual.gpMaterial.getAllAllowedNodes();
+		ASTNode nodeToReplace,replacementNode = null;
+		replacementNode = seedNodes.get(replacementIndex); // "i" 
+		nodeToReplace = indClone.gpMaterial.getAllAllowedNodes().get(indexToReplace); // "1"
+		
+		NodeModifierUtil.replaceNode(nodeToReplace, replacementNode);
+		
+		System.out.println(indClone.ASTSet.getCodeListing());
+		
+		if(ourIndEval.evaluateInd(indClone)){
+			System.out.println("Replacing " +indexToReplace+" with " +replacementIndex + " "+ indClone.getClassName() 
+					+ " Time: "+indClone.getRunningTime()+" Fit: " + indClone.getFitness()
+					+ " TestError: " + indClone.getFunctionalityErrorCount()+ " ASTNodes: " + indClone.getNumNodes() 
+					+ " Compiled: 1" 
+					+ " testResults:"+indClone.getTestCaseResultsText());
+		}else{
+			Logger.log("Replacing " +indexToReplace+" with " +replacementIndex + " "+ indClone.getClassName() 
+					+ " Time: "+indClone.getRunningTime()+" Fit: " + indClone.getFitness()
+					+ " TestError: " + indClone.getFunctionalityScore()+ " ASTNodes: " + indClone.getNumNodes() 
+					+ " Replaced: 1" + " Compiled: 0");
+			System.out.println("Replacing " +indexToReplace+" with " +replacementIndex + " "+ indClone.getClassName() 
+					+ " Time: "+indClone.getRunningTime()+" Fit: " + indClone.getFitness()
+					+ " TestError: " + indClone.getFunctionalityErrorCount()+ " ASTNodes: " + indClone.getNumNodes() 
+					+ " Compiled: 0" 
+					+ " testResults:"+indClone.getTestCaseResultsText());
+		}
+		return indClone;
+	}*/
+		
 	}
 
 }

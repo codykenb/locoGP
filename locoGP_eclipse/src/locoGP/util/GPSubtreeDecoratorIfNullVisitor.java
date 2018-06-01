@@ -15,7 +15,7 @@ public class GPSubtreeDecoratorIfNullVisitor extends ASTVisitor{
 	
 	public void preVisit(ASTNode aNode){
 		
-		if( GPMaterialVisitor.allowedType2( aNode) ){
+		if( GPMaterialVisitor.allowedTypeAndParentType( aNode) ){
 			GPASTNodeData tmpData = (GPASTNodeData) aNode.getProperty("gpdata");
 			if(tmpData == null){
 				aNode.setProperty("gpdata", new GPASTNodeData());

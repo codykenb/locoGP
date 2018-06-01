@@ -78,14 +78,6 @@ return jclassObject;
     	return returnMap;
     }
     
-    public Map<String, JavaClassObject> getClassMap(){
-    	Map<String, JavaClassObject> returnMap = new HashMap<String, JavaClassObject>();
-    	for (JavaClassObject jCO : jclassObjects) {
-    		returnMap.put(jCO.getSimpleName(), jCO);
-    	}
-    	return returnMap;
-    }
-    
 	/*public byte[] getClassForOutput(String name) throws ClassNotFoundException {
 		boolean found = false;
 		byte[] b = null;

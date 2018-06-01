@@ -1,0 +1,131 @@
+
+@article{binder2006a,
+  author    = {Walter Binder and Jarle Hulaas},
+  title     = {{Using Bytecode Instruction Counting as Portable CPU Consumption Metric}},
+  journal   = {Electr. Notes Theor. Comput. Sci.},
+  volume    = {153},
+  number    = {2},
+  year      = {2006},
+  pages     = {57-77},
+  ee        = {http://dx.doi.org/10.1016/j.entcs.2005.10.032}
+}
+
+@inproceedings{dufour2003a,
+  author = {Bruno Dufour and Karel Driesen and Laurie Hendren and Clark Verbrugge},
+  title = {{Dynamic Metrics for Java}},
+  booktitle = {OOPSLA '03: Proceedings of the 18th annual ACM SIGPLAN conference on Object-oriented programing, systems, languages, and applications},
+  year = {2003},
+  isbn = {1-58113-712-5},
+  pages = {149--168},
+  location = {Anaheim, California, USA},
+  doi = {http://doi.acm.org/10.1145/949305.949320},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+}
+
+@INPROCEEDINGS{hauck2009b,
+  author = {Michael Hauck and Michael Kuperberg and Klaus Krogmann and Ralf Reussner},
+  title = {{Modelling Layered Component Execution Environments for Performance
+	Prediction}},
+  booktitle = {{Proceedings of the 12th International Symposium on Component Based
+	Software Engineering (CBSE 2009)}},
+  year = {2009},
+  number = {5582},
+  series = {LNCS},
+  pages = {191--208},
+  publisher = {Springer},
+  doi = {10.1007/978-3-642-02414-6_12},
+  ee = {http://dx.doi.org/10.1007/978-3-642-02414-6_12},
+  isbn = {978-3-642-02413-9},
+  url = {http://www.comparch-events.org/pages/present.html}
+}
+ 
+
+@INPROCEEDINGS{kuperberg2007a,
+  author = {Michael Kuperberg and Steffen Becker},
+  title = {{P}redicting {S}oftware {C}omponent {P}erformance: {O}n the {R}elevance
+	of {P}arameters for {B}enchmarking {B}ytecode and {API}s},
+  booktitle = {Proceedings of the 12th International Workshop on Component Oriented
+	Programming (WCOP 2007)},
+  year = {2007},
+  editor = {Ralf Reussner and Clemens Czyperski and Wolfgang Weck},
+  month = {July},
+  abstract = {Performance prediction of component-based software systems is needed
+	for systematic evaluation of design decisions, but also when an application’s
+	execution system is changed. Often, the entire application cannot
+	be benchmarked in advance on its new execution system due to high
+	costs or because some required services cannot be provided there.
+	In this case, performance of bytecode instructions or other atomic
+	building blocks of components can be used for performance prediction.
+	However, the performance of bytecode instructions depends not only
+	on the execution system they use, but also on their parameters, which
+	are not considered by most existing research. In this paper, we demonstrate
+	that parameters cannot be ignored when considering Java bytecode.
+	Consequently, we outline a suitable benchmarking approach and the
+	accompanying challenges.},
+  url = {http://sdqweb.ipd.uka.de/publications/pdfs/kuperberg2007a.pdf}
+}
+
+@INPROCEEDINGS{kuperberg2008a,
+  author = {Michael Kuperberg and Martin Krogmann and Ralf Reussner},
+  title = {{ByCounter: Portable Runtime Counting of Bytecode Instructions and
+	Method Invocations}},
+  booktitle = {{Proceedings of the 3rd International Workshop on Bytecode Semantics,
+	Verification, Analysis and Transformation, Budapest, Hungary, 5th
+	April 2008 (ETAPS 2008, 11th European Joint Conferences on Theory
+	and Practice of Software)}},
+  year = {2008},
+  abstract = {For bytecode-based applications, runtime instruction counts can be
+	used as a platform- independent application execution metric, and
+	also can serve as the basis for bytecode-based performance prediction.
+	However, different instruction types have different execution durations,
+	so they must be counted separately, and method invocations should
+	be identified and counted because of their substantial contribution
+	to the total application performance. For Java bytecode, most JVMs
+	and profilers do not provide such functionality at all, and existing
+	bytecode analysis frameworks require expensive JVM instrumentation
+	for instruction-level counting. In this paper, we present ByCounter,
+	a lightweight approach for exact runtime counting of executed bytecode
+	instructions and method invocations. ByCounter significantly reduces
+	total counting costs by instrumenting only the application bytecode
+	and not the JVM, and it can be used without modifications on any
+	JVM. We evaluate the presented approach by successfully applying
+	it to multiple Java applications on different JVMs, and discuss the
+	runtime costs of applying ByCounter to these cases.},
+  keywords = {Java, bytecode, counting, portable, runtime, instrumentation, fine-grained},
+  owner = {MichaelKuperberg},
+  url = {http://sdqweb.ipd.uka.de/publications/pdfs/kuperberg2008a.pdf}
+}
+
+
+@INPROCEEDINGS{kuperberg2008c,
+  author = {Michael Kuperberg and Klaus Krogmann and Ralf Reussner},
+  title = {{P}erformance {P}rediction for {B}lack-{B}ox {C}omponents using {R}eengineered
+	{P}arametric {B}ehaviour {M}odels},
+  booktitle = {Proceedings of the 11th International Symposium on Component Based
+	Software Engineering (CBSE 2008), Karlsruhe, Germany, 14th-17th October
+	2008},
+  year = {2008},
+  volume = {5282},
+  series = LNCS,
+  pages = {48-63},
+  month = {October},
+  publisher = SPRINGER,
+  abstract = {In component-based software engineering, the response time of an entire
+	application is often predicted from the execution durations of individual
+	component services. However, these execution durations are specific
+	for an execution platform (i.e. its resources such as CPU) and for
+	a usage profile. Reusing an existing component on different execution
+	platforms up to now required repeated measurements of the concerned
+	components for each relevant combination of execution platform and
+	usage profile, leading to high effort. This paper presents a novel
+	integrated approach that overcomes these limitations by reconstructing
+	behaviour models with platform-independent resource demands of bytecode
+	components. The reconstructed models are parameterised over input
+	parameter values. Using platform-specific results of bytecode benchmarking,
+	our approach is able to translate the platform-independent resource
+	demands into predictions for execution durations on a certain platform.
+	We validate our approach by predicting the performance of a file
+	sharing application.},
+  url = {http://sdqweb.ipd.uka.de/publications/pdfs/kuperberg2008c.pdf}
+}

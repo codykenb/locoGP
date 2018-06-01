@@ -19,7 +19,10 @@ import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -29,6 +32,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -44,62 +49,69 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-// TODO restructure this whole program, an individual should contain all information needed for mutation
+/*
+ * TODO: allow inserting/chaining/removing method calls (this should be done per the node type selected for modification)
+ */
 
+/**
+ * Raw util functions which handle AST manipulations. (Should not be GP modifications)
+ * 
+ * @author bck
+ *
+ */
 public class NodeOperators {
 
 	private static Random generator = new Random();
-	private static GPMaterialVisitor GPPrimitives;
+	// public static GPMaterialVisitor GPPrimitives;
 	private static float nodeSelectionTournamentSizeRatio = .1f;
 
-	public static void initialise(CompilationSet initialCodeSet) {
-		GPPrimitives = new GPMaterialVisitor();
-		for(CompilationDetail cD : initialCodeSet.getCompilationList())
-			initialise(cD.getCodeString());
-		GPPrimitives.printAll();
+
+	static ASTNode replaceStatementOrExpression(ASTNode nodeToReplace,
+			Individual ind, boolean differentGPParents) {
+		ASTNode replacementNode =  null;
+				
+		if (nodeToReplace instanceof Statement) { 
+			replacementNode = extractStatement(ind.gpMaterial) ; //replaceStatement((Statement)nodeToReplace, extractStatement(ind.gpMaterial));
+		} else if (nodeToReplace instanceof Expression) {
+			replacementNode = replaceExpression((Expression)nodeToReplace, ind.gpMaterial);
+		}
+		if(differentGPParents)
+			setNewNodeDataParentToOld(nodeToReplace, replacementNode);
+		
+		ind.ASTSet.recordReplacement(nodeToReplace, replacementNode);
+		
+		return replacementNode ; //return differentGPParents;
 	}
 	
-	public static void initialise(String initialCode) {
-		CompilationUnit indAST = parseSource(initialCode);
-		indAST.accept(GPPrimitives);
+	public static Statement extractStatement(GPMaterialVisitor gpMaterial ) {	
+		ASTNode aNode = gpMaterial.selectStatement();
+		//if (aNode instanceof Statement){
+			//System.out.println("statement selected!");
+			return (Statement) getClone(aNode.getAST(), aNode);
+		/*}else{
+			Expression anExpr = (Expression) getClone(aNode.getAST(), aNode);
+			return anExpr.getAST().newExpressionStatement( anExpr );
+		}*/
 	}
+	/*private static ASTNode replaceStatement(Statement nodeToReplace,
+			ASTNode replacementNode) {
+		CompilationUnit newIndAST = (CompilationUnit)nodeToReplace.getRoot();
+		Statement stmtClone = (Statement) getClone(newIndAST, replacementNode);
+			replacementNode = replaceStatement(newIndAST,
+				(Statement) nodeToReplace, stmtClone);
+		return replacementNode; 
+	}*/
 
-	public static Individual crossover(Individual parentOne,
-			Individual parentTwo, boolean singlePointEnforced,
-			boolean pickBestLocation) {
-
-		Individual newInd = parentOne.clone(); // we clone the first parent, modify clone
-		int tries = 0 ;
-		ASTNode nodeToReplace = null;
-		try {
-			do {				
-				//ref to node in cloned tree which is to be overwritten
-				nodeToReplace = pickNodes(newInd.gpMaterial.getAllAllowedNodes(),1,pickBestLocation).get(0);
-				
-				//Logger.logTrash("Picked node type: "+ ASTNode.nodeClassForType(nodeToReplace.getNodeType()));
-				tries++;
-				
-			} while (tries <100 && ! modifyNodeUsingParent(nodeToReplace, parentTwo, true));
-		} catch (Exception e) {
-			Logger.logTrash("Couldnt find a statement to put in place of another "
-					+ e.getStackTrace().toString());
-		}
-		if(tries<100){
-			newInd.setChanged();
-			if(nodeToReplace!=null){
-				setChangedFlag(nodeToReplace);
-			}
-		}
-		return newInd;
-	}
-	
-	private static boolean modifyNodeUsingParent(ASTNode nodeToReplace,
-			Individual parentTwo, boolean differentParents) {
+	/*private static boolean modifyNodeUsingParent(ASTNode nodeToReplace,
+			Individual parentTwo, boolean differentGPParents) {
+		
 		ASTNode replacementNode =  nodeToReplace;
 		boolean successfulXover = true;
+		
 		if(nodeToReplace == null){
 			System.out.println("trying to replace null!! ");
 		}
+		
 		if (nodeToReplace instanceof Statement) { 
 			replacementNode = replaceOrInsertStatement((Statement)nodeToReplace, parentTwo );
 		} else if (nodeToReplace instanceof Expression) {
@@ -112,7 +124,7 @@ public class NodeOperators {
 		
 		// TODO still throwing errors trying to clone data (why?)
 		try{
-			getExistingGPDataRef( nodeToReplace, replacementNode);
+			cloneExistingGPDataRef( nodeToReplace, replacementNode);
 		}catch (Exception e){
 			// cause either node or replacement are null
 			if(nodeToReplace == null)
@@ -123,14 +135,10 @@ public class NodeOperators {
 				System.out.println("Problem cloning GPData from " + nodeToReplace.toString() + " to " + replacementNode.toString());
 			return false;
 		}
-		if(differentParents)
+		if(differentGPParents)
 			setNewNodeDataParentToOld(nodeToReplace, replacementNode);
-	if(successfulXover){
-		
-		setChangedFlag(replacementNode);
-	}
 	return successfulXover;
-	}
+	}*/
 
 	/*private static void cloneGPDatall(ASTNode nodeToReplace,
 			ASTNode replacementNode){
@@ -138,6 +146,7 @@ public class NodeOperators {
 		replacementNode.setProperty("gpdata", gpData);
 	}*/
 	
+	// TODO extract the biasData structuring functionality 
 	private static void setNewNodeDataParentToOld(ASTNode nodeToReplace,
 			ASTNode replacementNode) {
 		/*
@@ -165,50 +174,51 @@ public class NodeOperators {
 		/* blocks, statements
 		 */
 		
-		try{
+		try{ //http://www.docjar.org/html/api/org/eclipse/jdt/core/dom/ASTNode.java.html
 			if(nodeToReplace instanceof Statement || nodeToReplace instanceof VariableDeclarationStatement){
 				//CompilationUnit targetIndAST,				Statement nodeToReplace, Statement newStmt
-				replaceSingleLine((CompilationUnit)nodeToReplace.getRoot(), (Statement)nodeToReplace,(Statement)newClonedNode);
+				replaceStatement((Statement)nodeToReplace,(Statement)newClonedNode);
 			} else if (parentToReplaceIn instanceof InfixExpression) {
-			replaceNodeIn((InfixExpression) parentToReplaceIn, (Expression)nodeToReplace,(Expression)newClonedNode);
-		} else if (parentToReplaceIn instanceof PostfixExpression) {
-			replaceNodeIn((PostfixExpression) parentToReplaceIn,(Expression)newClonedNode); 			
-		} else if (parentToReplaceIn instanceof IfStatement) {
-			replaceNodeIn((IfStatement) parentToReplaceIn, (Expression)newClonedNode);
-		} else if (parentToReplaceIn instanceof ForStatement) {
-			replaceNodeIn((ForStatement) parentToReplaceIn, (Expression)nodeToReplace, (Expression)newClonedNode);
-		} else if (parentToReplaceIn instanceof WhileStatement) {
-			(( WhileStatement)parentToReplaceIn).setExpression((Expression)newClonedNode);
+				replaceNodeIn((InfixExpression) parentToReplaceIn, (Expression)nodeToReplace,(Expression)newClonedNode);
+			} else if (parentToReplaceIn instanceof PostfixExpression) {
+				replaceNodeIn((PostfixExpression) parentToReplaceIn,(Expression)newClonedNode);
+			} else if (parentToReplaceIn instanceof PrefixExpression) {
+				replaceNodeIn((PrefixExpression) parentToReplaceIn,(Expression)newClonedNode);
+			} else if (parentToReplaceIn instanceof IfStatement) {
+				replaceNodeIn((IfStatement) parentToReplaceIn, (Expression)newClonedNode);
+			} else if (parentToReplaceIn instanceof ForStatement) {
+				replaceNodeIn((ForStatement) parentToReplaceIn, (Expression)nodeToReplace, (Expression)newClonedNode);
+			} else if (parentToReplaceIn instanceof WhileStatement) {
+				(( WhileStatement)parentToReplaceIn).setExpression((Expression)newClonedNode);
 			//replaceNodeIn((WhileStatement) parentToReplaceIn, (Expression)nodeToReplace, (Expression)newClonedNode);
-		} else if (parentToReplaceIn instanceof ExpressionStatement) {
-			((ExpressionStatement)parentToReplaceIn).setExpression((Expression)newClonedNode);
+			} else if (parentToReplaceIn instanceof ExpressionStatement) {
+				((ExpressionStatement)parentToReplaceIn).setExpression((Expression)newClonedNode);
 			//replaceNodeIn((ExpressionStatement) parentToReplaceIn, (Expression)nodeToReplace, (Expression)newClonedNode);
-		} else if (parentToReplaceIn instanceof VariableDeclarationFragment) {
+			} else if (parentToReplaceIn instanceof VariableDeclarationFragment) {
 			// this could be left or right-hand-side
-			if(((VariableDeclarationFragment)parentToReplaceIn).getInitializer().toString().compareTo(nodeToReplace.toString())==0)
-				((VariableDeclarationFragment)parentToReplaceIn).setInitializer((Expression)newClonedNode);
+				if(((VariableDeclarationFragment)parentToReplaceIn).getInitializer().toString().compareTo(nodeToReplace.toString())==0)
+					((VariableDeclarationFragment)parentToReplaceIn).setInitializer((Expression)newClonedNode);
 			else
-				((VariableDeclarationFragment)parentToReplaceIn).setName((SimpleName)newClonedNode);
-				
+				((VariableDeclarationFragment)parentToReplaceIn).setName((SimpleName)newClonedNode);		
 			//replaceNodeIn((VariableDeclarationFragment) parentToReplaceIn, nodeToReplace , parentTwo);
-		} else if (parentToReplaceIn instanceof ArrayAccess) {
-			replaceNodeIn((ArrayAccess) parentToReplaceIn, (Expression)nodeToReplace , (Expression)newClonedNode);
-		} else if (parentToReplaceIn instanceof MethodInvocation) {
-			replaceNodeIn((MethodInvocation) parentToReplaceIn,(Expression)nodeToReplace , (Expression)newClonedNode);
-		} else if (parentToReplaceIn instanceof Assignment) {
-			replaceNodeIn((Assignment) parentToReplaceIn, (Expression)nodeToReplace , (Expression)newClonedNode);
-		} else if (parentToReplaceIn instanceof ReturnStatement) {
-			((ReturnStatement)parentToReplaceIn).setExpression((Expression) newClonedNode);
+			} else if (parentToReplaceIn instanceof ArrayAccess) {
+				replaceNodeIn((ArrayAccess) parentToReplaceIn, (Expression)nodeToReplace , (Expression)newClonedNode);
+			} else if (parentToReplaceIn instanceof MethodInvocation) {
+				replaceNodeIn((MethodInvocation) parentToReplaceIn,(Expression)nodeToReplace , (Expression)newClonedNode);
+			} else if (parentToReplaceIn instanceof Assignment) {
+				replaceNodeIn((Assignment) parentToReplaceIn, (Expression)nodeToReplace , (Expression)newClonedNode);
+			} else if (parentToReplaceIn instanceof ReturnStatement) {
+				((ReturnStatement)parentToReplaceIn).setExpression((Expression) newClonedNode);
 			//replaceNodeIn((ReturnStatement) parentToReplaceIn, nodeToReplace , parentTwo);
-		} else if (nodeToReplace instanceof VariableDeclarationFragment) {
-			// then the child node is a fragment, don't modify
-			System.out.println("We don't modify expressions " + nodeToReplace.toString()+" Type: " +nodeToReplace.getNodeType());
-			newClonedNode= null;
+			} else if (parentToReplaceIn instanceof ConditionalExpression) { // type 16 
+				((ConditionalExpression)nodeToReplace).setExpression((Expression) newClonedNode);
 		//	replaceNodeIn((VariableDeclarationFragment)nodeToReplace , (VariableDeclarationFragment)newClonedNode);*/
-		}else{
-			System.out.println("Not sure what to do with " + parentToReplaceIn.toString()+" Type: " +parentToReplaceIn.getNodeType());
-			newClonedNode= null;
-		}
+			} else if (parentToReplaceIn instanceof CastExpression) { // type 11 
+				((CastExpression)nodeToReplace).setExpression((Expression) newClonedNode);
+			}else{
+				System.out.println("Not sure what to do with " + parentToReplaceIn.toString()+" Type: " +parentToReplaceIn.getNodeType());
+				newClonedNode= null;
+			}
 		}catch(Exception e){
 			System.out.println("Type mismatch: replacing "+nodeToReplace.toString() +" with " + newClonedNode.toString());
 			newClonedNode= null;
@@ -219,10 +229,6 @@ public class NodeOperators {
 	}
 	
 	
-	
-	
-	
-	
 	/*private static void replaceNodeIn(
 			VariableDeclarationFragment nodeToReplace,
 			VariableDeclarationFragment newClonedNode) {
@@ -231,72 +237,92 @@ public class NodeOperators {
 		parentToReplaceIn.fragments().add(replaceLoc, newClonedNode);
 	}*/
 
-	private static ASTNode crossoverExpressions(Expression nodeToReplace, Individual parentTwo) {
-		// doesnt matter what the expression is, only what its parent is..
-		// what node types do expressions exist in?
+	private static ASTNode replaceExpression(Expression nodeToReplace, GPMaterialVisitor gpMaterial) {
 		ASTNode replacementNode = null;
 		ASTNode parentToReplaceIn = nodeToReplace.getParent();
-		if (parentToReplaceIn instanceof InfixExpression) {
-			replacementNode = replaceNodeIn(
-					(InfixExpression) parentToReplaceIn, nodeToReplace,
-					parentTwo.gpMaterial.getDifferentRandomPrimitiveClone(nodeToReplace));
-		} else if (parentToReplaceIn instanceof PostfixExpression) {
-			replacementNode = parentTwo.gpMaterial.getDifferentRandomPrimitiveClone(nodeToReplace);
-			replaceNodeIn((PostfixExpression) parentToReplaceIn,(Expression) replacementNode); 			
-		} else if (parentToReplaceIn instanceof IfStatement) {
-			replacementNode = parentTwo.gpMaterial.getDifferentRandomConditionalClone(nodeToReplace);
-			replaceNodeIn((IfStatement) parentToReplaceIn, (Expression) replacementNode);
-		} else if (parentToReplaceIn instanceof ForStatement) {
-			replacementNode = replaceNodeIn((ForStatement) parentToReplaceIn, nodeToReplace , parentTwo);
-		} else if (parentToReplaceIn instanceof WhileStatement) {
-			replacementNode = replaceNodeIn((WhileStatement) parentToReplaceIn, nodeToReplace , parentTwo);
-		} else if (parentToReplaceIn instanceof ExpressionStatement) {
-			replacementNode = replaceNodeIn((ExpressionStatement) parentToReplaceIn, nodeToReplace , parentTwo);
-		} else if (parentToReplaceIn instanceof VariableDeclarationFragment) {
-				replacementNode = replaceNodeIn((VariableDeclarationFragment) parentToReplaceIn, nodeToReplace , parentTwo);
-		} else if (parentToReplaceIn instanceof ArrayAccess) {
-			replacementNode = replaceNodeIn((ArrayAccess) parentToReplaceIn, nodeToReplace , parentTwo);
-		} else if (parentToReplaceIn instanceof MethodInvocation) {
-			replacementNode = replaceNodeIn((MethodInvocation) parentToReplaceIn, nodeToReplace , parentTwo);
-		} else if (parentToReplaceIn instanceof Assignment) {
-			replacementNode = replaceNodeIn((Assignment) parentToReplaceIn, nodeToReplace , parentTwo);
-		} else if (parentToReplaceIn instanceof ReturnStatement) {
-			replacementNode = replaceNodeIn((ReturnStatement) parentToReplaceIn, nodeToReplace , parentTwo);
-		}else{
-			System.out.println("Not sure what to do with " + parentToReplaceIn.toString()+" Type:" +parentToReplaceIn.getNodeType());
-		}
+		Expression newExpression = (Expression)getClone(nodeToReplace.getAST(), gpMaterial.selectDifferentExpression(nodeToReplace));
+		Expression newConditional = (Expression)getClone(nodeToReplace.getAST(),gpMaterial.selectDifferentConditional(nodeToReplace));
+		
+		if( doesExpressionRequireConditional(parentToReplaceIn, nodeToReplace, newConditional))
+			replacementNode=newConditional;
+		//if(replaceExpressionRequiringExpression(parentToReplaceIn, nodeToReplace, newExpression))
+		else
+			replacementNode=newExpression; 
 		return replacementNode;
+	}
+	
+	private static boolean doesExpressionRequireConditional(
+			ASTNode parentToReplaceIn, Expression nodeToReplace,
+			Expression newConditional) {
+		if (parentToReplaceIn instanceof IfStatement||parentToReplaceIn instanceof WhileStatement) {
+			return true;	
+		} else {
+			// System.out.println("Not sure what to do with (Conditional) " + parentToReplaceIn.toString()+" Type: " +parentToReplaceIn.getNodeType());
+			return false;
+		}
+	}
+
+	private static boolean replaceExpressionRequiringExpression(
+			ASTNode parentToReplaceIn, Expression nodeToReplace,
+			Expression newExpression) {
+		
+		ASTNode returnNode = replaceNode(nodeToReplace, newExpression );
+		
+		if(returnNode == null )
+			return false;
+		else
+			return true;
+		/*if (parentToReplaceIn instanceof InfixExpression) {
+			replaceNodeIn((InfixExpression) parentToReplaceIn, nodeToReplace, newExpression);
+		} else if (parentToReplaceIn instanceof PostfixExpression) {
+			replaceNodeIn((PostfixExpression) parentToReplaceIn, newExpression);
+		} else if (parentToReplaceIn instanceof ForStatement) {
+			replaceNodeIn((ForStatement) parentToReplaceIn, nodeToReplace, newExpression);
+		} else if (parentToReplaceIn instanceof ExpressionStatement) {
+			replaceNodeIn((ExpressionStatement) parentToReplaceIn, newExpression);
+		} else if (parentToReplaceIn instanceof VariableDeclarationFragment) {
+			replaceNodeIn((VariableDeclarationFragment) parentToReplaceIn, nodeToReplace, newExpression);
+		} else if (parentToReplaceIn instanceof ArrayAccess) {
+			replaceNodeIn((ArrayAccess) parentToReplaceIn, nodeToReplace, newExpression);
+		} else if (parentToReplaceIn instanceof MethodInvocation) {
+			replaceNodeIn((MethodInvocation) parentToReplaceIn, nodeToReplace, newExpression);
+		} else if (parentToReplaceIn instanceof Assignment) {
+			replaceNodeIn((Assignment) parentToReplaceIn, nodeToReplace, newExpression);
+		} else if (parentToReplaceIn instanceof ReturnStatement) {
+			replaceNodeIn((ReturnStatement) parentToReplaceIn, newExpression);
+		} else return false;
+		return true;
+		*/
 	}
 
 	private static ASTNode replaceNodeIn(ReturnStatement parentToReplaceIn,
-			Expression nodeToReplace, Individual parentTwo) {
-		ASTNode returnNode = parentTwo.gpMaterial.getDifferentRandomPrimitiveClone(nodeToReplace);
-		parentToReplaceIn.setExpression((Expression) returnNode);
-		return returnNode;
+			Expression newExpression) {
+		parentToReplaceIn.setExpression((Expression) newExpression);
+		return newExpression;
 	}
 
 	
-	private static void replaceNodeIn(Assignment parentToReplaceIn,
+	private static Expression replaceNodeIn(Assignment parentToReplaceIn,
 			Expression nodeToReplace, Expression replacementNode) {
 		if(parentToReplaceIn.getLeftHandSide().equals(nodeToReplace))
 			parentToReplaceIn.setLeftHandSide(replacementNode);
 		else
 			parentToReplaceIn.setRightHandSide(replacementNode);
-
+		return replacementNode;
 	}
 	
-	private static ASTNode replaceNodeIn(Assignment parentToReplaceIn,
+	/*private static ASTNode replaceNodeIn(Assignment parentToReplaceIn,
 			Expression nodeToReplace, Individual parentTwo) {
-		ASTNode returnNode = parentTwo.gpMaterial.getDifferentRandomPrimitiveClone(nodeToReplace);
+		ASTNode returnNode = getClone(nodeToReplace.getAST(), parentTwo.gpMaterial.selectDifferentExpression(nodeToReplace));
 		if(parentToReplaceIn.getLeftHandSide().equals(nodeToReplace))
 			parentToReplaceIn.setLeftHandSide((Expression) returnNode);
 		else
 			parentToReplaceIn.setRightHandSide((Expression) returnNode);
 		return returnNode;
-	}
+	}*/
 
 	
-	private static void replaceNodeIn(MethodInvocation parentToReplaceIn,
+	private static Expression replaceNodeIn(MethodInvocation parentToReplaceIn,
 			Expression nodeToReplace, Expression  replacementNode) {
 		int index = parentToReplaceIn.arguments().indexOf(nodeToReplace);
 		try{
@@ -309,70 +335,55 @@ public class NodeOperators {
 			System.out.println("Failed attempt to replace method parameter "+nodeToReplace.toString() + " with "+replacementNode.toString());
 			// Picked the "optionalExpression" of a MethodInvocation e.g. - a[j].compareto(k)
 		}
-	}
-	
-	private static ASTNode replaceNodeIn(MethodInvocation parentToReplaceIn,
-			Expression nodeToReplace, Individual parentTwo) {
-		ASTNode returnNode = parentTwo.gpMaterial.getDifferentRandomPrimitiveClone(nodeToReplace);
-		int index = parentToReplaceIn.arguments().indexOf(nodeToReplace);
-		try{
-			if(index>-1){
-				parentToReplaceIn.arguments().remove(nodeToReplace);
-				parentToReplaceIn.arguments().add(index, returnNode);
-			}else
-				parentToReplaceIn.setExpression((Expression) returnNode);
-		} catch( Exception e){
-			System.out.println("Failed attempt to replace method parameter "+nodeToReplace.toString() + " with "+returnNode.toString());
-			// Picked the "optionalExpression" of a MethodInvocation e.g. - a[j].compareto(k)
-		}
-		return returnNode;
+		return replacementNode;
 	}
 
 	
-	private static void replaceNodeIn(ArrayAccess parentToReplaceIn,
+	private static Expression replaceNodeIn(ArrayAccess parentToReplaceIn,
 			Expression nodeToReplace, Expression replacementNode) {
 		if(parentToReplaceIn.getIndex().equals(nodeToReplace))
 			parentToReplaceIn.setIndex(replacementNode);
 		else
 			parentToReplaceIn.setArray(replacementNode);
+		
+		return replacementNode;
 	}
 	
-	private static ASTNode replaceNodeIn(ArrayAccess parentToReplaceIn,
+/*	private static ASTNode replaceNodeIn(ArrayAccess parentToReplaceIn,
 			Expression nodeToReplace, Individual parentTwo) {
-		ASTNode returnNode = parentTwo.gpMaterial.getDifferentRandomPrimitiveClone(nodeToReplace);
+		ASTNode returnNode = getClone(nodeToReplace.getAST(), parentTwo.gpMaterial.selectDifferentExpression(nodeToReplace));
 		if(parentToReplaceIn.getIndex().equals(nodeToReplace))
 			parentToReplaceIn.setIndex((Expression) returnNode);
 		else
 			parentToReplaceIn.setArray((Expression) returnNode);
 		return returnNode;
-	}
+	}*/
 
 	
 	private static ASTNode replaceNodeIn(
 			VariableDeclarationFragment parentToReplaceIn,
-			Expression nodeToReplace, Individual parentTwo) {
-		ASTNode returnNode = parentTwo.gpMaterial.getDifferentRandomPrimitiveClone(nodeToReplace);
-		parentToReplaceIn.setInitializer((Expression) returnNode);
-		return returnNode;
+			Expression nodeToReplace, Expression newExpression) {
+		parentToReplaceIn.setInitializer(newExpression);
+		return newExpression;
 	}
 
-	private static ASTNode replaceNodeIn(ExpressionStatement parentToReplaceIn,
-			Expression nodeToReplace, Individual parentTwo) {
-		ASTNode returnNode = parentTwo.gpMaterial.getDifferentRandomConditionalClone(nodeToReplace);
-		parentToReplaceIn.setExpression((Expression) returnNode);
-		return returnNode;
+	private static ASTNode replaceNodeIn(ExpressionStatement parentToReplaceIn, Expression newExpression) {
+		//ASTNode returnNode = getClone(nodeToReplace.getAST(), parentTwo.gpMaterial.selectDifferentConditional(nodeToReplace));
+		//ASTNode returnNode = parentTwo.gpMaterial.getDifferentRandomConditionalClone(nodeToReplace);
+		parentToReplaceIn.setExpression((Expression) newExpression);
+		return newExpression;
 	}
 
 
 	
 	private static ASTNode replaceNodeIn(WhileStatement parentToReplaceIn,
-			Expression nodeToReplace, Individual parentTwo) {
-		ASTNode returnNode = parentTwo.gpMaterial.getDifferentRandomConditionalClone(nodeToReplace);
-		parentToReplaceIn.setExpression((Expression) returnNode);
-		return returnNode;
+			 Expression newConditional) {
+		//ASTNode returnNode = parentTwo.gpMaterial.getDifferentRandomConditionalClone(nodeToReplace);
+		parentToReplaceIn.setExpression((Expression) newConditional);
+		return newConditional;
 	}
 
-	private static void replaceNodeIn(ForStatement parentToReplaceIn,
+	private static ASTNode replaceNodeIn(ForStatement parentToReplaceIn,
 			Expression nodeToReplace, Expression replacementNode) {
 		if(parentToReplaceIn.getExpression().equals(nodeToReplace)){ // i<10
 			parentToReplaceIn.setExpression(replacementNode);
@@ -385,16 +396,19 @@ public class NodeOperators {
 				parentToReplaceIn.updaters().add(replacementNode);
 			}
 		}
+		return replacementNode;
 	}
 	
 	private static ASTNode replaceNodeIn(ForStatement parentToReplaceIn,
 			Expression nodeToReplace, Individual parentTwo) {
 		ASTNode returnNode = null;
 		if(parentToReplaceIn.getExpression().equals(nodeToReplace)){ // i<10
-			returnNode = parentTwo.gpMaterial.getDifferentRandomConditionalClone(nodeToReplace);
+			returnNode = getClone(nodeToReplace.getAST(), parentTwo.gpMaterial.selectDifferentConditional(nodeToReplace));
+			//returnNode = parentTwo.gpMaterial.getDifferentRandomConditionalClone(nodeToReplace);
 			parentToReplaceIn.setExpression((Expression) returnNode);
 		}else {
-			returnNode =parentTwo.gpMaterial.getDifferentRandomPrimitiveClone(nodeToReplace);
+			returnNode = getClone(nodeToReplace.getAST(), parentTwo.gpMaterial.selectDifferentExpression(nodeToReplace));
+			//returnNode =parentTwo.gpMaterial.getDifferentRandomExpressionClone(nodeToReplace);
 			if(parentToReplaceIn.initializers().contains(nodeToReplace)){ // try it :/
 				parentToReplaceIn.initializers().remove(nodeToReplace);
 				parentToReplaceIn.initializers().add(returnNode);
@@ -406,111 +420,82 @@ public class NodeOperators {
 		return returnNode;
 	}
 
-	private static ASTNode replaceNodeIn(IfStatement ifToReplaceIn,
-			Expression differentRandomConditional) {
-		ifToReplaceIn.setExpression(differentRandomConditional);
-		return differentRandomConditional;
+	private static ASTNode replaceNodeIn(IfStatement ifToReplaceIn,Expression newConditional){
+			ifToReplaceIn.setExpression(newConditional);
+		return newConditional;
 	}
 
 	private static ASTNode replaceNodeIn(
 			PostfixExpression parentToReplaceIn,
-			Expression differentRandomPrimitive) {
-		parentToReplaceIn.setOperand(differentRandomPrimitive);
-		return differentRandomPrimitive;
+			GPMaterialVisitor gpMaterial) {
+		Expression newExpression = (Expression)getClone(parentToReplaceIn.getAST(),gpMaterial.selectDifferentExpression(parentToReplaceIn.getOperand()));
+		return replaceNodeIn(parentToReplaceIn, newExpression);
+	}
+	
+private static ASTNode replaceNodeIn(
+				PostfixExpression parentToReplaceIn,
+			Expression newExpression){		
+		parentToReplaceIn.setOperand(newExpression);
+		return newExpression;
 	}
 
 	private static ASTNode replaceNodeIn(
 			InfixExpression parentToReplaceIn, Expression nodeToReplace,
-			Expression differentRandomPrimitive) {
+			GPMaterialVisitor gpMaterial) {
+		Expression newExpression = (Expression)getClone(nodeToReplace.getAST(),gpMaterial.selectDifferentExpression(nodeToReplace));
+		return replaceNodeIn(parentToReplaceIn, nodeToReplace, newExpression);
+	}
+	private static ASTNode replaceNodeIn(InfixExpression parentToReplaceIn,
+			Expression nodeToReplace, Expression newExpression) {
+		
 		if(parentToReplaceIn.getLeftOperand().equals(nodeToReplace))
-			parentToReplaceIn.setLeftOperand(differentRandomPrimitive);
+			parentToReplaceIn.setLeftOperand(newExpression);
 		else
-			parentToReplaceIn.setRightOperand(differentRandomPrimitive);
-		return differentRandomPrimitive;
+			parentToReplaceIn.setRightOperand(newExpression);
+		return newExpression;
 	}
 	
+	private static ASTNode replaceNodeIn(
+			PrefixExpression parentToReplaceIn,
+		Expression newExpression){		
+	parentToReplaceIn.setOperand(newExpression);
+	return newExpression;
+}
 
-	private static ASTNode replaceOrInsertStatement(Statement nodeToReplace, Individual parentTwo) {
+/*	private static ASTNode replaceOrInsertStatement(Statement nodeToReplace, Individual parentTwo) {
 		ASTNode replacementNode;
 		CompilationUnit newIndAST = (CompilationUnit)nodeToReplace.getRoot();
-		List<Statement> stmtClones = parentTwo.gpMaterial.getStatementsClones2(newIndAST);
+		Statement stmtClone = (Statement) getClone(newIndAST, parentTwo.gpMaterial.extractStatement());
 		if ( generator.nextBoolean() && nodeToReplace instanceof Block  ) {
 			// 1/4 of the time, insert a line into, instead of replacing a block
 			replacementNode = insertSingleLine(newIndAST,
-					(Block) nodeToReplace, stmtClones.get(generator
-							.nextInt(stmtClones.size())));
+					(Block) nodeToReplace, stmtClone);
 		} else{ 
-			replacementNode = replaceSingleLine(newIndAST,
-				(Statement) nodeToReplace, stmtClones.get(generator
-						.nextInt(stmtClones.size())));
+			replacementNode = replaceStatement(newIndAST,
+				(Statement) nodeToReplace, stmtClone);
 		}
 		return replacementNode; 
-	}
+	}*/
 
-	public static int mutate(Individual newInd, int choice, int numChanges,
-			GPConfig gpConfig) {
+	
 
-		List<ASTNode> mutationCandidates = newInd.gpMaterial.getAllAllowedNodes();
-		List<ASTNode> mutNodes = null; 
-
-		if (gpConfig.isSinglePointEnforced()) {
-			/*
-			 * We pick a node and a statement, depending on whether we want to modify the node (replace) or delete or clone a statement
-			 * Interesting statements (with high bias) are more likely to be chosen for modification, or cloning to a random location in the program. 
-			 */
-			mutNodes = pickNodes(mutationCandidates, numChanges,
-					gpConfig.isPickBestLocation());
-		}		
-		if (!(mutNodes.size() == 0) /*&& !(mutStmts.size() == 0)*/) {
-			// --------------- which mutator?
-
-			/*
-			 * if (choice == 0){ // BCK removed delete 2 Aug 2013
-			 * 
-			 * PHD if deletion is selected, go nuts. The lower the probability,
-			 * the more likely a line is selected for deletion the probability
-			 * has the opposite effect for removal...
-			 * 
-			 * 
-			 * setChangedFlags(mutStmts); deleteRandomNode(mutStmts); // pick
-			 * one, delete it }else if (choice == 1){
-			 */
-			
-			// choice: 0 = delete, 1 = insert, 2-9 = modify
-			setChangedFlags(mutNodes);
-			
-			if(mutNodes.get(0) instanceof Block){ // 1/50 times this will happen, instead of 1/10 under previous design
-				insertRandomStmtInBlock((Block)mutNodes.get(0),newInd);
-			}else{
-				if (choice < 2 && mutNodes.get(0) instanceof Statement) {
-					/* only setting the flag for 1 statement (usually) */
-					  
-					deleteRandomNode(mutNodes);
-				} else
-					modifyNodes(mutNodes,newInd);
-			}
-
-		} else {
-			Logger.logTrash("Nothing to mutate (empty program?");
-		}
-		return numChanges;
-	}
-
-	private static void insertRandomStmtInBlock(Block mutBlock, Individual newInd) {
-		Statement stmt = duplicateSingleLineToSameAST(newInd.gpMaterial.getRandomStatement());
-		insertSingleLine((CompilationUnit)stmt.getRoot(),
-				mutBlock, stmt);
-		setChangedFlag(mutBlock);
+	static ASTNode insertRandomStmtInBlock(Block mutBlock, Individual newInd) {
+		
+		Statement stmtClone = extractStatement(newInd.gpMaterial); //duplicateSingleLineToSameAST(newInd.gpMaterial.extractStatement());
+		insertStatementInBlock(mutBlock, stmtClone);
+		/*insertSingleLine((CompilationUnit)stmt.getRoot(),
+				mutBlock, stmt);*/
 		//cloneGPData(nodeToReplace, replacementNode);
+		return stmtClone;
 	}
 
-	private static void setChangedFlags(List<ASTNode> mutStmts) {
+/*	private static void setChangedFlags(List<ASTNode> mutStmts) {
 		for (ASTNode aNode : mutStmts) {
 			setChangedFlag(aNode);
 		}
-	}
+	}*/
 
-	private static void setChangedFlag(ASTNode astNode) {
+	static void setChangedFlag(ASTNode astNode) {
 		// Set the flag on the data which is attached to this stmt
 		GPASTNodeData gpDataToSetFlag = (GPASTNodeData) astNode
 				.getProperty("gpdata");
@@ -522,7 +507,7 @@ public class NodeOperators {
 	}
 
 
-	private static Statement duplicateRandomSingleLineToSameAST( // should this be in GPMaterialVisitor?
+	/*private static Statement duplicateRandomSingleLineToSameAST( // should this be in GPMaterialVisitor?
 			List<ASTNode> mutStmts){
 		Statement stmtToCopy = (Statement) mutStmts.get(generator.nextInt(mutStmts.size()));
 		return duplicateSingleLineToSameAST(stmtToCopy);
@@ -530,31 +515,30 @@ public class NodeOperators {
 				
 	private static Statement duplicateSingleLineToSameAST(Statement mutStmt){
 		Statement dupe = duplicateSingleLine(mutStmt, (CompilationUnit)mutStmt.getRoot());
-		getExistingGPDataRef(mutStmt,dupe);
+		cloneExistingGPDataRef(mutStmt,dupe);
 		return dupe;
-	}
+	}*/
 	
-	public static void getExistingGPDataRef(ASTNode nodeWithGPData, ASTNode undecoratedNode){
+	public static void cloneExistingGPDataRef(ASTNode nodeWithGPData, ASTNode undecoratedNode){
 		/*
 		 * Take a reference to gpData from an existing node.
 		 * Set other nodes down the tree to have new gpData
+		 * TODO clone data down the tree!
 		 */
 		GPASTNodeData tempData = (GPASTNodeData) nodeWithGPData.getProperty("gpdata");
 		if(tempData == null){ // conniption
-			System.out.println("NodeOperators null GPData found: " + (new Throwable()).getStackTrace());
-			Logger.logAll("NodeOperators null GPData found: " + (new Throwable()).getStackTrace());
+			//System.out.println("NodeOperators null GPData found: " + (new Throwable()).getStackTrace());
+			Logger.logTrash("NodeOperators null GPData found: " + (new Throwable()).getStackTrace());
 			undecoratedNode.accept(new GPSubtreeDecoratorIfNullVisitor());
 			//System.exit(1); // maybe too far though
 		}else
-			undecoratedNode.setProperty("gpdata", nodeWithGPData.getProperty("gpdata"));
+			undecoratedNode.setProperty("gpdata", tempData);
 	}
 
-	private static Statement duplicateSingleLine(Statement mutStmt,
+	/*private static Statement duplicateSingleLine(Statement mutStmt,
 			CompilationUnit targetIndAST) {
-		Statement stmtClone = (Statement) ASTNode.copySubtree(
+		Statement stmtClone = (Statement) getClone(
 				targetIndAST.getAST(), mutStmt);
-
-		getExistingGPDataRef(mutStmt,stmtClone);
 		
 		GPBlockVisitor gpBV = new GPBlockVisitor();
 		targetIndAST.accept(gpBV);
@@ -568,20 +552,21 @@ public class NodeOperators {
 			bL.statements().add(generator.nextInt(bL.statements().size()),
 					stmtClone);
 		return stmtClone;
-	}
+	}*/
 
 	
 
-	private static Statement insertSingleLine(CompilationUnit targetIndAST,
+/*	private static Statement insertSingleLine(CompilationUnit targetIndAST,
 			Block aBlock, Statement newStmt) {
 		insertStatementInBlock(aBlock, newStmt);
 		return newStmt;
-	}
+	}*/
 	
 
-	private static Statement replaceSingleLine(CompilationUnit targetIndAST,
-			Statement nodeToReplace, Statement newStmt) {
-
+	private static Statement replaceStatement(Statement nodeToReplace, Statement newStmt) {
+		
+		// we need the appropriate ASTRewrite object here.
+		
 		// could be block, if stmt, for stmt, method declaration
 		if (nodeToReplace.getParent() instanceof Block)
 			replaceStatmentInParentBlock((Block) nodeToReplace.getParent(),
@@ -606,18 +591,48 @@ public class NodeOperators {
 		parentIf.setThenStatement(stmtClone);
 	}
 
+/*	private static void insertStatementInBlock(Block aBlock, Statement stmtClone) {
+		System.out.println("Before insert " + aBlock.toString());
+		try {
+			ASTRewrite astRewrite = ASTRewrite.create(aBlock.getAST());
+			ListRewrite lrw = astRewrite.getListRewrite(aBlock,
+					Block.STATEMENTS_PROPERTY);
+			lrw.insertAt(stmtClone,
+					generator.nextInt(aBlock.statements().size()), null);
+			astRewrite.rewriteAST();
+			System.out.println("Successfully inserted " + stmtClone.toString()
+					+ " statement in block (clone line using astrewrite):"
+					+ aBlock.toString());
+		} catch (Exception e) {
+			System.out.println("Random statement in block error: "
+					+ aBlock.statements().size() + "\n");
+		}
+	}*/
+	
 	private static void insertStatementInBlock(Block aBlock, Statement stmtClone) {
-		// TODO Debug this, does this do anything?
-		ASTRewrite astRewrite = ASTRewrite.create(aBlock.getAST());
-		ListRewrite lrw = astRewrite.getListRewrite(aBlock, Block.STATEMENTS_PROPERTY);
-		lrw.insertAt(stmtClone,generator.nextInt(aBlock.statements().size()),null);
+		//System.out.println("Before insert " + aBlock.toString());
+		try {
+			aBlock.statements().add(generator.nextInt(aBlock.statements().size()),stmtClone);
+			/*System.out.println("Successfully inserted " + stmtClone.toString()
+					+ " statement in block (clone line using astrewrite):"
+					+ aBlock.toString());*/
+		} catch (Exception e) {
+			/*System.out.println("Random statement in block error: "
+					+ aBlock.statements().size() + "\n");*/
+		}
 	}
 	
 	private static void replaceStatmentInParentBlock(Block parentBlock,
 			Statement nodeToReplace, Statement stmtClone) {
 		int replaceLoc = parentBlock.statements().indexOf(nodeToReplace);
 		parentBlock.statements().remove(replaceLoc);
-		parentBlock.statements().add(replaceLoc, stmtClone);
+		try{
+		parentBlock.statements().add(replaceLoc, getClone(stmtClone.getAST(),stmtClone));
+		//System.out.println("Successfully replaced statement in parent block");
+		} catch (Exception e){
+			//System.out.println("ParentBlockException: "+parentBlock.statements().size()+"\n"+parentBlock.toString());
+			//System.out.println("Replacing at:"+replaceLoc +" with " + stmtClone.toString());
+		}
 	}
 
 	/*private static Statement replaceSingleLine(Statement originalStmt,
@@ -660,7 +675,8 @@ public class NodeOperators {
 		return stmtClone;
 	}*/
 
-	private static void modifyNodes(List<ASTNode> mutStmts, Individual anInd) {
+	// This method written when we expect to modify many statements (never used)
+	/*private static void modifyNodes(List<ASTNode> mutStmts, Individual anInd) {
 		Iterator<ASTNode> mutStmtsIter = mutStmts.iterator();
 		ASTNode cur;
 		while (mutStmtsIter.hasNext()) {
@@ -669,144 +685,48 @@ public class NodeOperators {
 					+ cur.toString().replace("\n", "").replace("\r", ""));
 			modifyNode(cur, anInd);
 		}
+	}*/
+	
+	public static void modifypostFixOperator(PostfixExpression upExpr, GPMaterialVisitor gpMaterial) {
+		upExpr.setOperator(gpMaterial.selectDifferentOperator(upExpr.getOperator()));
 	}
 
-	private static void modifyNode(ASTNode node, Individual anInd) {
-		/*	depending on the node type, we should go in and mess with it?
-		 *  or should we replace the node with some other type?
-		 *  the node can be a primitive in an expression, or statement 
-		 *  (this is crossover with itself?)
-		 *  and operator messing
-		 */
-		
-		/* change operators in assignment, postfix or infix expression
-		 * otherwise
-		 * replace primitives with any other primitive 
-		 * replace statements with statements
-		 * 
-		 */
-		setChangedFlag(node);
-		if (node instanceof InfixExpression) {
-			modifyInfixExpressionOperator((InfixExpression) node);
-		} else if (node instanceof Assignment) {
-			modifyAssignmentOperator((Assignment) node);
-		} else if (node instanceof PostfixExpression) {
-			modifypostFixOperator((PostfixExpression) node);
-		}else {
-			modifyNodeUsingParent(node,	anInd, false);
-		}
-	}
-
-	private static void modifypostFixOperator(PostfixExpression upExpr) {
-		setChangedFlag(upExpr);
-		upExpr.setOperator(GPPrimitives
-				.getDifferentRandomOperator(upExpr.getOperator()));
-	}
-
-	private static void modifyAssignmentOperator(Assignment exp) {
-		setChangedFlag(exp);
-		exp.setOperator(GPPrimitives.getDifferentRandomOperator(exp
+	public static void modifyAssignmentOperator(Assignment exp, GPMaterialVisitor gpMaterial) {
+		exp.setOperator(gpMaterial.selectDifferentOperator(exp
 				.getOperator())); 
 	}
 
-	private static void modifyInfixExpressionOperator(InfixExpression condExp) {
-		setChangedFlag(condExp);
-			condExp.setOperator(GPPrimitives.getDifferentRandomOperator(condExp
+	public static void modifyInfixExpressionOperator(InfixExpression condExp, GPMaterialVisitor gpMaterial) {
+			condExp.setOperator(gpMaterial.selectDifferentOperator(condExp
 					.getOperator()));
 	}
 
-	private static List<ASTNode> pickNodes(
-			// TODO this should be merged with
-			// GPMaterialVisitor.getRandomGPNode(),
-			// they both do roughly the same thing, 
-			// should really be moved to GPMaterialVisitor
-
-			List<ASTNode> mutationCandidates, int numChanges,
-			boolean pickBestLocation) {
-
-		if (pickBestLocation)
-			return pickBestNodes(mutationCandidates, numChanges);
-		else
-			return pickNodes(mutationCandidates, numChanges);
-	}
-
-	private static List<ASTNode> pickBestNodes(
-			List<ASTNode> mutationCandidates, int numChanges) {
-
-		List<ASTNode> returnList = new ArrayList<ASTNode>();
-
-		int numberToPick = (int) (mutationCandidates.size() * nodeSelectionTournamentSizeRatio);
-		ArrayList<Integer> indexToPick = new ArrayList<Integer>();
-		Integer newInt;
-		while (indexToPick.size() < numberToPick) { // get unique set of index's
-			newInt = generator.nextInt(mutationCandidates.size());
-			if (!indexToPick.contains(newInt)) {
-				indexToPick.add(newInt);
-			}
-		}
-		ASTNode returnNode = null;
-		try{
-		returnNode = mutationCandidates.get(indexToPick.get(0));
-		} catch (Exception e){
-			System.out.println("Missing node choices");
-		}
-		ASTNode curNode;
-		for (Integer curIndex : indexToPick) { // find best from this tournament
-			curNode = mutationCandidates.get(curIndex);
-			//bork! problem here with block which doesnt have gpdata, because its parent isnt allowed!
-			if (((GPASTNodeData) curNode.getProperty("gpdata"))
-					.getProbabilityVal() > ((GPASTNodeData) returnNode
-					.getProperty("gpdata")).getProbabilityVal()) {
-				returnNode = curNode;
-			}
-		}
-
-		returnList.add(returnNode);
-		return returnList;
-	}
-
-	private static List<ASTNode> pickNodes(List<ASTNode> mutationCandidates,
-			int numChanges) {
-
-		List<ASTNode> returnList = new ArrayList<ASTNode>();
-		if (mutationCandidates.size() > 0) {
-			int randNum;
-			do {
-				randNum = generator.nextInt(mutationCandidates.size());
-				if (!returnList.contains(mutationCandidates.get(randNum)))
-					returnList.add(mutationCandidates.get(randNum));
-			} while (returnList.size() < numChanges);
-		}
-		return returnList;
-	}
-
-
-	private static void deleteRandomNode(List<ASTNode> mutNodes) {
+/*	static void deleteRandomNode(ASTNode mutNode) {
 		// TODO write this so it deletes if,while,for statements without
 		// deleting all child statements.
 		// Guaranteed to delete a line
-		int stmtIndexToDelete = generator.nextInt(mutNodes.size()); 
-		System.out.println("Deleting: "
-				+ (mutNodes.get(stmtIndexToDelete)).toString()
-						.replace("\n", "").replace("\r", ""));
-		deleteNode(mutNodes.get(stmtIndexToDelete));
-	}
+		deleteNode(mutNode);
+	}*/
 
-	public static void deleteNode(ASTNode stmt) {
+	public static void deleteNode(ASTNode aNode) {
 		try {
-			stmt.delete();
-		} catch (IllegalArgumentException e) { 
-			/*
-			 * TODO should we change this so it modifies the statements parent,
-			 * to allow deletion of this statement leaving the body empty nah...
-			 */
-
-			// delete the parent so....
-			deleteNode((Statement) stmt.getParent());
+			if (aNode instanceof Statement)
+				aNode.delete(); // ah this can be used to remove any node
+			if (aNode instanceof MethodInvocation) {
+				Expression innerExpression = ((MethodInvocation) aNode)
+						.getExpression();
+				replaceExpressionRequiringExpression(aNode.getParent(),
+						(MethodInvocation) aNode, innerExpression);
+			} else
+				deleteNode((Statement) aNode.getParent());
+		} catch (Exception e) {
+			Logger.logDebugConsole("locoGP when deleting " + aNode.toString()
+					+ "\n" + e.getMessage());
 		}
 	}
 
-	public static CompilationSet parseSource(Individual newInd) {
+	/*public static CompilationSet parseSource(Individual newInd) {
+		// TODO This should be in ASTDetail, refactor!
 		return parseSource(newInd.ourProblem.getStrings()); 
 
 	}
@@ -816,35 +736,17 @@ public class NodeOperators {
 			codeString.setAST(parseSource(codeString.getCodeString()));
 		}
 		return codeSet;
-	}
+	}*/
+	
 
-	public static CompilationUnit parseSource(String newIndCode) {
-		ASTParser parser = ASTParser.newParser(AST.JLS3); 
-		// TODO optimisation around repeat parsing
-		
-		// use ast rewrite to allow changes
-		// http://publib.boulder.ibm.com/infocenter/iadthelp/v6r0/index.jsp?topic=/org.eclipse.jdt.doc.isv/guide/jdt_api_manip.htm
 
-		// TODO get bindings working, for now we hack this
-		parser.setResolveBindings(true);
-		// parser.setBindingsRecovery(true);
-		parser.setSource(newIndCode.toCharArray());
-
-		// ICompilationUnit icompUnit = (ICompilationUnit)
-		// parser.createAST(null); // No!
-		CompilationUnit compUnit = (CompilationUnit) parser.createAST(null);
-
-		compUnit.recordModifications();
-
-		return compUnit;
-	}
-
-	public static void updateClassName(CompilationDetail compilationDetail, String className, GPMaterialVisitor gpMaterial) {
-		CompilationUnit compilationU = compilationDetail.AST;
+	
+	private static TypeDeclaration findClassDeclaration(CompilationDetail compilationDetail, GPMaterialVisitor gpMaterial){
+		CompilationUnit  compilationU= compilationDetail.getCompilationUnit();
 		int closest =-1, bestIndex = 0, tmp = 0 ;
 		for(int i =0; i < compilationU.types().size(); i ++){ //TypeDeclaration tD : (List<TypeDeclaration>) parsedAST.types()){
 			// this lark was added when to skip over internal classes, could be allright to remove. 
-			tmp = className.compareTo(((TypeDeclaration)compilationU.types().get(i)).getName().toString());
+			tmp = compilationDetail.getClassName().compareTo(((TypeDeclaration)compilationU.types().get(i)).getName().toString());
 			if(tmp<0)
 				tmp = - tmp;
 			if( closest<0 || tmp <closest){
@@ -852,16 +754,20 @@ public class NodeOperators {
 				closest = tmp;
 			}
 		}
-		TypeDeclaration classRef = ((TypeDeclaration) compilationU.types().get(bestIndex));
+		return ((TypeDeclaration) compilationU.types().get(bestIndex));
+	}
+	
+	public static void updateClassName(CompilationDetail compilationDetail, GPMaterialVisitor gpMaterial) {
+		TypeDeclaration classRef = findClassDeclaration(compilationDetail, gpMaterial);
 		String oldName = classRef.getName().toString();
-		SimpleName newName = compilationU.getAST().newSimpleName(className);
+		String className = compilationDetail.getClassName();
+		SimpleName newName = compilationDetail.getCompilationUnit().getAST().newSimpleName(className);
 		classRef.setName(newName);
-		updateConstructorNames(compilationU.getAST(), className, oldName, gpMaterial); // this is convoluted
+		updateConstructorNames(compilationDetail.getCompilationUnit().getAST(), className, oldName, gpMaterial); // this is convoluted
 	}
 
 	private static void updateConstructorNames(AST parsedAST,
 			String newName, String oldName, GPMaterialVisitor gpMaterial) {
-		// goddamn constructors in huffman... 
 		List<MethodDeclaration> constructors = gpMaterial.getConstructors(oldName);
 		if(constructors.size() >0){
 			for(MethodDeclaration constructor : constructors)
@@ -879,21 +785,22 @@ public class NodeOperators {
 	
 	public static CompilationUnit cloneAST(CompilationUnit originalAST) {
 		AST ast = AST.newAST(AST.JLS3);
-		CompilationUnit cloneAST = ast.newCompilationUnit(); 
-		cloneAST.types().addAll(CompilationUnit.copySubtrees(cloneAST.getAST(), originalAST.types()));
+		CompilationUnit cloneAST = ast.newCompilationUnit();
+		List allNodes = CompilationUnit.copySubtrees(cloneAST.getAST(), originalAST.types());
+		cloneAST.types().addAll(allNodes); // needed? yes... ?
+		//CompilationUnit.copySubtrees(cloneAST.getAST(), originalAST.types());
 		
 		// why?
 		cloneAST.setPackage((PackageDeclaration) CompilationUnit.copySubtree( cloneAST.getAST(), originalAST.getPackage()));
 		//GPMaterialVisitor.cloneProbabilitiesDownTree(originalAST, cloneAST); // This cloning can be done a couple of ways, and is handled in the Individual object now 
 		return cloneAST;
 	}
-	
-	
 
 	public static void updateMethodInvocationClassNames(
 			ArrayList<MethodInvocation> methodCalls,
 			ArrayList<String> newClassNames, ArrayList<String> originalClassNames) {
-
+		String originalName;
+		String compName;
 		if (!originalClassNames.get(0).contains(newClassNames.get(0))) { // skip if they're the same, ie the original program
 			String allOriginal = originalClassNames.toString();
 			for (MethodInvocation mI : methodCalls) { // update each method call with teh appropriate name
@@ -902,9 +809,13 @@ public class NodeOperators {
 					 * checking if its not null is enough.
 					 * we can easily check if the expression contains one of the original names without going through them all.. 
 					 */
+					compName = mI.getExpression().toString();
 					for (int i = 0; i < originalClassNames.size(); i++) {
-						if (mI.getExpression().toString().contains(originalClassNames.get(i)))
+						originalName = originalClassNames.get(i);
+						if (compName.equals(originalName) || compName.startsWith(originalName+".") || compName.startsWith(originalName+"_") ){
 							mI.setExpression(mI.getAST().newSimpleName(newClassNames.get(i)));
+							break;
+						}
 					}
 				}
 			}
@@ -955,11 +866,15 @@ public class NodeOperators {
 
 	public static void updateTypes(ArrayList<Type> types,
 			ArrayList<String> newClassNames, ArrayList<String> originalClassNames) {
+		String typeStr;
+		String origStr;
 		if (!originalClassNames.get(0).contains(newClassNames.get(0))) { // skip if they're the same, ie the original program
 			for (Type aType : types) {
 				if (aType != null) {
+					typeStr = aType.toString();
 					for (int i = 0; i < originalClassNames.size(); i++) {
-						if (aType.toString().contains(originalClassNames.get(i)))
+						origStr = originalClassNames.get(i);
+						if (typeStr.equals(origStr) || typeStr.startsWith(origStr+"_")) // changed from contains!
 						{
 							renameType(aType, newClassNames.get(i));
 						}
@@ -969,7 +884,86 @@ public class NodeOperators {
 		}
 	}
 
+	// TODO should be in NodeModifierUtil
+	static ASTNode getClone(CompilationUnit indAST, ASTNode nodeToClone){
+		ASTNode clonedNode = ASTNode.copySubtree(indAST.getAST(), nodeToClone);
+		NodeOperators.cloneExistingGPDataRef( nodeToClone, clonedNode);
+		return clonedNode;
+	}
 
+	
+	static ASTNode getClone(AST indAST, ASTNode nodeToClone){
+		ASTNode clonedNode = ASTNode.copySubtree(indAST, nodeToClone);
+		NodeOperators.cloneExistingGPDataRef( nodeToClone, clonedNode);
+		return clonedNode;
+	}
+
+	public static void rename(SimpleName oldName, String newName, ASTRewrite rewriter) {
+		/*
+		 * MethodInvocation.optionalExpression
+		 * QualifiedName.qualifier
+		 * TypeDeclaration.typeName
+		 * MethodDeclaration.methodName
+		 * SimpleType.typeName
+		 * ConditionalExpression
+		 * 
+		 * ConstructorInvocation
+		 * ClassInstanceCreation
+		 */
+		//ASTNode parentASTNode = oldName.getParent();
+		SimpleName newSimpleName = oldName.getAST().newSimpleName(newName);
+		rewriter.replace(oldName, newSimpleName, null);
+		/*if(parentASTNode instanceof SimpleType){
+			((SimpleType)parentASTNode).setName(newSimpleName);
+		}else if(parentASTNode instanceof MethodInvocation){
+			changeNameIn((MethodInvocation)parentASTNode, oldName, newSimpleName);
+		}else if(parentASTNode instanceof TypeDeclaration){
+			((TypeDeclaration)parentASTNode).setName(newSimpleName);
+		}else if(parentASTNode instanceof QualifiedName){
+			((QualifiedName)parentASTNode).setQualifier(newSimpleName);
+		}else if(parentASTNode instanceof MethodDeclaration){
+			//changeNameIn((MethodDeclaration)parentASTNode);
+			((MethodDeclaration)parentASTNode).setName(newSimpleName);
+		}else if(parentASTNode instanceof ConditionalExpression){
+			changeNameIn((ConditionalExpression)parentASTNode, oldName, newSimpleName);
+		}*/
+		
+		/*else if(parentASTNode instanceof Type){
+			System.out.println((Type)parentASTNode);//.setType(newSimpleName);
+		}else {
+			System.out.print("\nError trying to rename "+oldName.toString() + " with " + newName.toString() );
+			if(parentASTNode == null)
+				System.out.print(" Parent node is null");				
+		}*/
+	}
+	/*private static void changeNameIn(MethodDeclaration parentMethodDeclaration, SimpleName oldName, SimpleName newSimpleName){
+		if(parentMethodDeclaration.getName().equals(oldName))
+			parentMethodDeclaration.setName(newSimpleName);
+		else
+			(parent)
+	}*/
+			
+	private static void changeNameIn(ConditionalExpression parentConditionalExpression, SimpleName oldName, SimpleName newSimpleName){
+		if(parentConditionalExpression.getElseExpression().equals(oldName))
+			parentConditionalExpression.setElseExpression(newSimpleName);
+		else if(parentConditionalExpression.getThenExpression().equals(oldName))
+			parentConditionalExpression.setThenExpression(newSimpleName);
+		else if(parentConditionalExpression.getExpression().equals(oldName))
+			parentConditionalExpression.setExpression(newSimpleName);
+		else
+			throw new RuntimeException("Error trying to rename (ConditionalExpression) "+oldName.toString() + " with " + newSimpleName.toString()); 		
+	}
+	
+	private static void changeNameIn(MethodInvocation parentInvocation, SimpleName oldName, SimpleName newSimpleName){
+		if(parentInvocation.getExpression().equals(oldName)){ // qualifier for a static method call
+			parentInvocation.setExpression(newSimpleName);
+		}else if(parentInvocation.getName().equals(oldName)){ // probably should'nt ever be true
+			throw new RuntimeException("We should not be updating a MethodInvocation method name (constructor?)");
+		}else
+			throw new RuntimeException("Unknown updating a MethodInvocation");
+	}
+
+	
 	/*
 	 * http://publib.boulder.ibm.com/infocenter/rtnlhelp/v6r0m0/index.jsp?topic=%
 	 * 2Forg.eclipse.jdt.doc.isv%2Fguide%2Fjdt_api_manip.htm

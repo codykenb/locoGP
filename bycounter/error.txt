@@ -1,0 +1,15 @@
+Have you have tried to access password-protected areas (download, etc.)
+of the ByCounter homepage (http://sdqweb.ipd.kit.edu/wiki/ByCounter/) ?
+
+If you need the password: contact us per Email
+michael.kuperberg^^^kit.edu (password for download, questions, ...)
+(replace ^^^ by the usual email separator @)
+
+If you feel that you have been forwarded to this document in error:
+please write us an email.
+
+The openly accessible Javadocs and the PDF Manual are located at
+http://sdqweb.ipd.kit.edu/eclipse/ByCounter/
+
+Last updated: January 16th, 2010
+
